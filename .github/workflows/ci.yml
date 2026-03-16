@@ -1,0 +1,34 @@
+name: C/C++ CI Pipeline
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Get code
+              uses: actions/checkout@v4
+
+            - name: Download dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y build-essential cmake clang-format pkg-config libcriterion-dev
+
+            - name: Verify formatting (Clang-Format)
+              run: |
+                  find . -regex ".*\.\(cpp\|hpp\|c\|h\)" -exec clang-format --style=file -Werror --dry-run {} +
+
+            - name: Make configuration
+              run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+
+            - name: Compilation
+              run: cmake --build ${{github.workspace}}/build --config Release -j 4
+
+            - name: Tests
+              working-directory: ${{github.workspace}}/build
+              run: ctest -C Release --output-on-failure
