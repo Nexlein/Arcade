@@ -94,8 +94,7 @@ namespace arcade {
         Color(uint8_t red = 255, uint8_t green = 255, uint8_t blue = 255,
               uint8_t alpha = 255)
             : r(red), g(green), b(blue), a(alpha)
-        {
-        }
+        {}
     };
 
     /// @namespace Colors
@@ -138,8 +137,7 @@ namespace arcade {
         /// @param h Height (default: 0)
         Rect(int posX = 0, int posY = 0, int w = 0, int h = 0)
             : x(posX), y(posY), width(w), height(h)
-        {
-        }
+        {}
     };
 
     /// @struct Entity
@@ -149,22 +147,19 @@ namespace arcade {
     /// rendering. Terminal libraries will use the character field, while
     /// graphical libraries will use the spritePath and spriteRect fields.
     struct Entity {
-        Position pos;    ///< Position on screen
-        char character;  ///< ASCII character (for terminal-based display)
-        Color color;     ///< Entity foreground color
+        Position pos;           ///< Position on screen
+        char character;         ///< ASCII character (for terminal-based display)
+        Color color;            ///< Entity foreground color
         Color backgroundColor;  ///< Entity background color
-        std::string
-            spritePath;  ///< Path to sprite/texture (for graphical libs)
-        Rect
-            spriteRect;  ///< Rectangle within sprite sheet (for sprite atlases)
+        std::string spritePath; ///< Path to sprite/texture (for graphical libs)
+        Rect spriteRect;        ///< Rectangle within sprite sheet (for sprite atlases)
 
         /// @brief Default constructor
         Entity()
             : character(' '),
               color(Colors::WHITE),
               backgroundColor(Colors::BLACK)
-        {
-        }
+        {}
     };
 
     /// @struct Text
@@ -184,8 +179,7 @@ namespace arcade {
         Text(const std::string& text = "", float x = 0, float y = 0,
              const Color& textColor = Colors::WHITE, int size = 12)
             : content(text), pos(x, y), color(textColor), fontSize(size)
-        {
-        }
+        {}
     };
 
     /// @class IDisplayModule
