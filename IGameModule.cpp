@@ -137,5 +137,4 @@ namespace arcade {
         /// @return Recommended height
         virtual int getDisplayHeight() const = 0;
     };
-
 }  // namespace arcade
