@@ -1,8 +1,8 @@
 /*
 ** EPITECH PROJECT, 2026
-** G-OOP-400-MPL-4-1-arcade-5
+** Arcade
 ** File description:
-** IDisplayModule.hpp
+** IDisplayModule
 */
 
 /// @file IDisplayModule.hpp
@@ -13,6 +13,8 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+
+#include "IModule.hpp"
 
 namespace arcade {
 
@@ -91,10 +93,10 @@ namespace arcade {
         /// @param green Green component (default: 255)
         /// @param blue Blue component (default: 255)
         /// @param alpha Alpha component (default: 255)
-        Color(uint8_t red = 255, uint8_t green = 255, uint8_t blue = 255,
-              uint8_t alpha = 255)
+        Color(uint8_t red = 255, uint8_t green = 255, uint8_t blue = 255, uint8_t alpha = 255)
             : r(red), g(green), b(blue), a(alpha)
-        {}
+        {
+        }
     };
 
     /// @namespace Colors
@@ -137,29 +139,50 @@ namespace arcade {
         /// @param h Height (default: 0)
         Rect(int posX = 0, int posY = 0, int w = 0, int h = 0)
             : x(posX), y(posY), width(w), height(h)
-        {}
+        {
+        }
+    };
+
+    /// @enum CoordinateSpace
+    /// @brief Coordinate space used by a game for rendering
+    enum class CoordinateSpace {
+        GRID,  ///< Logical grid coordinates (tile/cell based)
+        PIXEL  ///< Logical pixel coordinates
+    };
+
+    /// @struct RenderContext
+    /// @brief Logical render space description provided by a game
+    struct RenderContext {
+        int width;              ///< Logical width of the game world
+        int height;             ///< Logical height of the game world
+        CoordinateSpace space;  ///< Coordinate system used by game entities/text
+
+        RenderContext(int w = 0, int h = 0, CoordinateSpace s = CoordinateSpace::GRID)
+            : width(w), height(h), space(s)
+        {
+        }
     };
 
     /// @struct Entity
     /// @brief Displayable game entity (character, sprite, or tile)
     ///
-    /// This structure supports both terminal-based (ASCII) and graphical
-    /// rendering. Terminal libraries will use the character field, while
-    /// graphical libraries will use the spritePath and spriteRect fields.
+    /// This structure supports both terminal-based (ASCII) and graphical rendering.
+    /// Terminal libraries will use the character field, while graphical libraries
+    /// will use the spritePath and spriteRect fields.
     struct Entity {
-        Position pos;           ///< Position on screen
-        char character;         ///< ASCII character (for terminal-based display)
-        Color color;            ///< Entity foreground color
-        Color backgroundColor;  ///< Entity background color
-        std::string spritePath; ///< Path to sprite/texture (for graphical libs)
-        Rect spriteRect;        ///< Rectangle within sprite sheet (for sprite atlases)
+        Position pos;            ///< Position on screen
+        Position size;           ///< Logical entity size (width/height), <= 0 means auto
+        char character;          ///< ASCII character (for terminal-based display)
+        Color color;             ///< Entity foreground color
+        Color backgroundColor;   ///< Entity background color
+        std::string spritePath;  ///< Path to sprite/texture (for graphical libs)
+        Rect spriteRect;         ///< Rectangle within sprite sheet (for sprite atlases)
 
         /// @brief Default constructor
         Entity()
-            : character(' '),
-              color(Colors::WHITE),
-              backgroundColor(Colors::BLACK)
-        {}
+            : size(0.0f, 0.0f), character(' '), color(Colors::WHITE), backgroundColor(Colors::BLACK)
+        {
+        }
     };
 
     /// @struct Text
@@ -179,29 +202,28 @@ namespace arcade {
         Text(const std::string& text = "", float x = 0, float y = 0,
              const Color& textColor = Colors::WHITE, int size = 12)
             : content(text), pos(x, y), color(textColor), fontSize(size)
-        {}
+        {
+        }
     };
 
     /// @class IDisplayModule
     /// @brief Interface for graphics libraries
     ///
-    /// This interface must be implemented by all graphics libraries (nCurses,
-    /// SDL2, SFML, etc.) The core program will use this interface to render the
-    /// game state without knowing which specific graphics library is being
-    /// used.
+    /// This interface must be implemented by all graphics libraries (nCurses, SDL2, SFML, etc.)
+    /// The core program will use this interface to render the game state without knowing
+    /// which specific graphics library is being used.
     ///
-    /// Graphics libraries must NOT contain any game logic. They are purely
-    /// responsible for rendering entities and handling input events.
-    class IDisplayModule {
+    /// Graphics libraries must NOT contain any game logic. They are purely responsible for
+    /// rendering entities and handling input events.
+    class IDisplayModule : public IModule {
         public:
         /// @brief Virtual destructor
         virtual ~IDisplayModule() = default;
 
         /// @brief Initialize the display module
         ///
-        /// Opens window/terminal and prepares the graphics system for
-        /// rendering. This method should be called once before any rendering
-        /// operations.
+        /// Opens window/terminal and prepares the graphics system for rendering.
+        /// This method should be called once before any rendering operations.
         virtual void init() = 0;
 
         /// @brief Stop and cleanup the display module
@@ -211,8 +233,7 @@ namespace arcade {
         virtual void stop() = 0;
 
         /// @brief Get the name of this display module
-        /// @return Name of the graphics library (e.g., "SFML", "SDL2",
-        /// "nCurses")
+        /// @return Name of the graphics library (e.g., "SFML", "SDL2", "nCurses")
         virtual const std::string& getName() const = 0;
 
         /// @brief Clear the screen/window
@@ -222,18 +243,16 @@ namespace arcade {
 
         /// @brief Display/present the current frame
         ///
-        /// Should be called at the end of each frame to show all rendered
-        /// content. This typically performs a buffer swap or screen refresh.
+        /// Should be called at the end of each frame to show all rendered content.
+        /// This typically performs a buffer swap or screen refresh.
         virtual void display() = 0;
 
         /// @brief Draw an entity at a specific position
-        /// @param entity The entity to draw (contains position, color,
-        /// character/sprite info)
+        /// @param entity The entity to draw (contains position, color, character/sprite info)
         virtual void drawEntity(const Entity& entity) = 0;
 
         /// @brief Draw text on screen
-        /// @param text The text structure containing content, position, color,
-        /// and size
+        /// @param text The text structure containing content, position, color, and size
         virtual void drawText(const Text& text) = 0;
 
         /// @brief Draw a filled rectangle
@@ -257,14 +276,16 @@ namespace arcade {
         /// @param title The title string
         virtual void setTitle(const std::string& title) = 0;
 
+        /// @brief Provide the game's logical render context to the display module
+        /// @param context Logical render context (size + coordinate space)
+        virtual void setRenderContext(const RenderContext& context) = 0;
+
         /// @brief Get the display width
-        /// @return Display width in cells (for terminal) or pixels (for
-        /// graphical)
+        /// @return Display width in cells (for terminal) or pixels (for graphical)
         virtual int getWidth() const = 0;
 
         /// @brief Get the display height
-        /// @return Display height in cells (for terminal) or pixels (for
-        /// graphical)
+        /// @return Display height in cells (for terminal) or pixels (for graphical)
         virtual int getHeight() const = 0;
     };
 }  // namespace arcade

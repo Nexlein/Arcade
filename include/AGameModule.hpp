@@ -1,0 +1,32 @@
+/*
+** EPITECH PROJECT, 2026
+** Arcade
+** File description:
+** AGameModule
+*/
+
+/// @file AGameModule.hpp
+/// @brief Abstract base class for game modules
+
+#pragma once
+
+#include "IGameModule.hpp"
+
+namespace arcade {
+
+    /// @class AGameModule
+    /// @brief Abstract implementation of IGameModule that provides getType()
+    ///
+    /// This class implements the getType() method returning ModuleType::GAME.
+    /// All concrete game modules (Snake, Pacman, etc.) should inherit from
+    /// this class instead of IGameModule directly.
+    class AGameModule : public IGameModule {
+        public:
+        /// @brief Virtual destructor
+        virtual ~AGameModule() = default;
+
+        /// @brief Get the type of this module
+        /// @return ModuleType::GAME
+        ModuleType getType() const override { return ModuleType::GAME; }
+    };
+}  // namespace arcade

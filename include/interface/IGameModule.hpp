@@ -2,11 +2,11 @@
 ** EPITECH PROJECT, 2026
 ** Arcade
 ** File description:
-** IGameModule.hpp
+** IGameModule
 */
 
-///@file IGameModule.hpp
-///@brief Interface for game libraries in the Arcade project
+/// @file IGameModule.hpp
+/// @brief Interface for game libraries in the Arcade project
 
 #pragma once
 
@@ -14,12 +14,12 @@
 #include <vector>
 
 #include "IDisplayModule.hpp"
+#include "IModule.hpp"
 
 namespace arcade {
 
     /// @enum GameState
     /// @brief Current state of the game
-
     enum class GameState {
         MENU,       ///< Game is in menu/not started
         RUNNING,    ///< Game is currently running
@@ -31,23 +31,22 @@ namespace arcade {
     /// @class IGameModule
     /// @brief Interface for game libraries
     ///
-    /// This interface must be implemented by all game libraries (Snake, Pacman,
-    /// etc.) The core program will use this interface to run the game logic
-    /// without knowing which specific game is being played.
+    /// This interface must be implemented by all game libraries (Snake, Pacman, etc.)
+    /// The core program will use this interface to run the game logic without knowing
+    /// which specific game is being played.
     ///
-    /// Game libraries must NOT contain any rendering code or reference to
-    /// specific graphics libraries. They should only manage game state and
-    /// provide entities to be rendered by the display module.
-    class IGameModule {
+    /// Game libraries must NOT contain any rendering code or reference to specific
+    /// graphics libraries. They should only manage game state and provide entities
+    /// to be rendered by the display module.
+    class IGameModule : public IModule {
         public:
         /// @brief Virtual destructor
         virtual ~IGameModule() = default;
 
         /// @brief Initialize the game
         ///
-        /// Sets up the initial game state, loads resources, and prepares for
-        /// gameplay. This method should be called once before starting the
-        /// game.
+        /// Sets up the initial game state, loads resources, and prepares for gameplay.
+        /// This method should be called once before starting the game.
         virtual void init() = 0;
 
         /// @brief Stop and cleanup the game
@@ -63,8 +62,7 @@ namespace arcade {
         /// @brief Update game logic
         ///
         /// This method is called once per frame to update the game state.
-        /// It should process physics, AI, collisions, and any time-based
-        /// events.
+        /// It should process physics, AI, collisions, and any time-based events.
         ///
         /// @param deltaTime Time elapsed since last update (in seconds)
         virtual void update(float deltaTime) = 0;
@@ -79,9 +77,9 @@ namespace arcade {
 
         /// @brief Get all entities to be rendered
         ///
-        /// Returns a list of all game entities (player, enemies, items, tiles,
-        /// etc.) that should be displayed on screen. The display module will
-        /// iterate over this list and render each entity.
+        /// Returns a list of all game entities (player, enemies, items, tiles, etc.)
+        /// that should be displayed on screen. The display module will iterate over
+        /// this list and render each entity.
         ///
         /// @return Vector of entities to render
         virtual std::vector<Entity> getEntities() const = 0;
@@ -89,8 +87,7 @@ namespace arcade {
         /// @brief Get UI text elements to be rendered
         ///
         /// Returns text elements for score, lives, messages, etc.
-        /// These are rendered separately from entities to ensure proper
-        /// layering.
+        /// These are rendered separately from entities to ensure proper layering.
         ///
         /// @return Vector of text elements to render
         virtual std::vector<Text> getUIText() const = 0;
@@ -105,8 +102,7 @@ namespace arcade {
 
         /// @brief Restart the game
         ///
-        /// Resets the game to its initial state, clearing score and
-        /// repositioning entities.
+        /// Resets the game to its initial state, clearing score and repositioning entities.
         virtual void restart() = 0;
 
         /// @brief Pause the game
@@ -119,22 +115,12 @@ namespace arcade {
         /// Resumes game logic updates after being paused.
         virtual void resume() = 0;
 
-        /// @brief Get the recommended display width for this game
+        /// @brief Get the render context for this game
         ///
-        /// Provides a hint to the display module about the ideal screen width.
-        /// For cell-based games (Snake, Pacman), this is in cells.
-        /// For pixel-based games, this is in pixels.
+        /// Defines the logical rendering space and coordinate system used by
+        /// entities and text returned by the game.
         ///
-        /// @return Recommended width
-        virtual int getDisplayWidth() const = 0;
-
-        /// @brief Get the recommended display height for this game
-        ///
-        /// Provides a hint to the display module about the ideal screen height.
-        /// For cell-based games (Snake, Pacman), this is in cells.
-        /// For pixel-based games, this is in pixels.
-        ///
-        /// @return Recommended height
-        virtual int getDisplayHeight() const = 0;
+        /// @return Logical render context
+        virtual RenderContext getRenderContext() const = 0;
     };
 }  // namespace arcade
