@@ -6,8 +6,10 @@
 */
 
 #include <dlfcn.h>
+
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 
 #ifndef DLLOADER_HPP
@@ -27,7 +29,7 @@ namespace arcade {
                   if (handle) dlclose(handle);
               })
         {
-            if (!_handle) std::cerr << "[DLLoader] " << dlerror() << std::endl;
+            if (!_handle) throw DLLoaderException(dlerror());
         }
 
         /// @brief Get an instance of the loaded module
@@ -43,13 +45,19 @@ namespace arcade {
             EntryPointFunc createModule =
                 (EntryPointFunc)dlsym(_handle.get(), entryPointName.c_str());
 
-            if (createModule == nullptr) {
-                std::cerr << "[DLLoader] dlsym Error: " << dlerror() << std::endl;
-                return nullptr;
-            }
+            if (createModule == nullptr) throw DLLoaderException(dlerror());
 
             return createModule();
         }
+
+        class DLLoaderException : public std::exception {
+            public:
+            DLLoaderException(const std::string& message) : _message(message) {}
+            const char* what() const noexcept override { return _message.c_str(); }
+
+            private:
+            std::string _message;
+        };
 
         private:
         /// @brief A unique pointer that manages the handle to the loaded shared library, ensuring
