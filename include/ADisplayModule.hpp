@@ -22,6 +22,7 @@ namespace arcade {
     /// this class instead of IDisplayModule directly.
     class ADisplayModule : public IDisplayModule {
         public:
+        ADisplayModule(std::string name = "Unnamed Display") : _name(name) {}
         /// @brief Virtual destructor
         virtual ~ADisplayModule() = default;
 
