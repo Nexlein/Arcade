@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2026
-** Arcade
+** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
 ** IGameModule
 */
@@ -47,6 +47,8 @@ namespace arcade {
         ///
         /// Sets up the initial game state, loads resources, and prepares for gameplay.
         /// This method should be called once before starting the game.
+        ///
+        /// @throw ModuleException if initialization fails
         virtual void init() = 0;
 
         /// @brief Stop and cleanup the game
@@ -77,20 +79,20 @@ namespace arcade {
 
         /// @brief Get all entities to be rendered
         ///
-        /// Returns a list of all game entities (player, enemies, items, tiles, etc.)
+        /// Returns a reference to all game entities (player, enemies, items, tiles, etc.)
         /// that should be displayed on screen. The display module will iterate over
         /// this list and render each entity.
         ///
-        /// @return Vector of entities to render
-        virtual std::vector<Entity> getEntities() const = 0;
+        /// @return Const reference to vector of entities to render
+        virtual const std::vector<Entity>& getEntities() const = 0;
 
         /// @brief Get UI text elements to be rendered
         ///
         /// Returns text elements for score, lives, messages, etc.
         /// These are rendered separately from entities to ensure proper layering.
         ///
-        /// @return Vector of text elements to render
-        virtual std::vector<Text> getUIText() const = 0;
+        /// @return Const reference to vector of text elements to render
+        virtual const std::vector<Text>& getUIText() const = 0;
 
         /// @brief Get the current game state
         /// @return Current state (menu, running, paused, game over, won)

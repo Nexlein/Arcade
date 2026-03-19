@@ -1,15 +1,25 @@
 /*
 ** EPITECH PROJECT, 2026
-** Arcade
+** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
 ** IModule
 */
 
 /// @file IModule.hpp
 /// @brief Base interface for all Arcade modules (games and display libraries)
-
+///
+/// @section dynamic_loading Dynamic Loading Convention
+/// Each .so library MUST export the following C-style entry point function:
+/// @code
+/// extern "C" arcade::IModule* entryPoint() {
+///     return new MyModuleImplementation();
+/// }
+/// @endcode
+///
+/// The core program will call this function to instantiate the module.
 #pragma once
 
+#include <exception>
 #include <string>
 
 namespace arcade {
@@ -19,6 +29,25 @@ namespace arcade {
     enum class ModuleType {
         DISPLAY,  ///< Graphics/display library module
         GAME      ///< Game logic module
+    };
+
+    /// @class ModuleException
+    /// @brief Exception class for module errors
+    ///
+    /// This exception can be thrown by any module during initialization,
+    /// resource loading, or runtime errors.
+    class ModuleException : public std::exception {
+        public:
+        /// @brief Construct exception with error message
+        /// @param message Description of the error
+        explicit ModuleException(const std::string& message) : _message(message) {}
+
+        /// @brief Get the error message
+        /// @return C-string containing the error description
+        const char* what() const noexcept override { return _message.c_str(); }
+
+        private:
+        std::string _message;  ///< Error message
     };
 
     /// @class IModule

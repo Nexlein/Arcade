@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2026
-** Arcade
+** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
 ** IDisplayModule
 */
@@ -70,6 +70,10 @@ namespace arcade {
         X,
         Y,
         Z,
+        // Mouse buttons
+        MOUSE_LEFT,
+        MOUSE_RIGHT,
+        MOUSE_MIDDLE,
         // Meta keys for Arcade control
         NEXT_GRAPHICS,  ///< Switch to next graphics library
         PREV_GRAPHICS,  ///< Switch to previous graphics library
@@ -77,16 +81,13 @@ namespace arcade {
         PREV_GAME,      ///< Switch to previous game
         RESTART,        ///< Restart current game
         MENU,           ///< Return to menu
-        EXIT            ///< Exit the program
+        EXIT,           ///< Exit the program
     };
 
     /// @struct Color
     /// @brief RGBA color representation
     struct Color {
-        uint8_t r;  ///< Red component (0-255)
-        uint8_t g;  ///< Green component (0-255)
-        uint8_t b;  ///< Blue component (0-255)
-        uint8_t a;  ///< Alpha channel (0-255, 255 = opaque)
+        uint8_t r, g, b, a;
 
         /// @brief Construct a color
         /// @param red Red component (default: 255)
@@ -115,12 +116,12 @@ namespace arcade {
     /// @struct Position
     /// @brief 2D position in screen space
     struct Position {
-        float x;  ///< X coordinate
-        float y;  ///< Y coordinate
+        float x, y;
 
         /// @brief Construct a position
         /// @param posX X coordinate (default: 0.0)
         /// @param posY Y coordinate (default: 0.0)
+
         Position(float posX = 0.0f, float posY = 0.0f) : x(posX), y(posY) {}
     };
 
@@ -152,6 +153,9 @@ namespace arcade {
 
     /// @struct RenderContext
     /// @brief Logical render space description provided by a game
+    /// @note How display modules transform game coordinates to screen coordinates
+    /// (scaling, centering, aspect ratio handling) is implementation-defined.
+    /// Each display module decides its own transformation strategy.
     struct RenderContext {
         int width;              ///< Logical width of the game world
         int height;             ///< Logical height of the game world
@@ -164,32 +168,44 @@ namespace arcade {
 
     /// @struct Entity
     /// @brief Displayable game entity (character, sprite, or tile)
-    ///
     /// This structure supports both terminal-based (ASCII) and graphical rendering.
-    /// Terminal libraries will use the character field, while graphical libraries
-    /// will use the spritePath and spriteRect fields.
+    /// - Terminal libraries use the character field
+    /// - Graphical libraries use the spritePath field
+    ///
+    /// @note Entity::size <= 0 means "auto":
+    /// - For ASCII rendering: 1x1 character cell
+    /// - For graphical rendering: native sprite dimensions
+    ///
+    /// @note Entity::backgroundColor:
+    /// - Terminal displays: render as cell background color
+    /// - Graphical displays: should ignore this field
+    ///
+    /// @note Supported sprite formats: PNG, JPG
+    /// Each sprite is a single complete image file (no sprite sheets/atlases).
     struct Entity {
         Position pos;            ///< Position on screen
         Position size;           ///< Logical entity size (width/height), <= 0 means auto
         char character;          ///< ASCII character (for terminal-based display)
         Color color;             ///< Entity foreground color
-        Color backgroundColor;   ///< Entity background color
-        std::string spritePath;  ///< Path to sprite/texture (for graphical libs)
-        Rect spriteRect;         ///< Rectangle within sprite sheet (for sprite atlases)
+        Color backgroundColor;   ///< Entity background color (terminal only)
+        std::string spritePath;  ///< Path to sprite image file (PNG or JPG)
 
         /// @brief Default constructor
+
         Entity()
             : size(0.0f, 0.0f), character(' '), color(Colors::WHITE), backgroundColor(Colors::BLACK)
-        {}
+        {
+        }
     };
 
     /// @struct Text
     /// @brief Text to be displayed on screen
     struct Text {
-        std::string content;  ///< Text content to display
-        Position pos;         ///< Position on screen
-        Color color;          ///< Text color
-        int fontSize;         ///< Font size (in points or equivalent)
+        std::string content;   ///< Text content to display
+        Position pos;          ///< Position on screen
+        Color color;           ///< Text color
+        int fontSize;          ///< Font size (in points or equivalent)
+        std::string fontPath;  ///< Path to custom font file (empty = system default)
 
         /// @brief Construct a text object
         /// @param text Text content (default: empty string)
@@ -197,19 +213,29 @@ namespace arcade {
         /// @param y Y coordinate (default: 0)
         /// @param textColor Text color (default: white)
         /// @param size Font size (default: 12)
+        /// @param font Font path (default: empty = system default)
         Text(const std::string& text = "", float x = 0, float y = 0,
-             const Color& textColor = Colors::WHITE, int size = 12)
-            : content(text), pos(x, y), color(textColor), fontSize(size)
+             const Color& textColor = Colors::WHITE, int size = 12, const std::string& font = "")
+            : content(text), pos(x, y), color(textColor), fontSize(size), fontPath(font)
         {}
+    };
+
+    /// @struct MouseEvent
+    /// @brief Mouse input event data
+    struct MouseEvent {
+        Position pos;  ///< Mouse position
+        Key button;    ///< Mouse button that was clicked (MOUSE_LEFT, MOUSE_RIGHT, MOUSE_MIDDLE, or
+                       ///< UNKNOWN)
+
+        MouseEvent() : button(Key::UNKNOWN) {}
+        MouseEvent(const Position& position, Key btn) : pos(position), button(btn) {}
     };
 
     /// @class IDisplayModule
     /// @brief Interface for graphics libraries
-    ///
     /// This interface must be implemented by all graphics libraries (nCurses, SDL2, SFML, etc.)
     /// The core program will use this interface to render the game state without knowing
     /// which specific graphics library is being used.
-    ///
     /// Graphics libraries must NOT contain any game logic. They are purely responsible for
     /// rendering entities and handling input events.
     class IDisplayModule : public IModule {
@@ -218,13 +244,12 @@ namespace arcade {
         virtual ~IDisplayModule() = default;
 
         /// @brief Initialize the display module
-        ///
         /// Opens window/terminal and prepares the graphics system for rendering.
         /// This method should be called once before any rendering operations.
+        /// @throw ModuleException if initialization fails
         virtual void init() = 0;
 
         /// @brief Stop and cleanup the display module
-        ///
         /// Closes window/terminal and releases all graphics resources.
         /// This method should be called once when shutting down.
         virtual void stop() = 0;
@@ -234,12 +259,10 @@ namespace arcade {
         virtual const std::string& getName() const = 0;
 
         /// @brief Clear the screen/window
-        ///
         /// Should be called at the beginning of each frame before drawing.
         virtual void clear() = 0;
 
         /// @brief Display/present the current frame
-        ///
         /// Should be called at the end of each frame to show all rendered content.
         /// This typically performs a buffer swap or screen refresh.
         virtual void display() = 0;
@@ -258,12 +281,17 @@ namespace arcade {
         virtual void drawRectangle(const Rect& rect, const Color& color) = 0;
 
         /// @brief Get the last key pressed
-        ///
         /// Non-blocking call that returns the last key event.
         /// Should return Key::UNKNOWN if no key was pressed since last check.
-        ///
         /// @return Key code or Key::UNKNOWN if no key was pressed
         virtual Key getKey() = 0;
+
+        /// @brief Get the last mouse event
+        /// Non-blocking call that returns the last mouse click event.
+        /// Returns MouseEvent with button = Key::UNKNOWN if no mouse event occurred.
+        /// @return Mouse event data (position and button)
+
+        virtual MouseEvent getMouseEvent() = 0;
 
         /// @brief Check if the display is still open/running
         /// @return true if window is open, false if user closed it
@@ -273,9 +301,22 @@ namespace arcade {
         /// @param title The title string
         virtual void setTitle(const std::string& title) = 0;
 
+        /// @brief Set the window size
+        /// @param width Window width in pixels (or columns for terminal)
+        /// @param height Window height in pixels (or rows for terminal)
+        virtual void setWindowSize(int width, int height) = 0;
+
+        /// @brief Set fullscreen mode
+        /// @param fullscreen true for fullscreen, false for windowed
+        virtual void setFullscreen(bool fullscreen) = 0;
+
         /// @brief Provide the game's logical render context to the display module
         /// @param context Logical render context (size + coordinate space)
         virtual void setRenderContext(const RenderContext& context) = 0;
+
+        /// @brief Get the time elapsed since the last frame
+        /// @return Delta time in seconds
+        virtual float getDeltaTime() const = 0;
 
         /// @brief Get the display width
         /// @return Display width in cells (for terminal) or pixels (for graphical)

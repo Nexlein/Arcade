@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2026
-** Arcade
+** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
 ** ADisplayModule
 */
