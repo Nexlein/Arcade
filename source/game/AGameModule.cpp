@@ -1,0 +1,43 @@
+/*
+** EPITECH PROJECT, 2026
+** G-OOP-400-MPL-4-1-arcade-5
+** File description:
+** AGameModule
+*/
+
+#include "AGameModule.hpp"
+
+arcade::AGameModule::AGameModule(std::string name, GameState initialState, int width, int height) 
+    : _name(name), _state(initialState), _width(width), _height(height), _score(0)
+{}
+
+arcade::ModuleType arcade::AGameModule::getType() const
+{
+    return ModuleType::GAME;
+}
+
+const std::string& arcade::AGameModule::getName() const
+{
+    return _name;
+}
+
+arcade::GameState arcade::AGameModule::getState() const { return _state; }
+
+int arcade::AGameModule::getScore() const { return _score; }
+
+void arcade::AGameModule::stop() {}
+
+void arcade::AGameModule::pause()
+{
+    if (_state == GameState::RUNNING) _state = GameState::PAUSED;
+}
+
+void arcade::AGameModule::resume()
+{
+    if (_state == GameState::PAUSED) _state = GameState::RUNNING;
+}
+
+void arcade::AGameModule::init()
+{
+    restart();
+}
