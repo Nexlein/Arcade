@@ -12,10 +12,10 @@
 
 namespace arcade {
 
-    class menu : public AGameModule {
+    class ArcadeMenu : public AGameModule {
         public:
-        menu();
-        ~menu();
+        ArcadeMenu(std::vector<std::string> _displayPath, std::vector<std::string> _gamePath);
+        ~ArcadeMenu();
 
         void init() override;
         void stop() override;
@@ -31,8 +31,12 @@ namespace arcade {
         RenderContext getRenderContext() const override;
 
         private:
-        GameState _gameState;
-        Text _title;
+        GameState _state;
+
+        std::vector<std::string> _displayPath;
+        std::vector<std::string> _gamePath;
+        int _displayIdx;
+        int _gameIdx;
     };
 }
 

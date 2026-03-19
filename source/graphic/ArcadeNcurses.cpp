@@ -6,14 +6,14 @@
 */
 
 
-#include "arcade_ncurses.hpp"
+#include "ArcadeNcurses.hpp"
 #include <ncurses.h>
 
 static const std::string NCURSES_NAME = "nCurses";
 
-arcade::arcade_ncurses::arcade_ncurses() : ADisplayModule(NCURSES_NAME) {}
+arcade::ArcadeNcurses::ArcadeNcurses() : ADisplayModule(NCURSES_NAME) {}
 
-void arcade::arcade_ncurses::init()
+void arcade::ArcadeNcurses::init()
 {
     initscr();              // Démarre ncurses et crée la fenêtre principale (stdscr)
     cbreak();               // Rend les touches disponibles sans attendre Entrée
@@ -22,8 +22,8 @@ void arcade::arcade_ncurses::init()
     curs_set(0);            // Cache le curseur
 }
 
-void arcade::arcade_ncurses::stop()
+void arcade::ArcadeNcurses::stop()
 {}
 
-void arcade::arcade_ncurses::clear() 
+void arcade::ArcadeNcurses::clear() 
 {}
