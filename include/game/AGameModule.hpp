@@ -58,9 +58,10 @@ namespace arcade {
         std::string _name;
 
         GameState _state;
-        int _score;
 
         int _width;
         int _height;
+
+        int _score;
     };
 }  // namespace arcade
