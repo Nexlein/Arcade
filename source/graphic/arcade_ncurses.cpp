@@ -9,10 +9,9 @@
 #include "arcade_ncurses.hpp"
 #include <ncurses.h>
 
-arcade::arcade_ncurses::arcade_ncurses()
-{
-    _name = "nCurses";
-}
+static const std::string NCURSES_NAME = "nCurses";
+
+arcade::arcade_ncurses::arcade_ncurses() : ADisplayModule(NCURSES_NAME) {}
 
 void arcade::arcade_ncurses::init()
 {

@@ -7,10 +7,9 @@
 
 #include "arcade_menu.hpp"
 
-arcade::menu::menu()
-{
-    _name = "Menu";
-}
+static const std::string MENU_NAME = "Menu";
+
+arcade::menu::menu() : AGameModule(MENU_NAME) {}
 
 void arcade::menu::init()
 {

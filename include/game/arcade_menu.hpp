@@ -32,6 +32,7 @@ namespace arcade {
 
         private:
         GameState _gameState;
+        Text _title;
     };
 }
 
