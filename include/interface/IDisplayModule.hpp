@@ -159,8 +159,7 @@ namespace arcade {
 
         RenderContext(int w = 0, int h = 0, CoordinateSpace s = CoordinateSpace::GRID)
             : width(w), height(h), space(s)
-        {
-        }
+        {}
     };
 
     /// @struct Entity
@@ -181,8 +180,7 @@ namespace arcade {
         /// @brief Default constructor
         Entity()
             : size(0.0f, 0.0f), character(' '), color(Colors::WHITE), backgroundColor(Colors::BLACK)
-        {
-        }
+        {}
     };
 
     /// @struct Text
@@ -202,8 +200,7 @@ namespace arcade {
         Text(const std::string& text = "", float x = 0, float y = 0,
              const Color& textColor = Colors::WHITE, int size = 12)
             : content(text), pos(x, y), color(textColor), fontSize(size)
-        {
-        }
+        {}
     };
 
     /// @class IDisplayModule

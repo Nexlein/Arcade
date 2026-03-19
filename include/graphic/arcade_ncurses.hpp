@@ -12,9 +12,9 @@
 
 namespace arcade {
     class arcade_ncurses : public ADisplayModule {
-    public:
-        arcade_ncurses(/* args */);
-        ~arcade_ncurses();
+        public:
+        arcade_ncurses();
+        ~arcade_ncurses() = default;
 
         void init() override;
         void stop() override;
@@ -30,7 +30,10 @@ namespace arcade {
         void setRenderContext(const RenderContext& context) override;
         int getWidth() const override;
         int getHeight() const override;
+
+        private:
+        std::string _name;
     };
-}
+}  // namespace arcade
 
 #endif /* !ARCADE_NCURSES_HPP */

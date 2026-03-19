@@ -21,9 +21,24 @@ namespace arcade {
             int run();
         private:
             void printUsage(const std::string& programName) const;
-            DLLoader<IDisplayModule> _graphicLoader;
+            void loadLibrairies(const std::string& loadPath = "lib");
+
+            void menuManager();
+
+            std::unique_ptr<DLLoader<IDisplayModule>> _graphicLoader;
+            std::unique_ptr<DLLoader<IGameModule>> _gameLoader;
+
             IDisplayModule* _graphic;
+            IGameModule* _game;
+
+            std::vector<std::string> _displayPath;
+            std::vector<std::string> _gamePath;
+            int _displayIdx;
+            int _gameIdx;
+
             GameState _gameState;
+            std::string _playerName;
+            bool _isRunning;
     };
 }
 
