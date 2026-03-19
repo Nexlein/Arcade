@@ -48,7 +48,7 @@ int arcade::Arcade::run()
 
 void arcade::Arcade::menuManager()
 {
-
+    
 }
 
 void arcade::Arcade::loadLibrairies(const std::string& loadPath)
@@ -60,7 +60,8 @@ void arcade::Arcade::loadLibrairies(const std::string& loadPath)
         if (file.is_regular_file() && file.path().extension() == ".so") {
             loader = std::make_unique<DLLoader<IModule>>(file.path());
             mod = loader.get()->getInstance();
-            printf("{%s} type: %d\n\n", mod->getName(), int(mod->getType()));
+            printf("module_name:%s, type: %d\n\n", mod->getName(), int(mod->getType()));
+            // en fonction du type trouvé -> stocker dans la liste correspondante.
         }
     }
 }

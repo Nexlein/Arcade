@@ -28,5 +28,9 @@ namespace arcade {
         /// @brief Get the type of this module
         /// @return ModuleType::GAME
         ModuleType getType() const override { return ModuleType::GAME; }
+        const std::string& getName() const override { return _name; }
+
+        protected:
+        std::string _name;
     };
 }  // namespace arcade

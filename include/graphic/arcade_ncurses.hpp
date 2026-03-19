@@ -18,7 +18,6 @@ namespace arcade {
 
         void init() override;
         void stop() override;
-        const std::string& getName() const override;
         void clear() override;
         void display() override;
         void drawEntity(const Entity& entity) override;
@@ -30,9 +29,6 @@ namespace arcade {
         void setRenderContext(const RenderContext& context) override;
         int getWidth() const override;
         int getHeight() const override;
-
-        private:
-        std::string _name;
     };
 }  // namespace arcade
 
