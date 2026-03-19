@@ -30,22 +30,24 @@ file(GLOB GRAPHIC_FILES "source/graphic/*.cpp")
 
 foreach(file ${GAME_FILES})
     get_filename_component(name ${file} NAME_WE)
+    
     if(NOT name STREQUAL "AGameModule")
         add_library(${name} SHARED ${file} source/game/AGameModule.cpp)
-        set_target_properties(${name} PROPERTIES PREFIX "arcade_")
+
+        set_target_properties(${name} PROPERTIES PREFIX "")
         target_compile_options(${name} PRIVATE -fPIC -Wall -Wextra -Werror)
     endif()
 endforeach()
 
 foreach(file ${GRAPHIC_FILES})
     get_filename_component(name ${file} NAME_WE)
-    add_library(${name} SHARED ${file})
-    if(NOT name MATCHES "^arcade_")
-        set_target_properties(${name} PROPERTIES PREFIX "arcade_")
-    else()
+    
+    if (NOT name STREQUAL "ADisplayModule")
+        add_library(${name} SHARED ${file})
+
         set_target_properties(${name} PROPERTIES PREFIX "")
+        target_compile_options(${name} PRIVATE -fPIC -Wall -Wextra -Werror)
     endif()
-    target_compile_options(${name} PRIVATE -fPIC -Wall -Wextra -Werror)
 endforeach()
 
 # Tests
