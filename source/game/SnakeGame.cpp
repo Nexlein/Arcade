@@ -2,34 +2,16 @@
 ** EPITECH PROJECT, 2026
 ** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
-** snake
+** SnakeGame
 */
 
-#include "snake.hpp"
+#include "SnakeGame.hpp"
 
 #include <random>
 
 const std::string GAMENAME = "Snake";
 
-arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME)
-{
-    init();
-}
-
-void arcade::SnakeGame::init()
-{
-    _width = 20;
-    _height = 20;
-    restart();
-}
-
-void arcade::SnakeGame::stop() {}
-
-/// Getters
-
-int arcade::SnakeGame::getScore() const { return _score; }
-arcade::GameState arcade::SnakeGame::getState() const { return _state; }
-const std::string& arcade::SnakeGame::getName() const { return _name; }
+arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, 20, 20) { init(); }
 
 void arcade::SnakeGame::update(float elapsedTime)
 {
@@ -50,13 +32,13 @@ void arcade::SnakeGame::handleInput(Key key)
     }
 
     if (key == Key::UP || key == Key::Z)
-        if (_currentDir != Direction::DOWN) _currentDir = Direction::UP;
+        if (_currentDir != Direction::DOWN) _nextDir = Direction::UP;
     if (key == Key::DOWN || key == Key::S)
-        if (_currentDir != Direction::UP) _currentDir = Direction::DOWN;
+        if (_currentDir != Direction::UP) _nextDir = Direction::DOWN;
     if (key == Key::LEFT || key == Key::Q)
-        if (_currentDir != Direction::RIGHT) _currentDir = Direction::LEFT;
+        if (_currentDir != Direction::RIGHT) _nextDir = Direction::LEFT;
     if (key == Key::RIGHT || key == Key::D)
-        if (_currentDir != Direction::LEFT) _currentDir = Direction::RIGHT;
+        if (_currentDir != Direction::LEFT) _nextDir = Direction::RIGHT;
 }
 
 const std::vector<arcade::Entity>& arcade::SnakeGame::getEntities() const
@@ -128,22 +110,10 @@ const std::vector<arcade::Text>& arcade::SnakeGame::getUIText() const
     _uiTexts.clear();
 
     std::string scoreStr = "Score: " + std::to_string(_score);
-    _uiTexts.push_back(Text(
-        scoreStr,
-        1,
-        0,
-        Colors::WHITE,
-        20
-    ));
+    _uiTexts.push_back(Text(scoreStr, 1, 0, Colors::WHITE, 20));
 
     if (_state == GameState::GAME_OVER)
-        _uiTexts.push_back(Text(
-            "GAME OVER",
-            _width / 2 - 2,
-            _height / 2,
-            Colors::RED,
-            30
-        ));
+        _uiTexts.push_back(Text("GAME OVER", _width / 2 - 2, _height / 2, Colors::RED, 30));
 
     return _uiTexts;
 }
@@ -152,30 +122,21 @@ void arcade::SnakeGame::restart()
 {
     _state = GameState::RUNNING;
     _score = 0;
-    _timeSinceLastMove = float(0.0);
-    _moveInterval = float(0.15);
-    _currentDir = Direction::RIGHT;
+    _timeSinceLastMove = static_cast<float>(0.0);
+    _moveInterval = static_cast<float>(0.15);
+    _currentDir = Direction::NONE;
+    _nextDir = Direction::NONE;
 
     _snakeBody.clear();
     int midX = _width / 2;
     int midY = _height / 2;
-    _snakeBody.push_back({(float)midX, (float)midY});
-    _snakeBody.push_back({(float)midX - 1, (float)midY});
-    _snakeBody.push_back({(float)midX - 2, (float)midY});
-    _snakeBody.push_back({(float)midX - 3, (float)midY});
+    _snakeBody.push_back({static_cast<float>(midX), static_cast<float>(midY)});
+    _snakeBody.push_back({static_cast<float>(midX - 1), static_cast<float>(midY)});
+    _snakeBody.push_back({static_cast<float>(midX - 2), static_cast<float>(midY)});
+    _snakeBody.push_back({static_cast<float>(midX - 3), static_cast<float>(midY)});
 
     _fruits.clear();
     spawnFruit();
-}
-
-void arcade::SnakeGame::pause()
-{
-    if (_state == GameState::RUNNING) _state = GameState::PAUSED;
-}
-
-void arcade::SnakeGame::resume()
-{
-    if (_state == GameState::PAUSED) _state = GameState::RUNNING;
 }
 
 arcade::RenderContext arcade::SnakeGame::getRenderContext() const
@@ -185,6 +146,17 @@ arcade::RenderContext arcade::SnakeGame::getRenderContext() const
 
 void arcade::SnakeGame::moveSnake()
 {
+    if (_nextDir != Direction::NONE) {
+        if (_nextDir == Direction::UP && _currentDir != Direction::DOWN)
+            _currentDir = _nextDir;
+        else if (_nextDir == Direction::DOWN && _currentDir != Direction::UP)
+            _currentDir = _nextDir;
+        else if (_nextDir == Direction::LEFT && _currentDir != Direction::RIGHT)
+            _currentDir = _nextDir;
+        else if (_nextDir == Direction::RIGHT && _currentDir != Direction::LEFT)
+            _currentDir = _nextDir;
+    }
+
     Position nextHead = _snakeBody.front();
 
     switch (_currentDir) {
@@ -226,8 +198,8 @@ void arcade::SnakeGame::moveSnake()
     for (auto& fruitPos : _fruits) {
         if (fruitPos.x == nextHead.x && fruitPos.y == nextHead.y) {
             _score += 10;
-            _fruits.clear(); 
-            spawnFruit(); 
+            _fruits.clear();
+            spawnFruit();
             ateFruit = true;
             break;
         }
