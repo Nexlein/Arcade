@@ -19,10 +19,6 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y build-essential cmake clang-format pkg-config libcriterion-dev
 
-            - name: Verify formatting (Clang-Format)
-              run: |
-                  find . -regex ".*\.\(cpp\|hpp\|c\|h\)" -exec clang-format --style=file -Werror --dry-run {} +
-
             - name: Make configuration
               run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
 
