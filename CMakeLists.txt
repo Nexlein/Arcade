@@ -4,18 +4,49 @@ project(Arcade)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(${CMAKE_SOURCE_DIR}/Include)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
-file(GLOB PROJECT_FILES
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/interface
+    ${CMAKE_SOURCE_DIR}/include/game
+    ${CMAKE_SOURCE_DIR}/include/graphic
 )
 
-add_executable(arcade Source/main.cpp ${PROJECT_FILES})
+# Core Project
+file(GLOB CORE_FILES "source/core/*.cpp")
+add_executable(arcade source/main.cpp ${CORE_FILES})
 target_compile_options(arcade PRIVATE
     -Wall
     -Wextra
     -Werror
     -Wunused
+    -ldl
 )
+
+# Game and Graphic libraries
+file(GLOB GAME_FILES "source/game/*.cpp")
+file(GLOB GRAPHIC_FILES "source/graphic/*.cpp")
+
+foreach(file ${GAME_FILES})
+    get_filename_component(name ${file} NAME_WE)
+    if(NOT name STREQUAL "AGameModule")
+        add_library(${name} SHARED ${file} source/game/AGameModule.cpp)
+        set_target_properties(${name} PROPERTIES PREFIX "arcade_")
+        target_compile_options(${name} PRIVATE -fPIC -Wall -Wextra -Werror)
+    endif()
+endforeach()
+
+foreach(file ${GRAPHIC_FILES})
+    get_filename_component(name ${file} NAME_WE)
+    add_library(${name} SHARED ${file})
+    if(NOT name MATCHES "^arcade_")
+        set_target_properties(${name} PROPERTIES PREFIX "arcade_")
+    else()
+        set_target_properties(${name} PROPERTIES PREFIX "")
+    endif()
+    target_compile_options(${name} PRIVATE -fPIC -Wall -Wextra -Werror)
+endforeach()
 
 # Tests
 find_package(PkgConfig)
@@ -36,5 +67,5 @@ if (CRITERION_FOUND)
     target_include_directories(tests_run PRIVATE ${CRITERION_INCLUDE_DIRS})
     target_link_libraries(tests_run ${CRITERION_LIBRARIES})
     enable_testing()
-    add_test(NAME components_tests COMMAND tests_run)
+    add_test(NAME tests COMMAND tests_run)
 endif()
