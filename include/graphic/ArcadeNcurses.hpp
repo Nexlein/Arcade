@@ -19,11 +19,13 @@ namespace arcade {
         void init() override;
         void stop() override;
         void clear() override;
+        void pollEvents() override;
         void display() override;
         void drawEntity(const Entity& entity) override;
         void drawText(const Text& text) override;
         void drawRectangle(const Rect& rect, const Color& color) override;
         Key getKey() override;
+        MouseEvent getMouseEvent() override;
         bool isOpen() const override;
         void setTitle(const std::string& title) override;
         void setRenderContext(const RenderContext& context) override;

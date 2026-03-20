@@ -25,5 +25,13 @@ void arcade::ArcadeNcurses::init()
 void arcade::ArcadeNcurses::stop()
 {}
 
+void arcade::ArcadeNcurses::pollEvents()
+{}
+
 void arcade::ArcadeNcurses::clear() 
 {}
+
+arcade::MouseEvent arcade::ArcadeNcurses::getMouseEvent()
+{
+    return MouseEvent();
+}
