@@ -11,10 +11,10 @@
 #include "ADisplayModule.hpp"
 
 namespace arcade {
-    class arcade_ncurses : public ADisplayModule {
+    class ArcadeNcurses : public ADisplayModule {
         public:
-        arcade_ncurses();
-        ~arcade_ncurses() = default;
+        ArcadeNcurses();
+        ~ArcadeNcurses() = default;
 
         void init() override;
         void stop() override;
