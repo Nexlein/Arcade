@@ -10,8 +10,7 @@
 
 static const std::string GAMENAME = "ArcadeMenu";
 
-// faudrait que le getRender du snake définisse un static const plustot que reconstruire a chaque fois.
-// window size peu etre a revoir?
+// faudrait que le getRender du snake définisse un static const plustot que reconstruire a chaque fois?
 
 arcade::ArcadeMenu::ArcadeMenu(std::vector<std::string> displayPath, std::vector<std::string> gamePath)
     : AGameModule(GAMENAME, GameState::MENU, 200, 300),
