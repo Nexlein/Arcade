@@ -17,8 +17,8 @@ namespace arcade {
         ArcadeMenu();
         ~ArcadeMenu() = default;
 
-        void setDisplayPaths(const std::vector<std::string>& paths) { _displayPath = paths; }
-        void setGamePaths(const std::vector<std::string>& paths) { _gamePath = paths; }
+        void setDisplayPaths(const std::vector<std::string>& paths);
+        void setGamePaths(const std::vector<std::string>& paths);
 
         void restart() override;
         void handleInput(Key key) override;

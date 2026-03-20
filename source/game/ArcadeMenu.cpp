@@ -30,6 +30,9 @@ arcade::ArcadeMenu::ArcadeMenu()
     init();
 }
 
+void arcade::ArcadeMenu::setDisplayPaths(const std::vector<std::string>& paths) { _displayPath = paths; }
+void arcade::ArcadeMenu::setGamePaths(const std::vector<std::string>& paths) { _gamePath = paths; }
+
 void arcade::ArcadeMenu::restart()
 {
     _state = GameState::RUNNING;
