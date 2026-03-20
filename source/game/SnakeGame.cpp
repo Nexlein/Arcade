@@ -120,6 +120,8 @@ const std::vector<arcade::Text>& arcade::SnakeGame::getUIText() const
     if (_state == GameState::GAME_OVER)
         _uiTexts.push_back(Text("GAME OVER", _width / 2, _height / 2, Anchor::CENTER, Colors::RED, 30));
 
+    appendCommonUITexts(_uiTexts);
+
     return _uiTexts;
 }
 

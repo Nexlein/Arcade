@@ -41,3 +41,12 @@ void arcade::AGameModule::init()
 {
     restart();
 }
+
+void arcade::AGameModule::appendCommonUITexts(std::vector<arcade::Text>& uiTexts) const
+{
+    float yPos = static_cast<float>(_height);
+    
+    // Bottom left summary
+    uiTexts.push_back(Text("[R] Restart  [P] Pause  [M] Menu", 1, yPos, Anchor::BOTTOM_LEFT, Colors::WHITE, 16));
+}
+

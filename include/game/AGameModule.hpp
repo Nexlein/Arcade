@@ -55,6 +55,9 @@ namespace arcade {
         void init() override;
 
         protected:
+        /// @brief Append common UI texts (controls) to the given vector
+        void appendCommonUITexts(std::vector<Text>& uiTexts) const;
+
         std::string _name;
 
         GameState _state;
