@@ -11,6 +11,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include/interface
     ${CMAKE_SOURCE_DIR}/include/game
     ${CMAKE_SOURCE_DIR}/include/graphic
+    ${CMAKE_SOURCE_DIR}/include/core
 )
 
 # Core Project
