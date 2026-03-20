@@ -14,28 +14,35 @@ namespace arcade {
 
     class ArcadeMenu : public AGameModule {
         public:
-        ArcadeMenu(std::vector<std::string> _displayPath, std::vector<std::string> _gamePath);
+        ArcadeMenu();
         ~ArcadeMenu() = default;
+
+        void setDisplayPaths(const std::vector<std::string>& paths) { _displayPath = paths; }
+        void setGamePaths(const std::vector<std::string>& paths) { _gamePath = paths; }
 
         void restart() override;
         void handleInput(Key key) override;
-        void update(float deltaTime) override;
+        void handleInput(MouseEvent mouseEvent) override;
+        void update(float elapsedTime) override;
         const std::vector<Entity>& getEntities() const override;
         const std::vector<Text>& getUIText() const override;
         RenderContext getRenderContext() const override;
+
+        const std::string& getSelectedGame() const;
+        const std::string& getSelectedGraphic() const;
 
         private:
         enum class CurrentChoice { ONGRAPHIC, ONGAME };
         void upKey();
         void downKey();
         void switchChoice(const Key& key);
-        GameState _state;
 
         std::vector<std::string> _displayPath;
         std::vector<std::string> _gamePath;
 
+        std::vector<Entity> _entities;
         std::vector<Text> _uiText;
-        CurrentChoice _currentIdx;
+        CurrentChoice _currentSection;
         int _displayIdx;
         int _gameIdx;
     };
