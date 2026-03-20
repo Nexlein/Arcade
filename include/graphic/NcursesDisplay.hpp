@@ -1,20 +1,20 @@
 /*
 ** EPITECH PROJECT, 2026
-** Arcade
+** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
-** arcade_ncurses
+** NcursesDisplay
 */
 
-#ifndef ARCADE_NCURSES_HPP
-#define ARCADE_NCURSES_HPP
+#ifndef NCURSESDISPLAY_HPP
+#define NCURSESDISPLAY_HPP
 
 #include "ADisplayModule.hpp"
 
 namespace arcade {
-    class ArcadeNcurses : public ADisplayModule {
+    class NcursesDisplay : public ADisplayModule {
         public:
-        ArcadeNcurses();
-        ~ArcadeNcurses() = default;
+        NcursesDisplay();
+        ~NcursesDisplay() = default;
 
         void init() override;
         void stop() override;
@@ -34,4 +34,4 @@ namespace arcade {
     };
 }  // namespace arcade
 
-#endif /* !ARCADE_NCURSES_HPP */
+#endif /* !NCURSESDISPLAY_HPP */
