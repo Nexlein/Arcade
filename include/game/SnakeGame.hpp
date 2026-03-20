@@ -25,6 +25,10 @@ namespace arcade {
         /// @param key The key that was pressed
         void handleInput(Key key) override;
 
+        /// @brief Handle mouse input
+        /// @param mouseEvent The mouse event
+        void handleInput(MouseEvent mouseEvent) override;
+
         /// @brief get all entities to be rendered
         /// @return Const reference to vector of entities to render
         const std::vector<Entity>& getEntities() const override;

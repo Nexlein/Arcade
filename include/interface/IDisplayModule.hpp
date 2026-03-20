@@ -100,7 +100,7 @@ namespace arcade {
         }
     };
 
-    /// @namespace Colors
+    /// @namespace arcade::Colors
     /// @brief Predefined common colors
     namespace Colors {
         const Color BLACK(0, 0, 0);
@@ -125,23 +125,38 @@ namespace arcade {
         Position(float posX = 0.0f, float posY = 0.0f) : x(posX), y(posY) {}
     };
 
+    /// @enum Anchor
+    /// @brief Anchor point for positioning rectangle, entities and text
+    enum class Anchor {
+        TOP_LEFT,       ///< Anchor at top-left corner (default)
+        TOP_CENTER,     ///< Anchor at top-center
+        TOP_RIGHT,      ///< Anchor at top-right corner
+        MIDDLE_LEFT,    ///< Anchor at middle-left
+        CENTER,         ///< Anchor at center
+        MIDDLE_RIGHT,   ///< Anchor at middle-right
+        BOTTOM_LEFT,    ///< Anchor at bottom-left corner
+        BOTTOM_CENTER,  ///< Anchor at bottom-center
+        BOTTOM_RIGHT    ///< Anchor at bottom-right corner
+    };
+
     /// @struct Rect
     /// @brief Rectangle definition for sprites and shapes
     struct Rect {
-        int x;       ///< X coordinate of top-left corner
-        int y;       ///< Y coordinate of top-left corner
-        int width;   ///< Width of rectangle
-        int height;  ///< Height of rectangle
+        int x;          ///< X coordinate of anchor point
+        int y;          ///< Y coordinate of anchor point
+        int width;      ///< Width of rectangle
+        int height;     ///< Height of rectangle
+        Anchor anchor;  ///< Anchor point for positioning (default: TOP_LEFT)
 
         /// @brief Construct a rectangle
         /// @param posX X coordinate (default: 0)
         /// @param posY Y coordinate (default: 0)
         /// @param w Width (default: 0)
         /// @param h Height (default: 0)
-        Rect(int posX = 0, int posY = 0, int w = 0, int h = 0)
-            : x(posX), y(posY), width(w), height(h)
-        {
-        }
+        /// @param a Anchor point (default: TOP_LEFT)
+        Rect(int posX = 0, int posY = 0, int w = 0, int h = 0, Anchor a = Anchor::TOP_LEFT)
+            : x(posX), y(posY), width(w), height(h), anchor(a)
+        {}
     };
 
     /// @enum CoordinateSpace
@@ -153,6 +168,7 @@ namespace arcade {
 
     /// @struct RenderContext
     /// @brief Logical render space description provided by a game
+    ///
     /// @note How display modules transform game coordinates to screen coordinates
     /// (scaling, centering, aspect ratio handling) is implementation-defined.
     /// Each display module decides its own transformation strategy.
@@ -168,6 +184,7 @@ namespace arcade {
 
     /// @struct Entity
     /// @brief Displayable game entity (character, sprite, or tile)
+    ///
     /// This structure supports both terminal-based (ASCII) and graphical rendering.
     /// - Terminal libraries use the character field
     /// - Graphical libraries use the spritePath field
@@ -184,6 +201,7 @@ namespace arcade {
     /// Each sprite is a single complete image file (no sprite sheets/atlases).
     struct Entity {
         Position pos;            ///< Position on screen
+        Anchor anchor;           ///< Anchor point for positioning (default: TOP_LEFT)
         Position size;           ///< Logical entity size (width/height), <= 0 means auto
         char character;          ///< ASCII character (for terminal-based display)
         Color color;             ///< Entity foreground color
@@ -191,11 +209,13 @@ namespace arcade {
         std::string spritePath;  ///< Path to sprite image file (PNG or JPG)
 
         /// @brief Default constructor
-
         Entity()
-            : size(0.0f, 0.0f), character(' '), color(Colors::WHITE), backgroundColor(Colors::BLACK)
-        {
-        }
+            : anchor(Anchor::TOP_LEFT),
+              size(0.0f, 0.0f),
+              character(' '),
+              color(Colors::WHITE),
+              backgroundColor(Colors::BLACK)
+        {}
     };
 
     /// @struct Text
@@ -203,6 +223,7 @@ namespace arcade {
     struct Text {
         std::string content;   ///< Text content to display
         Position pos;          ///< Position on screen
+        Anchor anchor;         ///< Anchor point for positioning (default: TOP_LEFT)
         Color color;           ///< Text color
         int fontSize;          ///< Font size (in points or equivalent)
         std::string fontPath;  ///< Path to custom font file (empty = system default)
@@ -214,9 +235,10 @@ namespace arcade {
         /// @param textColor Text color (default: white)
         /// @param size Font size (default: 12)
         /// @param font Font path (default: empty = system default)
-        Text(const std::string& text = "", float x = 0, float y = 0,
+        /// @param a Anchor point (default: TOP_LEFT)
+        Text(const std::string& text = "", float x = 0, float y = 0, Anchor a = Anchor::TOP_LEFT,
              const Color& textColor = Colors::WHITE, int size = 12, const std::string& font = "")
-            : content(text), pos(x, y), color(textColor), fontSize(size), fontPath(font)
+            : content(text), pos(x, y), anchor(a), color(textColor), fontSize(size), fontPath(font)
         {}
     };
 
@@ -233,9 +255,11 @@ namespace arcade {
 
     /// @class IDisplayModule
     /// @brief Interface for graphics libraries
+    ///
     /// This interface must be implemented by all graphics libraries (nCurses, SDL2, SFML, etc.)
     /// The core program will use this interface to render the game state without knowing
     /// which specific graphics library is being used.
+    ///
     /// Graphics libraries must NOT contain any game logic. They are purely responsible for
     /// rendering entities and handling input events.
     class IDisplayModule : public IModule {
@@ -244,25 +268,40 @@ namespace arcade {
         virtual ~IDisplayModule() = default;
 
         /// @brief Initialize the display module
+        ///
         /// Opens window/terminal and prepares the graphics system for rendering.
         /// This method should be called once before any rendering operations.
+        ///
         /// @throw ModuleException if initialization fails
         virtual void init() = 0;
 
         /// @brief Stop and cleanup the display module
+        ///
         /// Closes window/terminal and releases all graphics resources.
         /// This method should be called once when shutting down.
         virtual void stop() = 0;
+
+        /// @brief Poll and cache all pending input events
+        ///
+        /// Should be called once per frame. Drains the event queue and caches events
+        /// for getKey() and getMouseEvent(). Implementations should handle window
+        /// close events and update isOpen() state accordingly.
+        ///
+        /// @note This method does not block. It processes all queued events and returns
+        /// immediately.
+        virtual void pollEvents() = 0;
 
         /// @brief Get the name of this display module
         /// @return Name of the graphics library (e.g., "SFML", "SDL2", "nCurses")
         virtual const std::string& getName() const = 0;
 
         /// @brief Clear the screen/window
+        ///
         /// Should be called at the beginning of each frame before drawing.
         virtual void clear() = 0;
 
         /// @brief Display/present the current frame
+        ///
         /// Should be called at the end of each frame to show all rendered content.
         /// This typically performs a buffer swap or screen refresh.
         virtual void display() = 0;
@@ -281,16 +320,19 @@ namespace arcade {
         virtual void drawRectangle(const Rect& rect, const Color& color) = 0;
 
         /// @brief Get the last key pressed
+        ///
         /// Non-blocking call that returns the last key event.
         /// Should return Key::UNKNOWN if no key was pressed since last check.
+        ///
         /// @return Key code or Key::UNKNOWN if no key was pressed
         virtual Key getKey() = 0;
 
         /// @brief Get the last mouse event
+        ///
         /// Non-blocking call that returns the last mouse click event.
         /// Returns MouseEvent with button = Key::UNKNOWN if no mouse event occurred.
+        ///
         /// @return Mouse event data (position and button)
-
         virtual MouseEvent getMouseEvent() = 0;
 
         /// @brief Check if the display is still open/running

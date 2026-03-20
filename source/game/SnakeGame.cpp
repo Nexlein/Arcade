@@ -41,6 +41,11 @@ void arcade::SnakeGame::handleInput(Key key)
         if (_currentDir != Direction::LEFT) _nextDir = Direction::RIGHT;
 }
 
+void arcade::SnakeGame::handleInput(MouseEvent mouseEvent)
+{
+    (void)mouseEvent;
+}
+
 const std::vector<arcade::Entity>& arcade::SnakeGame::getEntities() const
 {
     _entities.clear();
@@ -110,10 +115,10 @@ const std::vector<arcade::Text>& arcade::SnakeGame::getUIText() const
     _uiTexts.clear();
 
     std::string scoreStr = "Score: " + std::to_string(_score);
-    _uiTexts.push_back(Text(scoreStr, 1, 0, Colors::WHITE, 20));
+    _uiTexts.push_back(Text(scoreStr, 1, 0, Anchor::TOP_LEFT, Colors::WHITE, 20));
 
     if (_state == GameState::GAME_OVER)
-        _uiTexts.push_back(Text("GAME OVER", _width / 2 - 2, _height / 2, Colors::RED, 30));
+        _uiTexts.push_back(Text("GAME OVER", _width / 2, _height / 2, Anchor::CENTER, Colors::RED, 30));
 
     return _uiTexts;
 }

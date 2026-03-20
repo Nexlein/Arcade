@@ -77,6 +77,14 @@ namespace arcade {
         /// @param key The key that was pressed
         virtual void handleInput(Key key) = 0;
 
+        /// @brief Handle mouse input
+        ///
+        /// Process a mouse event to update game state accordingly.
+        /// The core program will call this method when a mouse event occurs.
+        ///
+        /// @param mouseEvent The mouse event data (position and button)
+        virtual void handleInput(MouseEvent mouseEvent) = 0;
+
         /// @brief Get all entities to be rendered
         ///
         /// Returns a reference to all game entities (player, enemies, items, tiles, etc.)
