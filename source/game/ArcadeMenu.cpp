@@ -24,15 +24,15 @@ void arcade::ArcadeMenu::restart()
     int x = 10;
     int y = 5;
 
-    for (const auto display : _displayPath) {
+    for (const auto& display : _displayPath) {
         arcade::Text newText( display, x, y, Colors::WHITE, 30);
         _uiText.push_back(newText);
         y += 20;
     }
     x = 200;
     y = 5;
-    for (const auto display : _gamePath) {
-        arcade::Text newText( display, x, y, Colors::WHITE, 30);
+    for (const auto& game : _gamePath) {
+        arcade::Text newText( game, x, y, Colors::WHITE, 30);
         _uiText.push_back(newText);
         y += 20;
     }
