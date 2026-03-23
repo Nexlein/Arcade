@@ -2,10 +2,10 @@
 ** EPITECH PROJECT, 2026
 ** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
-** Sdl2Display
+** SDL2Display
 */
 
-/// @file Sdl2Display.hpp
+/// @file SDL2Display.hpp
 /// @brief SDL2 implementation of the IDisplayModule interface
 
 #pragma once
@@ -20,10 +20,10 @@
 #include "ADisplayModule.hpp"
 
 namespace arcade {
-    class Sdl2Display : public ADisplayModule {
+    class SDL2Display : public ADisplayModule {
         public:
-        Sdl2Display();
-        ~Sdl2Display() = default;
+        SDL2Display();
+        ~SDL2Display() = default;
 
         /// @brief Initialize the SDL2 display module
         /// @throw std::runtime_error if initialization fails

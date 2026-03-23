@@ -2,14 +2,14 @@
 ** EPITECH PROJECT, 2026
 ** Arcade
 ** File description:
-** Sdl2Display
+** SDL2Display
 */
 
-/// @file Sdl2Display.cpp
-/// @brief Implementation of the Sdl2Display class, which provides an SDL2-based display module for
+/// @file SDL2Display.cpp
+/// @brief Implementation of the SDL2Display class, which provides an SDL2-based display module for
 /// the Arcade project.
 
-#include "Sdl2Display.hpp"
+#include "SDL2Display.hpp"
 
 #include <algorithm>
 #include <array>
@@ -83,11 +83,11 @@ static const std::unordered_map<SDL_Keycode, arcade::Key> MOUSE_BINDINGS = {
 
 // TODO: gestion des size/fullscreen a revoir.
 
-arcade::Sdl2Display::Sdl2Display() : ADisplayModule(DISPLAY_NAME), _win(nullptr), _renderer(nullptr)
+arcade::SDL2Display::SDL2Display() : ADisplayModule(DISPLAY_NAME), _win(nullptr), _renderer(nullptr)
 {
 }
 
-void arcade::Sdl2Display::init()
+void arcade::SDL2Display::init()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) throw std::runtime_error(SDL_GetError());
     if (TTF_Init() != 0) {
@@ -113,13 +113,13 @@ void arcade::Sdl2Display::init()
     }
 }
 
-void arcade::Sdl2Display::clear() { SDL_RenderClear(_renderer); }
+void arcade::SDL2Display::clear() { SDL_RenderClear(_renderer); }
 
-void arcade::Sdl2Display::display() { SDL_RenderPresent(_renderer); }
+void arcade::SDL2Display::display() { SDL_RenderPresent(_renderer); }
 
-bool arcade::Sdl2Display::isOpen() const { return _win != nullptr; }
+bool arcade::SDL2Display::isOpen() const { return _win != nullptr; }
 
-void arcade::Sdl2Display::pollEvents()
+void arcade::SDL2Display::pollEvents()
 {
     SDL_Event event;
 
@@ -142,7 +142,7 @@ void arcade::Sdl2Display::pollEvents()
     }
 }
 
-bool arcade::Sdl2Display::isValidFormat(const std::string& path)
+bool arcade::SDL2Display::isValidFormat(const std::string& path)
 {
     std::filesystem::path p(path);
 
@@ -154,7 +154,7 @@ bool arcade::Sdl2Display::isValidFormat(const std::string& path)
     return false;
 }
 
-SDL_Texture* arcade::Sdl2Display::getSprite(const std::string& path)
+SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
 {
     auto it = _spriteCache.find(path);
 
@@ -168,7 +168,7 @@ SDL_Texture* arcade::Sdl2Display::getSprite(const std::string& path)
     return texture;
 }
 
-void arcade::Sdl2Display::drawEntity(const Entity& entity)
+void arcade::SDL2Display::drawEntity(const Entity& entity)
 {
     SDL_Texture* sprite = getSprite(entity.spritePath);
 
@@ -178,13 +178,13 @@ void arcade::Sdl2Display::drawEntity(const Entity& entity)
     SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
 }
 
-TTF_Font* arcade::Sdl2Display::tryOpenFont(const std::string& fontPath, int size)
+TTF_Font* arcade::SDL2Display::tryOpenFont(const std::string& fontPath, int size)
 {
     TTF_Font* font = TTF_OpenFont(fontPath.c_str(), size);
     return font;
 }
 
-TTF_Font* arcade::Sdl2Display::getFallbackFont(int size)
+TTF_Font* arcade::SDL2Display::getFallbackFont(int size)
 {
     for (const auto& fontPath : FALLBACK_FONTS) {
         TTF_Font* font = tryOpenFont(fontPath, size);
@@ -193,7 +193,7 @@ TTF_Font* arcade::Sdl2Display::getFallbackFont(int size)
     return nullptr;
 }
 
-TTF_Font* arcade::Sdl2Display::getFont(const std::string& path, int size)
+TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
 {
     auto key = std::make_pair(path, size);
     auto it = _fontCache.find(key);
@@ -214,7 +214,7 @@ TTF_Font* arcade::Sdl2Display::getFont(const std::string& path, int size)
     return newFont;
 }
 
-void arcade::Sdl2Display::drawText(const Text& text)
+void arcade::SDL2Display::drawText(const Text& text)
 {
     TTF_Font* font = getFont(text.fontPath, text.fontSize);
 
@@ -232,7 +232,7 @@ void arcade::Sdl2Display::drawText(const Text& text)
     SDL_DestroyTexture(texture);
 }
 
-void arcade::Sdl2Display::drawRectangle(const Rect& rect, const Color& color)
+void arcade::SDL2Display::drawRectangle(const Rect& rect, const Color& color)
 {
     SDL_Rect sdlRect = {static_cast<int>(rect.x), static_cast<int>(rect.y),
                         static_cast<int>(rect.width), static_cast<int>(rect.height)};
@@ -241,19 +241,19 @@ void arcade::Sdl2Display::drawRectangle(const Rect& rect, const Color& color)
     SDL_RenderFillRect(_renderer, &sdlRect);
 }
 
-void arcade::Sdl2Display::stopFont()
+void arcade::SDL2Display::stopFont()
 {
     for (auto& [key, font] : _fontCache) TTF_CloseFont(font);
     _fontCache.clear();
 }
 
-void arcade::Sdl2Display::stopSprite()
+void arcade::SDL2Display::stopSprite()
 {
     for (auto& [path, texture] : _spriteCache) SDL_DestroyTexture(texture);
     _spriteCache.clear();
 }
 
-void arcade::Sdl2Display::stop()
+void arcade::SDL2Display::stop()
 {
     stopFont();
     stopSprite();
@@ -267,6 +267,6 @@ void arcade::Sdl2Display::stop()
 
 extern "C" {
     arcade::IModule* entryPoint() {
-        return new arcade::Sdl2Display();
+        return new arcade::SDL2Display();
     }
 }
