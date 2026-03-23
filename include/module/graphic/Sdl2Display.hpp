@@ -45,6 +45,9 @@ namespace arcade {
 
         private:
         TTF_Font *getFont(const std::string& path, int size);
+        TTF_Font* tryOpenFont(const std::string& fontPath, int size);
+        TTF_Font *getFallbackFont(int size);
+
         SDL_Texture *getSprite(const std::string& path);
         bool isValidFormat(const std::string& path);
 

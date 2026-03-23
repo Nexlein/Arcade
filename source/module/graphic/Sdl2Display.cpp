@@ -84,20 +84,33 @@ arcade::Sdl2Display::Sdl2Display()
 
 void arcade::Sdl2Display::init()
 {
-    try {
-        SDL_Init(SDL_INIT_EVERYTHING);
-    } catch (const std::exception& e) {
-        printf("error initializing SDL: %s\n", SDL_GetError());
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+        throw std::runtime_error(std::string("SDL_Init failed: ") + SDL_GetError());
+    if (TTF_Init() != 0) {
+        SDL_Quit();
+        throw std::runtime_error(std::string("TTF_Init failed: ") + TTF_GetError());
     }
-    TTF_Init();  // throw ?
 
-    _win = SDL_CreateWindow(  // throw ?
+    _win = SDL_CreateWindow(
         _title.c_str(),
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         _context.width, _context.height, 0
     );
+    if (!_win) {
+        TTF_Quit();
+        SDL_Quit();
+        throw std::runtime_error(std::string("SDL_CreateWindow failed: ") + SDL_GetError());
+    }
+
     _renderer = SDL_CreateRenderer(_win, -1, SDL_RENDERER_ACCELERATED);
+    if (!_renderer) {
+        SDL_DestroyWindow(_win);
+        _win = nullptr;
+        TTF_Quit();
+        SDL_Quit();
+        throw std::runtime_error(std::string("SDL_CreateRenderer failed: ") + SDL_GetError());
+    }
 }
 
 void arcade::Sdl2Display::clear()
@@ -176,7 +189,7 @@ SDL_Texture* arcade::Sdl2Display::getSprite(const std::string& path)
 
     SDL_Texture *texture = IMG_LoadTexture(_renderer, "assets/sprite.png");
     if (!texture)
-        std::cerr << "Error while loading new sprite" << std::endl;
+        throw std::runtime_error(IMG_GetError());
     _spriteCache[path] = texture;
     return texture;
 }
@@ -190,6 +203,28 @@ void arcade::Sdl2Display::drawEntity(const Entity& entity)
     SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
 }
 
+TTF_Font* arcade::Sdl2Display::tryOpenFont(const std::string& fontPath, int size)
+{
+    TTF_Font *font = TTF_OpenFont(fontPath.c_str(), size);
+    return font;
+}
+
+const std::vector<std::string> FALLBACK_FONTS = {
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+};
+
+TTF_Font *arcade::Sdl2Display::getFallbackFont(int size)
+{
+    for (const auto& fontPath : FALLBACK_FONTS) {
+        TTF_Font *font = tryOpenFont(fontPath, size);
+        if (font)
+            return font;
+    }
+
+    std::cerr << "Warning: No fallback font found, attempting default SDL font" << std::endl;
+    return nullptr;
+}
+
 TTF_Font *arcade::Sdl2Display::getFont(const std::string& path, int size)
 {
     auto key = std::make_pair(path, size);
@@ -199,9 +234,14 @@ TTF_Font *arcade::Sdl2Display::getFont(const std::string& path, int size)
         return it->second;
 
     std::string fontPath = path.empty() ? "font/defaultFont.ttf" : path;
-    TTF_Font *newFont = TTF_OpenFont(fontPath.c_str(), size);
+    TTF_Font *newFont = tryOpenFont(fontPath, size);
+
+    // If the specified font is not found, try fallback fonts
     if (!newFont)
-        std::cerr << "Error while loading new font" << std::endl;
+        newFont = getFallbackFont(size);
+
+    if (!newFont)
+        throw std::runtime_error("Failed to load font: " + fontPath + " and no fallback font available");
 
     _fontCache[key] = newFont;
     return newFont;
