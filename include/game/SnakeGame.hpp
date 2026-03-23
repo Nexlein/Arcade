@@ -37,10 +37,6 @@ namespace arcade {
         /// @return Const reference to vector of text elements to render
         const std::vector<Text>& getUIText() const override;
 
-        /// @brief Get the current score
-        /// @return Player's current score
-        int getScore() const override;
-
         /// @brief Restart the game
         void restart() override;
 

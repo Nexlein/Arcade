@@ -14,9 +14,14 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include/core
 )
 
-# Core Project
+# Core library
 file(GLOB CORE_FILES "source/core/*.cpp")
-add_executable(arcade source/main.cpp ${CORE_FILES})
+# Game and Graphic libraries
+file(GLOB GAME_FILES "source/game/*.cpp")
+file(GLOB GRAPHIC_FILES "source/graphic/*.cpp")
+
+# Core Project
+add_executable(arcade source/main.cpp source/game/ArcadeMenu.cpp source/game/AGameModule.cpp ${CORE_FILES})
 target_compile_options(arcade PRIVATE
     -Wall
     -Wextra
@@ -25,13 +30,9 @@ target_compile_options(arcade PRIVATE
     -ldl
 )
 
-# Game and Graphic libraries
-file(GLOB GAME_FILES "source/game/*.cpp")
-file(GLOB GRAPHIC_FILES "source/graphic/*.cpp")
-
 foreach(file ${GAME_FILES})
     get_filename_component(name ${file} NAME_WE)
-    
+
     if(NOT name STREQUAL "AGameModule")
         add_library(${name} SHARED ${file} source/game/AGameModule.cpp)
 
@@ -42,7 +43,7 @@ endforeach()
 
 foreach(file ${GRAPHIC_FILES})
     get_filename_component(name ${file} NAME_WE)
-    
+
     if (NOT name STREQUAL "ADisplayModule")
         add_library(${name} SHARED ${file})
 

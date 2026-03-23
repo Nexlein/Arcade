@@ -48,5 +48,9 @@ void arcade::AGameModule::appendCommonUITexts(std::vector<arcade::Text>& uiTexts
     
     // Bottom left summary
     uiTexts.push_back(Text("[R] Restart  [P] Pause  [M] Menu", 1, yPos, Anchor::BOTTOM_LEFT, Colors::WHITE, 16));
+
+    if (_state == GameState::PAUSED) {
+        uiTexts.push_back(Text("PAUSED", _width / 2, _height / 2, Anchor::CENTER, Colors::YELLOW, 30));
+    }
 }
 

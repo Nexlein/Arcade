@@ -26,8 +26,16 @@ void arcade::SnakeGame::update(float elapsedTime)
 
 void arcade::SnakeGame::handleInput(Key key)
 {
-    if (_state == GameState::GAME_OVER && key == Key::RESTART) {
+    if (key == Key::RESTART) {
         restart();
+        return;
+    }
+
+    if (key == Key::P) {
+        if (_state == GameState::RUNNING)
+            pause();
+        else if (_state == GameState::PAUSED)
+            resume();
         return;
     }
 
