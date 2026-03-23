@@ -5,15 +5,6 @@
 ** arcade_menu
 */
 
-// Exemple d'utilisation dans ton Core :
-// arcade::IGameModule* menuModule = menuLoader->getInstance();
-// arcade::ArcadeMenu* menu = dynamic_cast<arcade::ArcadeMenu*>(menuModule);
-// 
-// if (menu) {
-//     menu->setDisplayPaths(myFoundGraphics);
-//     menu->setGamePaths(myFoundGames);
-// }
-
 #include "ArcadeMenu.hpp"
 
 #include "IDisplayModule.hpp"
@@ -30,8 +21,8 @@ arcade::ArcadeMenu::ArcadeMenu()
     init();
 }
 
-void arcade::ArcadeMenu::setDisplayPaths(const std::vector<std::string>& paths) { _displayPath = paths; }
-void arcade::ArcadeMenu::setGamePaths(const std::vector<std::string>& paths) { _gamePath = paths; }
+void arcade::ArcadeMenu::setDisplayPaths(const std::vector<std::string>& paths) { _displayPaths = paths; }
+void arcade::ArcadeMenu::setGamePaths(const std::vector<std::string>& paths) { _gamePaths = paths; }
 
 void arcade::ArcadeMenu::restart()
 {
@@ -66,21 +57,21 @@ void arcade::ArcadeMenu::handleInput(Key key)
 
 void arcade::ArcadeMenu::upKey()
 {
-    if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPath.empty()) {
+    if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
         _displayIdx -= 1;
-        if (_displayIdx < 0) _displayIdx = _displayPath.size() - 1;
-    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePath.empty()) {
+        if (_displayIdx < 0) _displayIdx = _displayPaths.size() - 1;
+    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
         _gameIdx -= 1;
-        if (_gameIdx < 0) _gameIdx = _gamePath.size() - 1;
+        if (_gameIdx < 0) _gameIdx = _gamePaths.size() - 1;
     }
 }
 
 void arcade::ArcadeMenu::downKey()
 {
-    if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPath.empty()) {
-        _displayIdx = (_displayIdx + 1) % _displayPath.size();
-    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePath.empty()) {
-        _gameIdx = (_gameIdx + 1) % _gamePath.size();
+    if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
+        _displayIdx = (_displayIdx + 1) % _displayPaths.size();
+    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
+        _gameIdx = (_gameIdx + 1) % _gamePaths.size();
     }
 }
 
@@ -134,12 +125,12 @@ void arcade::ArcadeMenu::update(float elapsedTime)
     ));
 
     int y = 10;
-    for (size_t i = 0; i < _displayPath.size(); i++) {
+    for (size_t i = 0; i < _displayPaths.size(); i++) {
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGRAPHIC && i == static_cast<size_t>(_displayIdx))
             color = Colors::RED;
         _uiText.push_back(Text(
-            _displayPath[i],
+            _displayPaths[i],
             leftColX,
             y,
             Anchor::TOP_CENTER,
@@ -161,12 +152,12 @@ void arcade::ArcadeMenu::update(float elapsedTime)
     ));
 
     y = 10;
-    for (size_t i = 0; i < _gamePath.size(); i++) {
+    for (size_t i = 0; i < _gamePaths.size(); i++) {
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx))
             color = Colors::RED;
         _uiText.push_back(Text(
-            _gamePath[i],
+            _gamePaths[i],
             rightColX,
             y,
             Anchor::TOP_CENTER,
@@ -188,15 +179,15 @@ arcade::RenderContext arcade::ArcadeMenu::getRenderContext() const
 
 const std::string& arcade::ArcadeMenu::getSelectedGame() const
 {
-    if (_gameIdx >= 0 && _gameIdx < static_cast<int>(_gamePath.size()))
-        return _gamePath[_gameIdx];
+    if (_gameIdx >= 0 && _gameIdx < static_cast<int>(_gamePaths.size()))
+        return _gamePaths[_gameIdx];
     return EMPTY;
 }
 
 const std::string& arcade::ArcadeMenu::getSelectedGraphic() const
 {
-    if (_displayIdx >= 0 && _displayIdx < static_cast<int>(_displayPath.size()))
-        return _displayPath[_displayIdx];
+    if (_displayIdx >= 0 && _displayIdx < static_cast<int>(_displayPaths.size()))
+        return _displayPaths[_displayIdx];
     return EMPTY;
 }
 
