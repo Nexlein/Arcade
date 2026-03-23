@@ -22,14 +22,14 @@ namespace arcade {
     /// this class instead of IDisplayModule directly.
     class ADisplayModule : public IDisplayModule {
         public:
-        ADisplayModule(std::string name = "Unnamed Display") : _name(name) {}
+        ADisplayModule(std::string name = "Unnamed Display");
         /// @brief Virtual destructor
         virtual ~ADisplayModule() = default;
 
         /// @brief Get the type of this module
         /// @return ModuleType::DISPLAY
-        ModuleType getType() const override { return ModuleType::DISPLAY; }
-        const std::string& getName() const override { return _name; }
+        ModuleType getType() const override;
+        const std::string& getName() const override;
 
         protected:
         std::string _name;

@@ -11,12 +11,79 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include <filesystem>
+#include <array>
+#include <algorithm>
+#include <unordered_map>
 
 static const std::string DISPLAYNAME = "ArcadeMenu";
+static const std::array<std::string_view, 3> VALID_FORMATS = {
+    ".png", ".jpg", ".jpeg"
+};
+
+static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
+    {SDLK_UP,        arcade::Key::NEXT_GAME},
+    {SDLK_DOWN,      arcade::Key::PREV_GAME},
+    {SDLK_LEFT,      arcade::Key::PREV_GRAPHICS},
+    {SDLK_RIGHT,     arcade::Key::NEXT_GRAPHICS},
+    {SDLK_SPACE,     arcade::Key::SPACE},
+    {SDLK_RETURN,    arcade::Key::ENTER},
+    {SDLK_ESCAPE,    arcade::Key::EXIT},
+    {SDLK_BACKSPACE, arcade::Key::BACKSPACE},
+    {SDLK_0,         arcade::Key::NUM_0},
+    {SDLK_1,         arcade::Key::NUM_1},
+    {SDLK_2,         arcade::Key::NUM_2},
+    {SDLK_3,         arcade::Key::NUM_3},
+    {SDLK_4,         arcade::Key::NUM_4},
+    {SDLK_5,         arcade::Key::NUM_5},
+    {SDLK_6,         arcade::Key::NUM_6},
+    {SDLK_7,         arcade::Key::NUM_7},
+    {SDLK_8,         arcade::Key::NUM_8},
+    {SDLK_9,         arcade::Key::NUM_9},
+    {SDLK_a,         arcade::Key::A},
+    {SDLK_b,         arcade::Key::B},
+    {SDLK_c,         arcade::Key::C},
+    {SDLK_d,         arcade::Key::D},
+    {SDLK_e,         arcade::Key::E},
+    {SDLK_f,         arcade::Key::F},
+    {SDLK_g,         arcade::Key::G},
+    {SDLK_h,         arcade::Key::H},
+    {SDLK_i,         arcade::Key::I},
+    {SDLK_j,         arcade::Key::J},
+    {SDLK_k,         arcade::Key::K},
+    {SDLK_l,         arcade::Key::L},
+    {SDLK_m,         arcade::Key::MENU},
+    {SDLK_n,         arcade::Key::N},
+    {SDLK_o,         arcade::Key::O},
+    {SDLK_p,         arcade::Key::P},
+    {SDLK_q,         arcade::Key::Q},
+    {SDLK_r,         arcade::Key::RESTART},
+    {SDLK_s,         arcade::Key::S},
+    {SDLK_t,         arcade::Key::T},
+    {SDLK_u,         arcade::Key::U},
+    {SDLK_v,         arcade::Key::V},
+    {SDLK_w,         arcade::Key::W},
+    {SDLK_x,         arcade::Key::X},
+    {SDLK_y,         arcade::Key::Y},
+    {SDLK_z,         arcade::Key::Z},
+};
+
+static const std::unordered_map<SDL_Keycode, arcade::Key> MOUSE_BINDINGS = {
+    {SDL_BUTTON_LEFT, arcade::Key::MOUSE_LEFT},
+    {SDL_BUTTON_RIGHT, arcade::Key::MOUSE_RIGHT},
+    {SDL_BUTTON_MIDDLE, arcade::Key::MOUSE_MIDDLE},
+};
+
+// gestion des size/fullscreen a revoir.
 
 arcade::Sdl2Display::Sdl2Display()
     : ADisplayModule(DISPLAYNAME),
-    _win(nullptr) {}
+    _win(nullptr),
+    _renderer(nullptr),
+    _title(""),
+    _context(1000, 1000, CoordinateSpace::GRID),
+    _fullscreen(false),
+    _currentTime(0.0),
+    _lastTime(0.0) {}
 
 void arcade::Sdl2Display::init()
 {
@@ -26,26 +93,76 @@ void arcade::Sdl2Display::init()
     TTF_Init();  // throw ?
 
     _win = SDL_CreateWindow(  // throw ?
-        "GAME",
+        _title.c_str(),
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        1000, 1000, 0
+        _context.width, _context.height, 0
     );
     _renderer = SDL_CreateRenderer(_win, -1, SDL_RENDERER_ACCELERATED);
 }
 
-void arcade::Sdl2Display::stop()
+void arcade::Sdl2Display::clear()
 {
-    SDL_DestroyTexture(texture);
-    TTF_CloseFont(font);
-    TTF_Quit();
-    SDL_Quit();
+    SDL_RenderClear(_renderer);
 }
 
-// vérifier le format et apres si format est bon, alors on le charge dans le cache -> drawEntity;
+void arcade::Sdl2Display::display()
+{
+    SDL_RenderPresent(_renderer);
+}
+
+void arcade::Sdl2Display::pollEvents()
+{
+    SDL_Event event;
+
+    _keyEvent = {};
+    _mouseEvent = {};
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT)
+            _win = nullptr;
+        if (event.type == SDL_KEYDOWN) {
+            auto it = KEY_BINDINGS.find(event.key.keysym.sym);
+            _keyEvent.push(it != KEY_BINDINGS.end() ? it->second : Key::UNKNOWN);
+        }
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            float x = static_cast<float>(event.button.x);
+            float y = static_cast<float>(event.button.y);
+
+            auto it = MOUSE_BINDINGS.find(event.button.button);
+            _mouseEvent.push(
+                it != MOUSE_BINDINGS.end() ?
+                MouseEvent{{x, y}, it->second} :
+                MouseEvent{Position{}, Key::UNKNOWN});
+        }
+    }
+}
+
+arcade::Key arcade::Sdl2Display::getKey()
+{
+    Key lastKey = _keyEvent.empty() ? Key::UNKNOWN : _keyEvent.front();
+
+    _keyEvent.pop();
+    return lastKey;
+}
+
+arcade::MouseEvent arcade::Sdl2Display::getMouseEvent()
+{
+    MouseEvent lastMouse = _mouseEvent.empty() ? MouseEvent{{0.0f, 0.0f}, Key::UNKNOWN} : _mouseEvent.front();
+
+    _mouseEvent.pop();
+    return lastMouse;
+}
+
 bool arcade::Sdl2Display::isValidFormat(const std::string& path)
 {
-    
+    std::filesystem::path p(path);
+
+    if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
+        std::string ext = p.extension().string();
+        return std::find(VALID_FORMATS.begin(), VALID_FORMATS.end(), std::string_view(ext))
+            != VALID_FORMATS.end();
+    }
+    return false;
 }
 
 SDL_Texture* arcade::Sdl2Display::getSprite(const std::string& path)
@@ -54,24 +171,24 @@ SDL_Texture* arcade::Sdl2Display::getSprite(const std::string& path)
 
     if (it != _spriteCache.end())
         return it->second;
-    
+
     if (!isValidFormat(path))
         return nullptr;
+
     SDL_Texture *texture = IMG_LoadTexture(_renderer, "assets/sprite.png");
-    
+    if (!texture)
+        std::cerr << "Error while loading new sprite" << std::endl;
+    _spriteCache[path] = texture;
+    return texture;
 }
 
 void arcade::Sdl2Display::drawEntity(const Entity& entity)
 {
     SDL_Texture *sprite = getSprite(entity.spritePath);
 
-    // if (sprite == nullptr) throw
-    // Dessin
-    SDL_Rect dst = {x, y, width, height};
-    SDL_RenderCopy(_renderer, texture, nullptr, &dst);
-
-    // Libération (dans le destructeur)
-    SDL_DestroyTexture(texture);
+    // if (!sprite) throw
+    SDL_Rect dst = {entity.pos.x, entity.pos.y, entity.size.x, entity.size.y};
+    SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
 }
 
 TTF_Font *arcade::Sdl2Display::getFont(const std::string& path, int size)
@@ -117,8 +234,50 @@ void arcade::Sdl2Display::drawRectangle(const Rect& rect, const Color& color)
     SDL_RenderFillRect(_renderer, &sdlRect);
 }
 
-// extern "C" {
-//     arcade::IModule* entryPoint() {
-//         return new arcade::Sdl2Display();
-//     }
-// }
+float arcade::Sdl2Display::getDeltaTime() const { return _currentTime - _lastTime; }
+
+int arcade::Sdl2Display::getWidth() const { return _context.width; }
+
+int arcade::Sdl2Display::getHeight() const { return _context.height; }
+
+bool arcade::Sdl2Display::isOpen() const { return _win != nullptr; }
+
+void arcade::Sdl2Display::setTitle(const std::string& title) { _title = title; }
+
+void arcade::Sdl2Display::setWindowSize(int width, int height) { _context.width = width; _context.height = height; }
+
+void arcade::Sdl2Display::setFullscreen(bool fullscreen) { _fullscreen = fullscreen; }
+
+void arcade::Sdl2Display::setRenderContext(const RenderContext& context) { _context = context; }
+
+void arcade::Sdl2Display::stopFont()
+{
+    for (auto& [key, font] : _fontCache)
+        TTF_CloseFont(font);
+    _fontCache.clear();
+}
+
+void arcade::Sdl2Display::stopSprite()
+{
+    for (auto& [path, texture] : _spriteCache)
+        SDL_DestroyTexture(texture);
+    _spriteCache.clear();
+}
+
+void arcade::Sdl2Display::stop()
+{
+    stopFont();
+    stopSprite();
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_win);
+    TTF_Quit();
+    SDL_Quit();
+    _renderer = nullptr;
+    _win = nullptr;
+}
+
+extern "C" {
+    arcade::IModule* entryPoint() {
+        return new arcade::Sdl2Display();
+    }
+}
