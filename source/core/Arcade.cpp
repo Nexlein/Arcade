@@ -223,7 +223,7 @@ int arcade::Arcade::run()
 
 void arcade::Arcade::printUsage(const std::string& programName) const
 {
-    std::cerr << "\n"
+    std::cout << "\n"
               << "   █████╗ ██████╗  ██████╗ █████╗ ██████╗ ███████╗\n"
               << "  ██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝\n"
               << "  ███████║██████╔╝██║     ███████║██║  ██║█████╗  \n"
