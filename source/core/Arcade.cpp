@@ -1,91 +1,241 @@
 /*
 ** EPITECH PROJECT, 2026
-** Arcade
+** G-OOP-400-MPL-4-1-arcade-5
 ** File description:
 ** Arcade
 */
 
-// Arcade.cpp
 #include "Arcade.hpp"
-#include <stdexcept>
-#include <iostream>
+
+#include <chrono>
 #include <filesystem>
+#include <iostream>
+#include <stdexcept>
+
+#include "IMenuModule.hpp"
 
 arcade::Arcade::Arcade(int ac, char* av[])
-    : _graphicLoader(std::make_unique<DLLoader<IDisplayModule>>(ac == 2 ? av[1] : "")),
-    _gameLoader(nullptr),
-    _game(nullptr),
-    _displayIdx(-1),
-    _gameIdx(-1),
-    _gameState(GameState::MENU),
-    _playerName(""),
-    _isRunning(true)
+    : _graphicLoader(nullptr),
+      _gameLoader(nullptr),
+      _graphicInstance(nullptr),
+      _gameInstance(nullptr),
+      _displayIdx(-1),
+      _gameIdx(-1),
+      _gameState(GameState::MENU),
+      _playerName(""),
+      _isRunning(true)
 {
     if (ac != 2) {
         printUsage(av[0]);
         throw std::invalid_argument("Invalid number of arguments.");
     }
 
+    // Load every lib
+    loadLibrairies("./lib");
+
+    // Load the initial graphic library
     try {
-        _graphic = _graphicLoader.get()->getInstance();
+        _graphicLoader = std::make_unique<DLLoader<IDisplayModule>>(av[1]);
+        _graphicInstance = _graphicLoader->getInstance();
+        _graphicInstance->init();
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
-        throw e.what();
+        throw std::invalid_argument("Failed to load graphic library.");
+    }
+
+    // Start the menu
+    menuManager();
+}
+
+void arcade::Arcade::loadLibrairies(const std::string& loadPath)
+{
+    if (!std::filesystem::exists(loadPath))
+        throw std::runtime_error(loadPath + ": Directory not found.");
+
+    for (const auto& file : std::filesystem::directory_iterator(loadPath)) {
+        if (file.is_regular_file() && file.path().extension() == ".so") {
+            try {
+                DLLoader<IModule> modLoader(file.path().string());
+                IModule* modInstance = modLoader.getInstance();
+
+                if (modInstance->getType() == ModuleType::DISPLAY)
+                    _displayPaths.push_back(file.path().string());
+                else if (modInstance->getType() == ModuleType::GAME) {
+                    if (modInstance->getName() != "ArcadeMenu")
+                        _gamePaths.push_back(file.path().string());
+                    else
+                        _menuPath = file.path().string();
+                }
+                delete modInstance;
+            } catch (const DLLoader<IModule>::DLLoaderException& e) {
+                throw std::runtime_error(file.path().string() + std::string(": ") + e.what());
+            }
+        }
+    }
+}
+
+void arcade::Arcade::menuManager()
+{
+    // Stop and clean up the game
+    if (_gameInstance != nullptr) {
+        _gameInstance->stop();
+        delete _gameInstance;
+        _gameLoader.reset();
+    }
+
+    // Start a new menu
+    if (_menuPath.empty()) throw std::runtime_error("ArcadeMenu.so not found in lib directory.");
+
+    _gameLoader = std::make_unique<DLLoader<IGameModule>>(_menuPath);
+    _gameInstance = _gameLoader->getInstance();
+
+    IMenuModule* menu = dynamic_cast<IMenuModule*>(_gameInstance);
+    if (menu) {
+        menu->setDisplayPaths(_displayPaths);
+        menu->setGamePaths(_gamePaths);
+    }
+
+    _gameState = GameState::MENU;
+}
+
+float arcade::Arcade::computeElapsedTime(
+    std::chrono::high_resolution_clock::time_point& lastTime) const
+{
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float elapsedTime = std::chrono::duration<float>(currentTime - lastTime).count();
+
+    lastTime = currentTime;
+    return elapsedTime;
+}
+
+bool arcade::Arcade::processInputs(arcade::Key& key)
+{
+    _graphicInstance->pollEvents();
+    key = _graphicInstance->getKey();
+
+    if (key == Key::ESCAPE) {
+        _isRunning = false;
+        return false;
+    }
+
+    if (key != Key::UNKNOWN) _gameInstance->handleInput(key);
+
+    return true;
+}
+
+void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
+{
+    delete _gameInstance;
+    _gameInstance = nullptr;
+
+    try {
+        _gameLoader = std::make_unique<DLLoader<IGameModule>>(selectedGame);
+        _gameInstance = _gameLoader->getInstance();
+        _gameState = GameState::RUNNING;
+    } catch (const DLLoader<IGameModule>::DLLoaderException& e) {
+        throw std::runtime_error(selectedGame + ": " + e.what());
+    }
+}
+
+void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
+{
+    delete _graphicInstance;
+    _graphicInstance = nullptr;
+
+    try {
+        _graphicLoader = std::make_unique<DLLoader<IDisplayModule>>(selectedGraphic);
+        _graphicInstance = _graphicLoader->getInstance();
+        _graphicInstance->init();
+    } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
+        throw std::runtime_error(selectedGraphic + ": " + e.what());
+    }
+}
+
+void arcade::Arcade::handleMenuSelection()
+{
+    IMenuModule* menu = dynamic_cast<IMenuModule*>(_gameInstance);
+
+    if (!menu) return;
+
+    std::string selectedGraphic = menu->getSelectedGraphic();
+    std::string selectedGame = menu->getSelectedGame();
+
+    if (!selectedGame.empty()) loadGameFromPath(selectedGame);
+    if (!selectedGraphic.empty()) loadDisplayFromPath(selectedGraphic);
+}
+
+void arcade::Arcade::handleStateTransitions(arcade::Key key)
+{
+    if (_gameState == GameState::MENU && _gameInstance->getState() == GameState::WON)
+        handleMenuSelection();
+    else if (_gameState == GameState::RUNNING && key == Key::MENU)
+        menuManager();
+}
+
+void arcade::Arcade::renderFrame()
+{
+    _graphicInstance->clear();
+    _graphicInstance->setRenderContext(_gameInstance->getRenderContext());
+
+    for (const auto& entity : _gameInstance->getEntities()) {
+        _graphicInstance->drawEntity(entity);
+    }
+
+    for (const auto& text : _gameInstance->getUIText()) {
+        _graphicInstance->drawText(text);
+    }
+
+    _graphicInstance->display();
+}
+
+void arcade::Arcade::cleanupResources()
+{
+    if (_gameInstance) {
+        _gameInstance->stop();
+        delete _gameInstance;
+        _gameInstance = nullptr;
+    }
+    if (_graphicInstance) {
+        _graphicInstance->stop();
+        delete _graphicInstance;
+        _graphicInstance = nullptr;
     }
 }
 
 int arcade::Arcade::run()
 {
-    while (_isRunning) {
-        switch (_gameState) {
-        case GameState::MENU: menuManager();
-            break;
-        default:
-            break;
-        }
+    auto lastTime = std::chrono::high_resolution_clock::now();
+
+    while (_isRunning && _graphicInstance && _graphicInstance->isOpen()) {
+        float elapsedTime = computeElapsedTime(lastTime);
+        arcade::Key key = Key::UNKNOWN;
+
+        if (!processInputs(key)) break;
+
+        _gameInstance->update(elapsedTime);
+        handleStateTransitions(key);
+        renderFrame();
     }
+
+    cleanupResources();
+
     return 0;
-}
-
-void arcade::Arcade::menuManager()
-{
-    
-}
-
-void arcade::Arcade::loadLibrairies(const std::string& loadPath)
-{
-    std::unique_ptr<DLLoader<IModule>> loader;
-    IModule* mod;
-
-    for (const auto& file : std::filesystem::directory_iterator(loadPath)) {
-        if (file.is_regular_file() && file.path().extension() == ".so") {
-            loader = std::make_unique<DLLoader<IModule>>(file.path());
-            mod = loader.get()->getInstance();
-            printf("module_name: %s, type: %d\n\n", mod->getName().c_str(), int(mod->getType()));
-            // en fonction du type trouvé -> stocker dans la liste correspondante.
-        }
-    }
 }
 
 void arcade::Arcade::printUsage(const std::string& programName) const
 {
-    std::cerr
-        << "\n"
-        << "   █████╗ ██████╗  ██████╗ █████╗ ██████╗ ███████╗\n"
-        << "  ██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝\n"
-        << "  ███████║██████╔╝██║     ███████║██║  ██║█████╗  \n"
-        << "  ██╔══██║██╔══██╗██║     ██╔══██║██║  ██║██╔══╝  \n"
-        << "  ██║  ██║██║  ██║╚██████╗██║  ██║██████╔╝███████╗\n"
-        << "  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═════╝ ╚══════╝\n"
-        << "\n"
-        << "  THE EPITECH ARCADE EMULATOR — v1.0\n"
-        << "\n"
-        << "  \033[31mERROR  \033[0mInvalid number of arguments.\n"
-        << "\n"
-        << "  \033[90mUSAGE\033[0m\n"
-        << "    " << programName << " \033[33m<graphic_library>\033[0m\n"
-        << "\n"
-        << "  \033[90mEXAMPLES\033[0m\n"
-        << "    " << programName << " \033[33m./lib/arcade_ncurses.so\033[0m\n"
-        << "    " << programName << " \033[33m./lib/arcade_sdl2.so\033[0m\n"
-        << "\n";
+    std::cerr << "\n"
+              << "   █████╗ ██████╗  ██████╗ █████╗ ██████╗ ███████╗\n"
+              << "  ██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝\n"
+              << "  ███████║██████╔╝██║     ███████║██║  ██║█████╗  \n"
+              << "  ██╔══██║██╔══██╗██║     ██╔══██║██║  ██║██╔══╝  \n"
+              << "  ██║  ██║██║  ██║╚██████╗██║  ██║██████╔╝███████╗\n"
+              << "  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═════╝ ╚══════╝\n"
+              << "\n"
+              << "  \033[90mUSAGE\033[0m\n"
+              << "    " << programName << " \033[33m<graphic_library>\033[0m\n"
+              << "\n"
+              << "  \033[90mEXAMPLES\033[0m\n"
+              << "    " << programName << " \033[33m./lib/arcade_ncurses.so\033[0m\n"
+              << "    " << programName << " \033[33m./lib/arcade_sdl2.so\033[0m\n"
+              << "\n";
 }
