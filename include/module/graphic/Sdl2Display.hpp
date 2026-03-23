@@ -11,6 +11,9 @@
 #include "ADisplayModule.hpp"
 #include <map>
 #include <queue>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 
 namespace arcade {
     class Sdl2Display : public ADisplayModule {

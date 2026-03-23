@@ -6,9 +6,6 @@
 */
 
 #include "Sdl2Display.hpp"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_image.h>
 #include <iostream>
 #include <filesystem>
 #include <array>
@@ -87,8 +84,10 @@ arcade::Sdl2Display::Sdl2Display()
 
 void arcade::Sdl2Display::init()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        printf("error initializing SDL: %s\n", SDL_GetError()); // throw ?
+    try {
+        SDL_Init(SDL_INIT_EVERYTHING);
+    } catch (const std::exception& e) {
+        printf("error initializing SDL: %s\n", SDL_GetError());
     }
     TTF_Init();  // throw ?
 
@@ -187,7 +186,7 @@ void arcade::Sdl2Display::drawEntity(const Entity& entity)
     SDL_Texture *sprite = getSprite(entity.spritePath);
 
     // if (!sprite) throw
-    SDL_Rect dst = {entity.pos.x, entity.pos.y, entity.size.x, entity.size.y};
+    SDL_Rect dst = {static_cast<int>(entity.pos.x), static_cast<int>(entity.pos.y), static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
     SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
 }
 
@@ -218,7 +217,7 @@ void arcade::Sdl2Display::drawText(const Text& text)
     SDL_Texture *texture = SDL_CreateTextureFromSurface(_renderer, surface);
     SDL_FreeSurface(surface);
 
-    SDL_Rect dst = {(int)text.pos.x, (int)text.pos.y, 0, 0};
+    SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
     SDL_QueryTexture(texture, nullptr, nullptr, &dst.w, &dst.h);
     // TODO: gestion anchor ici
 
@@ -228,7 +227,7 @@ void arcade::Sdl2Display::drawText(const Text& text)
 
 void arcade::Sdl2Display::drawRectangle(const Rect& rect, const Color& color)
 {
-    SDL_Rect sdlRect = {rect.x, rect.y, rect.width, rect.height};
+    SDL_Rect sdlRect = {static_cast<int>(rect.x), static_cast<int>(rect.y), static_cast<int>(rect.width), static_cast<int>(rect.height)};
 
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(_renderer, &sdlRect);
