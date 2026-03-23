@@ -6,32 +6,99 @@
 */
 
 /// @file ADisplayModule.hpp
-/// @brief Abstract base class for display modules
+/// @brief Abstract base class for display modules in the Arcade project
 
 #pragma once
+
+#include <queue>
+#include <string>
 
 #include "IDisplayModule.hpp"
 
 namespace arcade {
 
-    /// @class ADisplayModule
-    /// @brief Abstract implementation of IDisplayModule that provides getType()
+    /// @brief Abstract base class for display modules
     ///
-    /// This class implements the getType() method returning ModuleType::DISPLAY.
-    /// All concrete display modules (SDL2, SFML, nCurses, etc.) should inherit from
-    /// this class instead of IDisplayModule directly.
+    /// Provides common functionality and state management for all display modules.
     class ADisplayModule : public IDisplayModule {
         public:
+        /// @brief Constructor for the ADisplayModule class
+        /// @param name The name of the display module (default is "Unnamed Display")
         ADisplayModule(std::string name = "Unnamed Display");
-        /// @brief Virtual destructor
         virtual ~ADisplayModule() = default;
 
-        /// @brief Get the type of this module
-        /// @return ModuleType::DISPLAY
+        // --- Getters ---
+
+        /// @brief Gets the type of the display module
+        /// @return The module type
         ModuleType getType() const override;
+
+        /// @brief Gets the name of the display module
+        /// @return The module name
         const std::string& getName() const override;
 
+        /// @brief Gets the last key event
+        /// @return The last key event
+        Key getKey() override;
+
+        /// @brief Gets the last mouse event
+        /// @return The last mouse event
+        MouseEvent getMouseEvent() override;
+
+        /// @brief Gets the delta time
+        /// @return The delta time
+        float getDeltaTime() const override;
+
+        /// @brief Gets the width of the display module
+        /// @return The width
+        int getWidth() const override;
+
+        /// @brief Gets the height of the display module
+        /// @return The height
+        int getHeight() const override;
+
+        // --- Setters ---
+
+        /// @brief Sets the title of the display module
+        /// @param title The new title
+        void setTitle(const std::string& title) override;
+
+        /// @brief Sets the size of the display module window
+        /// @param width The new width
+        /// @param height The new height
+        void setWindowSize(int width, int height) override;
+
+        /// @brief Sets the fullscreen mode of the display module
+        /// @param fullscreen The new fullscreen mode
+        void setFullscreen(bool fullscreen) override;
+
+        /// @brief Sets the render context of the display module
+        /// @param context The new render context
+        void setRenderContext(const RenderContext& context) override;
+
         protected:
+        /// @brief The name of the display module
         std::string _name;
+
+        /// @brief The title of the display window
+        std::string _title;
+
+        /// @brief The render context containing dimensions and coordinate space
+        RenderContext _context;
+
+        /// @brief Whether the display is in fullscreen mode
+        bool _fullScreen;
+
+        /// @brief Timing variables for delta time calculation
+        float _currentTime;
+
+        /// @brief The last recorded time for delta time calculation
+        float _lastTime;
+
+        /// @brief Queue to store key events
+        std::queue<Key> _keyEvent;
+
+        /// @brief Queue to store mouse events
+        std::queue<MouseEvent> _mouseEvent;
     };
 }  // namespace arcade
