@@ -9,16 +9,17 @@
 #define ARCADE_MENU_HPP
 
 #include "AGameModule.hpp"
+#include "IMenuModule.hpp"
 
 namespace arcade {
 
-    class ArcadeMenu : public AGameModule {
+    class ArcadeMenu : public IMenuModule, public AGameModule {
         public:
         ArcadeMenu();
         ~ArcadeMenu() = default;
 
-        void setDisplayPaths(const std::vector<std::string>& paths);
-        void setGamePaths(const std::vector<std::string>& paths);
+        void setDisplayPaths(const std::vector<std::string>& paths) override;
+        void setGamePaths(const std::vector<std::string>& paths) override;
 
         void restart() override;
         void handleInput(Key key) override;
@@ -28,8 +29,8 @@ namespace arcade {
         const std::vector<Text>& getUIText() const override;
         RenderContext getRenderContext() const override;
 
-        const std::string& getSelectedGame() const;
-        const std::string& getSelectedGraphic() const;
+        const std::string& getSelectedGame() const override;
+        const std::string& getSelectedGraphic() const override;
 
         private:
         enum class CurrentChoice { ONGRAPHIC, ONGAME };
@@ -37,8 +38,8 @@ namespace arcade {
         void downKey();
         void switchChoice(const Key& key);
 
-        std::vector<std::string> _displayPath;
-        std::vector<std::string> _gamePath;
+        std::vector<std::string> _displayPaths;
+        std::vector<std::string> _gamePaths;
 
         std::vector<Entity> _entities;
         std::vector<Text> _uiText;

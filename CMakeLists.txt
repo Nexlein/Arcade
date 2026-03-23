@@ -12,16 +12,26 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include/game
     ${CMAKE_SOURCE_DIR}/include/graphic
     ${CMAKE_SOURCE_DIR}/include/core
+    ${CMAKE_SOURCE_DIR}/include/menu
 )
 
+# TODO:
+# source/module/AGameModule.cpp
+# source/module/game/SnakeGame.cpp
+# source/module/ADisplayModule.cpp
+
 # Core library
-file(GLOB CORE_FILES "source/core/*.cpp")
+file(GLOB CORE_FILES
+    "source/core/*.cpp"
+    "source/game/AGameModule.cpp" # TODO: source/module/*.cpp
+    "source/main.cpp"
+)
 # Game and Graphic libraries
-file(GLOB GAME_FILES "source/game/*.cpp")
+file(GLOB GAME_FILES "source/game/*.cpp" "source/menu/*.cpp")
 file(GLOB GRAPHIC_FILES "source/graphic/*.cpp")
 
 # Core Project
-add_executable(arcade source/main.cpp source/game/ArcadeMenu.cpp source/game/AGameModule.cpp ${CORE_FILES})
+add_executable(arcade ${CORE_FILES})
 target_compile_options(arcade PRIVATE
     -Wall
     -Wextra
@@ -30,6 +40,7 @@ target_compile_options(arcade PRIVATE
     -ldl
 )
 
+# TODO: Change logic to follow the new structure of the project
 foreach(file ${GAME_FILES})
     get_filename_component(name ${file} NAME_WE)
 
