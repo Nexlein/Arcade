@@ -85,6 +85,8 @@ void arcade::Arcade::menuManager()
     // Stop and clean up the game
     if (_gameInstance != nullptr) {
         _gameInstance->stop();
+        delete _gameInstance;
+        _gameInstance = nullptr;
     }
 
     // Reset the loader (which destroys the old instance)
@@ -136,6 +138,8 @@ void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
         // Stop old instance before destroying the old loader
         if (_gameInstance != nullptr) {
             _gameInstance->stop();
+            delete _gameInstance;
+            _gameInstance = nullptr;
         }
 
         // Create new loader and get the instance
@@ -154,8 +158,11 @@ void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
 void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
 {
     try {
-        if (_graphicInstance != nullptr)
+        if (_graphicInstance != nullptr) {
             _graphicInstance->stop();
+            delete _graphicInstance;
+            _graphicInstance = nullptr;
+        }
 
         auto newGraphicLoader = std::make_unique<DLLoader<IDisplayModule>>(selectedGraphic);
         IDisplayModule* newGraphicInstance = newGraphicLoader->getInstance();
@@ -209,10 +216,12 @@ void arcade::Arcade::cleanupResources()
 {
     if (_gameInstance) {
         _gameInstance->stop();
+        delete _gameInstance;
         _gameInstance = nullptr;
     }
     if (_graphicInstance) {
         _graphicInstance->stop();
+        delete _graphicInstance;
         _graphicInstance = nullptr;
     }
 
