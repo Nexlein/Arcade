@@ -5,6 +5,10 @@
 ** Arcade
 */
 
+/// @file Arcade.cpp
+/// @brief Implementation of the Arcade class, which manages the main game loop, module loading, and
+/// state transitions for the arcade application.
+
 #include "Arcade.hpp"
 
 #include <chrono>
@@ -67,7 +71,8 @@ void arcade::Arcade::loadLibrairies(const std::string& loadPath)
                 }
                 delete modInstance;
             } catch (const DLLoader<IModule>::DLLoaderException& e) {
-                throw std::runtime_error(file.path().string() + std::string(": ") + e.what());
+                std::cerr << file.path().string() << ": " << e.what() << std::endl;
+                continue;
             }
         }
     }
@@ -78,9 +83,10 @@ void arcade::Arcade::menuManager()
     // Stop and clean up the game
     if (_gameInstance != nullptr) {
         _gameInstance->stop();
-        delete _gameInstance;
-        _gameLoader.reset();
     }
+
+    // Reset the loader (which destroys the old instance)
+    _gameLoader.reset();
 
     // Start a new menu
     if (_menuPath.empty()) throw std::runtime_error("ArcadeMenu.so not found in lib directory.");
@@ -124,12 +130,19 @@ bool arcade::Arcade::processInputs(arcade::Key& key)
 
 void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
 {
-    delete _gameInstance;
-    _gameInstance = nullptr;
-
     try {
-        _gameLoader = std::make_unique<DLLoader<IGameModule>>(selectedGame);
-        _gameInstance = _gameLoader->getInstance();
+        // Stop old instance before destroying the old loader
+        if (_gameInstance != nullptr) {
+            _gameInstance->stop();
+        }
+
+        // Create new loader and get the instance
+        auto newGameLoader = std::make_unique<DLLoader<IGameModule>>(selectedGame);
+        IGameModule* newGameInstance = newGameLoader->getInstance();
+
+        // Assign new loader
+        _gameLoader = std::move(newGameLoader);
+        _gameInstance = newGameInstance;
         _gameState = GameState::RUNNING;
     } catch (const DLLoader<IGameModule>::DLLoaderException& e) {
         throw std::runtime_error(selectedGame + ": " + e.what());
@@ -138,12 +151,15 @@ void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
 
 void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
 {
-    delete _graphicInstance;
-    _graphicInstance = nullptr;
-
     try {
-        _graphicLoader = std::make_unique<DLLoader<IDisplayModule>>(selectedGraphic);
-        _graphicInstance = _graphicLoader->getInstance();
+        if (_graphicInstance != nullptr)
+            _graphicInstance->stop();
+
+        auto newGraphicLoader = std::make_unique<DLLoader<IDisplayModule>>(selectedGraphic);
+        IDisplayModule* newGraphicInstance = newGraphicLoader->getInstance();
+
+        _graphicLoader = std::move(newGraphicLoader);
+        _graphicInstance = newGraphicInstance;
         _graphicInstance->init();
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
         throw std::runtime_error(selectedGraphic + ": " + e.what());
@@ -159,8 +175,12 @@ void arcade::Arcade::handleMenuSelection()
     std::string selectedGraphic = menu->getSelectedGraphic();
     std::string selectedGame = menu->getSelectedGame();
 
-    if (!selectedGame.empty()) loadGameFromPath(selectedGame);
     if (!selectedGraphic.empty()) loadDisplayFromPath(selectedGraphic);
+    if (!selectedGame.empty()) {
+        loadGameFromPath(selectedGame);
+        return;
+    }
+    _gameInstance->restart();
 }
 
 void arcade::Arcade::handleStateTransitions(arcade::Key key)
@@ -176,13 +196,9 @@ void arcade::Arcade::renderFrame()
     _graphicInstance->clear();
     _graphicInstance->setRenderContext(_gameInstance->getRenderContext());
 
-    for (const auto& entity : _gameInstance->getEntities()) {
-        _graphicInstance->drawEntity(entity);
-    }
+    for (const auto& entity : _gameInstance->getEntities()) _graphicInstance->drawEntity(entity);
 
-    for (const auto& text : _gameInstance->getUIText()) {
-        _graphicInstance->drawText(text);
-    }
+    for (const auto& text : _gameInstance->getUIText()) _graphicInstance->drawText(text);
 
     _graphicInstance->display();
 }
@@ -191,14 +207,16 @@ void arcade::Arcade::cleanupResources()
 {
     if (_gameInstance) {
         _gameInstance->stop();
-        delete _gameInstance;
         _gameInstance = nullptr;
     }
     if (_graphicInstance) {
         _graphicInstance->stop();
-        delete _graphicInstance;
         _graphicInstance = nullptr;
     }
+
+    // Reset loaders
+    _gameLoader.reset();
+    _graphicLoader.reset();
 }
 
 int arcade::Arcade::run()
