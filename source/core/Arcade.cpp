@@ -41,6 +41,8 @@ arcade::Arcade::Arcade(int ac, char* av[])
     try {
         _graphicLoader = std::make_unique<DLLoader<IDisplayModule>>(av[1]);
         _graphicInstance = _graphicLoader->getInstance();
+        if (_graphicInstance->getType() != ModuleType::DISPLAY)
+            throw std::invalid_argument(std::string(av[1]) + ": Not a display module.");
         _graphicInstance->init();
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
         throw std::invalid_argument("Failed to load graphic library.");
