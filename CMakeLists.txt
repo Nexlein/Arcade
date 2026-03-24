@@ -50,7 +50,7 @@ endforeach()
 # GRAPHIC MODULES
 
 # SDL2
-add_library(arcade_sdl2 SHARED source/module/graphic/Sdl2Display.cpp source/module/ADisplayModule.cpp)
+add_library(arcade_sdl2 SHARED source/module/graphic/SDL2Display.cpp source/module/ADisplayModule.cpp)
 set_target_properties(arcade_sdl2 PROPERTIES PREFIX "")
 target_compile_options(arcade_sdl2 PRIVATE -Wall -Wextra -Werror)
 target_link_libraries(arcade_sdl2 PRIVATE PkgConfig::SDL2 PkgConfig::SDL2_IMAGE PkgConfig::SDL2_TTF)
