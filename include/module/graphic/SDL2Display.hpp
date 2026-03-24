@@ -23,7 +23,7 @@ namespace arcade {
     class SDL2Display : public ADisplayModule {
         public:
         SDL2Display();
-        ~SDL2Display() = default;
+        ~SDL2Display();
 
         /// @brief Initialize the SDL2 display module
         /// @throw std::runtime_error if initialization fails

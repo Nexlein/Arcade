@@ -87,6 +87,8 @@ arcade::SDL2Display::SDL2Display() : ADisplayModule(DISPLAY_NAME), _win(nullptr)
 {
 }
 
+arcade::SDL2Display::~SDL2Display() { stop(); }
+
 void arcade::SDL2Display::init()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) throw std::runtime_error(SDL_GetError());
