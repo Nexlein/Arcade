@@ -91,7 +91,7 @@ arcade::SDL2Display::~SDL2Display() { stop(); }
 
 void arcade::SDL2Display::init()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) throw std::runtime_error(SDL_GetError());
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) throw std::runtime_error(SDL_GetError());
     if (TTF_Init() != 0) {
         SDL_Quit();
         throw std::runtime_error(TTF_GetError());
@@ -259,12 +259,19 @@ void arcade::SDL2Display::stop()
 {
     stopFont();
     stopSprite();
-    SDL_DestroyRenderer(_renderer);
-    SDL_DestroyWindow(_win);
+    
+    if (_renderer) {
+        SDL_DestroyRenderer(_renderer);
+        _renderer = nullptr;
+    }
+    if (_win) {
+        SDL_DestroyWindow(_win);
+        _win = nullptr;
+    }
+    
     TTF_Quit();
+    IMG_Quit();
     SDL_Quit();
-    _renderer = nullptr;
-    _win = nullptr;
 }
 
 extern "C" {
