@@ -4,9 +4,6 @@ project(Arcade)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Libraries -> lib/
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-
 include(FetchContent)
 
 # Force SDL to be built as a shared library
@@ -65,15 +62,22 @@ file(GLOB GAME_FILES "source/module/game/*.cpp" "source/module/menu/*.cpp")
 foreach(file ${GAME_FILES})
     cmake_path(GET file STEM name)
     add_library(${name} SHARED ${file} source/module/AGameModule.cpp)
-    set_target_properties(${name} PROPERTIES PREFIX "")
+    
+    set_target_properties(${name} PROPERTIES 
+        PREFIX ""
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
+    )
     target_compile_options(${name} PRIVATE -Wall -Wextra -Werror)
 endforeach()
 
 # GRAPHIC MODULES
-
 # SDL2
 add_library(arcade_sdl2 SHARED source/module/graphic/SDL2Display.cpp source/module/ADisplayModule.cpp)
-set_target_properties(arcade_sdl2 PROPERTIES PREFIX "")
+
+set_target_properties(arcade_sdl2 PROPERTIES 
+    PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
+)
 target_compile_options(arcade_sdl2 PRIVATE -Wall -Wextra -Werror)
 target_link_libraries(arcade_sdl2 PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf)
 
