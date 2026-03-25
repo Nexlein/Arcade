@@ -23,7 +23,7 @@ namespace arcade {
     class AGameModule : public IGameModule {
         public:
         /// @brief Virtual destructor
-        AGameModule(std::string name = "Unnamed Game", GameState initialState = GameState::MENU, int width = 20, int height = 20);
+        AGameModule(std::string name = "Unnamed Game", GameState initialState = GameState::MENU, int width = 800, int height = 600);
         virtual ~AGameModule() = default;
 
         /// @brief Get the type of this module

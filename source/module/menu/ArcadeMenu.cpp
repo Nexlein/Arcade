@@ -17,7 +17,7 @@ static const std::string GAMENAME = "ArcadeMenu";
 static const std::string EMPTY = "";
 
 arcade::ArcadeMenu::ArcadeMenu()
-    : AGameModule(GAMENAME, GameState::MENU, 1000, 618),
+    : AGameModule(GAMENAME, GameState::MENU),
       _currentSection(CurrentChoice::ONGRAPHIC),
       _validatedSection(CurrentChoice::ONGRAPHIC),
       _hasValidatedSelection(false),
@@ -106,7 +106,7 @@ void arcade::ArcadeMenu::update(float elapsedTime)
     _entities.clear();
 
     /// Title
-    _uiText.push_back(Text("Arcade Menu", _width / 2, 2, Anchor::CENTER, Colors::YELLOW, 40));
+    _uiText.push_back(Text("Arcade Menu", _width / 2, 40, Anchor::CENTER, Colors::YELLOW, 40));
 
     /// Draw a vertical line separating the columns in the middle
     int midX = _width / 2;
@@ -120,28 +120,28 @@ void arcade::ArcadeMenu::update(float elapsedTime)
 
     /// Graphics section
     int leftColX = midX / 2;
-    _uiText.push_back(Text("Graphics:", leftColX, 20, Anchor::CENTER, Colors::CYAN, 30));
+    _uiText.push_back(Text("Graphics:", leftColX, 100, Anchor::CENTER, Colors::CYAN, 30));
 
-    int y = 50;
+    int y = 155;
     for (size_t i = 0; i < _displayPaths.size(); i++) {
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGRAPHIC && i == static_cast<size_t>(_displayIdx))
             color = Colors::RED;
         _uiText.push_back(Text(_displayPaths[i], leftColX, y, Anchor::CENTER, color, 15));
-        y += 20;
+        y += 30;
     }
 
     /// Games section
     int rightColX = midX + (midX / 2);
-    _uiText.push_back(Text("Games:", rightColX, 6, Anchor::CENTER, Colors::CYAN, 30));
+    _uiText.push_back(Text("Games:", rightColX, 100, Anchor::CENTER, Colors::CYAN, 30));
 
-    y = 50;
+    y = 155;
     for (size_t i = 0; i < _gamePaths.size(); i++) {
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx))
             color = Colors::RED;
         _uiText.push_back(Text(_gamePaths[i], rightColX, y, Anchor::CENTER, color, 15));
-        y += 20;
+        y += 30;
     }
 }
 

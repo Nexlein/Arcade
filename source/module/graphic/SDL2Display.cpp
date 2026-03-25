@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
-#include <iostream>
 #include <unordered_map>
 
 /// @brief Name of the SDL2 display module
@@ -29,10 +28,10 @@ static const std::vector<std::string> FALLBACK_FONTS = {
 
 /// @brief Mapping of SDL key codes to arcade::Key values
 static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
-    {SDLK_UP, arcade::Key::NEXT_GAME},
-    {SDLK_DOWN, arcade::Key::PREV_GAME},
-    {SDLK_LEFT, arcade::Key::PREV_GRAPHICS},
-    {SDLK_RIGHT, arcade::Key::NEXT_GRAPHICS},
+    {SDLK_UP, arcade::Key::UP},
+    {SDLK_DOWN, arcade::Key::DOWN},
+    {SDLK_LEFT, arcade::Key::LEFT},
+    {SDLK_RIGHT, arcade::Key::RIGHT},
     {SDLK_SPACE, arcade::Key::SPACE},
     {SDLK_RETURN, arcade::Key::ENTER},
     {SDLK_ESCAPE, arcade::Key::EXIT},
@@ -215,6 +214,41 @@ TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
     return newFont;
 }
 
+void arcade::SDL2Display::setAnchor(const Text& text, SDL_Rect& dst)
+{
+    switch (text.anchor) {
+    case Anchor::TOP_LEFT: break;
+    case Anchor::TOP_CENTER:
+        dst.x -= dst.w / 2;
+        break;
+    case Anchor::TOP_RIGHT:
+        dst.x -= dst.w;
+        break;
+    case Anchor::MIDDLE_LEFT:
+        dst.y -= dst.h / 2;
+        break;
+    case Anchor::CENTER:
+        dst.x -= dst.w / 2;
+        dst.y -= dst.h / 2;
+        break;
+    case Anchor::MIDDLE_RIGHT:
+        dst.x -= dst.w;
+        dst.y -= dst.h / 2;
+        break;
+    case Anchor::BOTTOM_LEFT:
+        dst.y -= dst.h;
+        break;
+    case Anchor::BOTTOM_CENTER:
+        dst.x -= dst.w / 2;
+        dst.y -= dst.h;
+        break;
+    case Anchor::BOTTOM_RIGHT:
+        dst.x -= dst.w;
+        dst.y -= dst.h;
+        break;
+    }
+}
+
 void arcade::SDL2Display::drawText(const Text& text)
 {
     TTF_Font* font = getFont(text.fontPath, text.fontSize);
@@ -228,7 +262,7 @@ void arcade::SDL2Display::drawText(const Text& text)
     // printf("%s(%d; %d) -> %d\n", text.content.c_str(), static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), text.fontSize);
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
     SDL_QueryTexture(texture, nullptr, nullptr, &dst.w, &dst.h);
-    // TODO: gestion anchor ici
+    setAnchor(text, dst);
 
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
     SDL_DestroyTexture(texture);
