@@ -7,13 +7,35 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Libraries -> lib/
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
-# DEPENDANCES
-find_package(PkgConfig REQUIRED)
+include(FetchContent)
 
-# IMPORTED_TARGETS -> PkgConfig::SDL2, PkgConfig::SDL2_IMAGE, PkgConfig::SDL2_TTF
-pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2)
-pkg_check_modules(SDL2_IMAGE REQUIRED IMPORTED_TARGET SDL2_image)
-pkg_check_modules(SDL2_TTF REQUIRED IMPORTED_TARGET SDL2_ttf)
+# Force SDL to be built as a shared library
+set(SDL_SHARED ON CACHE BOOL "Build SDL shared library" FORCE)
+set(SDL_STATIC OFF CACHE BOOL "Build SDL static library" FORCE)
+
+message(STATUS "Fetching SDL2...")
+FetchContent_Declare(
+    SDL2
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG        release-2.30.0
+)
+FetchContent_MakeAvailable(SDL2)
+
+message(STATUS "Fetching SDL2_image...")
+FetchContent_Declare(
+    SDL2_image
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+    GIT_TAG        release-2.8.2
+)
+FetchContent_MakeAvailable(SDL2_image)
+
+message(STATUS "Fetching SDL2_ttf...")
+FetchContent_Declare(
+    SDL2_ttf
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+    GIT_TAG        release-2.22.0
+)
+FetchContent_MakeAvailable(SDL2_ttf)
 
 # GLOBAL INCLUDES
 include_directories(
@@ -53,10 +75,13 @@ endforeach()
 add_library(arcade_sdl2 SHARED source/module/graphic/SDL2Display.cpp source/module/ADisplayModule.cpp)
 set_target_properties(arcade_sdl2 PROPERTIES PREFIX "")
 target_compile_options(arcade_sdl2 PRIVATE -Wall -Wextra -Werror)
-target_link_libraries(arcade_sdl2 PRIVATE PkgConfig::SDL2 PkgConfig::SDL2_IMAGE PkgConfig::SDL2_TTF)
+target_link_libraries(arcade_sdl2 PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf)
 
 # TESTS
-pkg_check_modules(CRITERION criterion)
+find_package(PkgConfig QUIET)
+if (PKG_CONFIG_FOUND)
+    pkg_check_modules(CRITERION criterion)
+endif()
 
 if (CRITERION_FOUND)
     file(GLOB TEST_FILES tests/*.cpp)
