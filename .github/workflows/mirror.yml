@@ -28,4 +28,4 @@ jobs:
 
           # 3. Push all branches and tags to the Epitech repository, forcing the update
           git push epitechArcade --all --force
-          git push epitechArcade --tags --mirror
+          git push epitechArcade --tags --force
