@@ -18,7 +18,10 @@ jobs:
       - name: Download dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake clang-format pkg-config libcriterion-dev
+          sudo apt-get install -y build-essential cmake clang-format pkg-config libcriterion-dev \
+          libfreetype6-dev \
+          libx11-dev libxext-dev libwayland-dev libxkbcommon-dev libgl1-mesa-dev \
+          libasound2-dev libpulse-dev
 
       - name: Make configuration
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
