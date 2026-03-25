@@ -11,10 +11,10 @@
 
 #include "ADisplayModule.hpp"
 
-arcade::ADisplayModule::ADisplayModule(std::string name)
+arcade::ADisplayModule::ADisplayModule(std::string name, RenderContext context)
     : _name(name),
       _title(""),
-      _context(100, 100, CoordinateSpace::GRID),
+      _context(context),
       _fullScreen(false),
       _currentTime(0),
       _lastTime(0)

@@ -59,7 +59,6 @@ namespace arcade {
         void appendCommonUITexts(std::vector<Text>& uiTexts) const;
 
         std::string _name;
-
         GameState _state;
 
         int _width;

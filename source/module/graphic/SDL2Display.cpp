@@ -96,7 +96,6 @@ void arcade::SDL2Display::init()
         SDL_Quit();
         throw std::runtime_error(TTF_GetError());
     }
-
     _win = SDL_CreateWindow(_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                             _context.width, _context.height, 0);
     if (!_win) {
@@ -226,6 +225,7 @@ void arcade::SDL2Display::drawText(const Text& text)
     SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
     SDL_FreeSurface(surface);
 
+    // printf("%s(%d; %d) -> %d\n", text.content.c_str(), static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), text.fontSize);
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
     SDL_QueryTexture(texture, nullptr, nullptr, &dst.w, &dst.h);
     // TODO: gestion anchor ici

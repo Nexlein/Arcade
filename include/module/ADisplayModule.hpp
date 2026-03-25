@@ -24,7 +24,7 @@ namespace arcade {
         public:
         /// @brief Constructor for the ADisplayModule class
         /// @param name The name of the display module (default is "Unnamed Display")
-        ADisplayModule(std::string name = "Unnamed Display");
+        ADisplayModule(std::string name = "Unnamed Display", RenderContext context = {100, 100, CoordinateSpace::GRID});
         virtual ~ADisplayModule() = default;
 
         // --- Getters ---
