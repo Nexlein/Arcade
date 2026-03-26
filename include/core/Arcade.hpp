@@ -52,7 +52,7 @@ namespace arcade {
         /// @brief Processes the inputs from the user
         /// @param key The key that was pressed
         /// @return True if the input was processed, false otherwise
-        bool processInputs(arcade::Key& key);
+        bool processInputs();
 
         /// @brief Loads a game module from the specified path and starts it
         /// @param selectedGame The path of the selected game module
@@ -68,7 +68,7 @@ namespace arcade {
         void menuManager();
         /// @brief Handles state transitions based on the current game state and user input
         /// @param key The key that was pressed
-        void handleStateTransitions(arcade::Key key);
+        void handleStateTransitions();
 
         /// @brief Renders the current frame by drawing all entities and UI text
         void renderFrame();

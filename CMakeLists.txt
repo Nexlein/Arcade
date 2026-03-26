@@ -48,7 +48,6 @@ include_directories(
 # CORE PROJECT
 file(GLOB CORE_FILES
     "source/core/*.cpp"
-    "source/module/*.cpp"
     "source/main.cpp"
 )
 

@@ -155,21 +155,19 @@ void arcade::SDL2Display::pollEvents()
 {
     SDL_Event event;
 
-    _keyEvent = {};
-    _mouseEvent = {};
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) _win = nullptr;
         if (event.type == SDL_KEYDOWN) {
             auto it = KEY_BINDINGS.find(event.key.keysym.sym);
-            _keyEvent.push(it != KEY_BINDINGS.end() ? it->second : Key::UNKNOWN);
+            if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             float x = static_cast<float>(event.button.x);
             float y = static_cast<float>(event.button.y);
 
             auto it = MOUSE_BINDINGS.find(event.button.button);
-            _mouseEvent.push(it != MOUSE_BINDINGS.end() ? MouseEvent{{x, y}, it->second}
-                                                        : MouseEvent{Position{}, Key::UNKNOWN});
+            if (it != MOUSE_BINDINGS.end()) _mouseEvent.push(MouseEvent{{x, y}, it->second});
+            else _mouseEvent.push(MouseEvent{Position{}, Key::UNKNOWN});
         }
     }
 }

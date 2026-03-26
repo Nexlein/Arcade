@@ -118,15 +118,17 @@ float arcade::Arcade::computeElapsedTime(
     return elapsedTime;
 }
 
-bool arcade::Arcade::processInputs(arcade::Key& key)
+bool arcade::Arcade::processInputs()
 {
     _graphicInstance->pollEvents();
     key = _graphicInstance->getKey();
 
-    if (key == Key::ESCAPE) {
-        _isRunning = false;
-        return false;
-    }
+    arcade::Key key;
+    while ((key = _graphicInstance->getKey()) != Key::UNKNOWN) {
+        if (key == Key::ESCAPE) {
+            _isRunning = false;
+            return false;
+        }
 
     if (key != Key::UNKNOWN) _gameInstance->handleInput(key);
 
@@ -194,12 +196,10 @@ void arcade::Arcade::handleMenuSelection()
     _gameInstance->restart();
 }
 
-void arcade::Arcade::handleStateTransitions(arcade::Key key)
+void arcade::Arcade::handleStateTransitions()
 {
     if (_gameState == GameState::MENU && _gameInstance->getState() == GameState::WON)
         handleMenuSelection();
-    else if (_gameState == GameState::RUNNING && key == Key::MENU)
-        menuManager();
 }
 
 void arcade::Arcade::renderFrame()
@@ -238,12 +238,11 @@ int arcade::Arcade::run()
 
     while (_isRunning && _graphicInstance && _graphicInstance->isOpen()) {
         float elapsedTime = computeElapsedTime(lastTime);
-        arcade::Key key = Key::UNKNOWN;
 
-        if (!processInputs(key)) break;
+        if (!processInputs()) break;
 
         _gameInstance->update(elapsedTime);
-        handleStateTransitions(key);
+        handleStateTransitions();
         renderFrame();
     }
 
