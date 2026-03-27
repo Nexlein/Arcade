@@ -16,7 +16,6 @@
 
 #include <SDL_rect.h>
 #include <map>
-#include <queue>
 
 #include "ADisplayModule.hpp"
 #include "IDisplayModule.hpp"
@@ -95,7 +94,7 @@ namespace arcade {
         /// @brief Cleanup all loaded sprites
         void stopSprite();
 
-        void setAnchor(const Text& text, SDL_Rect& dst);
+        void applyAnchor(Anchor anchor, SDL_Rect& dst);
 
         /// @brief The SDL2 window
         SDL_Window* _win;

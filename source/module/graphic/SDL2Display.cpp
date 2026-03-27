@@ -113,7 +113,11 @@ void arcade::SDL2Display::init()
     }
 }
 
-void arcade::SDL2Display::clear() { SDL_RenderClear(_renderer); }
+void arcade::SDL2Display::clear()
+{
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+    SDL_RenderClear(_renderer);
+}
 
 void arcade::SDL2Display::display() { SDL_RenderPresent(_renderer); }
 
@@ -162,20 +166,32 @@ SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
 
     if (!isValidFormat(path)) return nullptr;
 
-    SDL_Texture* texture = IMG_LoadTexture(_renderer, "assets/sprite.png");
-    if (!texture) throw std::runtime_error(IMG_GetError());
+    SDL_Texture* texture = IMG_LoadTexture(_renderer, path.c_str());
+    if (!texture) {
+        // printf("IMG_LoadTexture error: %s\n", IMG_GetError()); // throw ?
+        return nullptr;
+    }
     _spriteCache[path] = texture;
     return texture;
 }
 
 void arcade::SDL2Display::drawEntity(const Entity& entity)
 {
-    SDL_Texture* sprite = getSprite(entity.spritePath);
-
-    // if (!sprite) throw
     SDL_Rect dst = {static_cast<int>(entity.pos.x), static_cast<int>(entity.pos.y),
-                    static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
-    SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
+                static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
+
+    applyAnchor(entity.anchor, dst);
+
+    SDL_Texture* sprite = nullptr;
+    if (!entity.spritePath.empty())
+        sprite = getSprite(entity.spritePath);
+
+    if (sprite) {
+        SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
+    } else {
+        SDL_SetRenderDrawColor(_renderer, entity.color.r, entity.color.g, entity.color.b, entity.color.a);
+        SDL_RenderFillRect(_renderer, &dst);
+    }
 }
 
 TTF_Font* arcade::SDL2Display::tryOpenFont(const std::string& fontPath, int size)
@@ -214,38 +230,18 @@ TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
     return newFont;
 }
 
-void arcade::SDL2Display::setAnchor(const Text& text, SDL_Rect& dst)
+void arcade::SDL2Display::applyAnchor(Anchor anchor, SDL_Rect& dst)
 {
-    switch (text.anchor) {
+    switch (anchor) {
     case Anchor::TOP_LEFT: break;
-    case Anchor::TOP_CENTER:
-        dst.x -= dst.w / 2;
-        break;
-    case Anchor::TOP_RIGHT:
-        dst.x -= dst.w;
-        break;
-    case Anchor::MIDDLE_LEFT:
-        dst.y -= dst.h / 2;
-        break;
-    case Anchor::CENTER:
-        dst.x -= dst.w / 2;
-        dst.y -= dst.h / 2;
-        break;
-    case Anchor::MIDDLE_RIGHT:
-        dst.x -= dst.w;
-        dst.y -= dst.h / 2;
-        break;
-    case Anchor::BOTTOM_LEFT:
-        dst.y -= dst.h;
-        break;
-    case Anchor::BOTTOM_CENTER:
-        dst.x -= dst.w / 2;
-        dst.y -= dst.h;
-        break;
-    case Anchor::BOTTOM_RIGHT:
-        dst.x -= dst.w;
-        dst.y -= dst.h;
-        break;
+    case Anchor::TOP_CENTER:    dst.x -= dst.w / 2; break;
+    case Anchor::TOP_RIGHT:     dst.x -= dst.w; break;
+    case Anchor::MIDDLE_LEFT:   dst.y -= dst.h / 2; break;
+    case Anchor::CENTER:        dst.x -= dst.w / 2; dst.y -= dst.h / 2; break;
+    case Anchor::MIDDLE_RIGHT:  dst.x -= dst.w; dst.y -= dst.h / 2; break;
+    case Anchor::BOTTOM_LEFT:   dst.y -= dst.h; break;
+    case Anchor::BOTTOM_CENTER: dst.x -= dst.w / 2; dst.y -= dst.h; break;
+    case Anchor::BOTTOM_RIGHT:  dst.x -= dst.w; dst.y -= dst.h; break;
     }
 }
 
@@ -259,10 +255,9 @@ void arcade::SDL2Display::drawText(const Text& text)
     SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
     SDL_FreeSurface(surface);
 
-    // printf("%s(%d; %d) -> %d\n", text.content.c_str(), static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), text.fontSize);
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
     SDL_QueryTexture(texture, nullptr, nullptr, &dst.w, &dst.h);
-    setAnchor(text, dst);
+    applyAnchor(text.anchor, dst);
 
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
     SDL_DestroyTexture(texture);
