@@ -6,7 +6,6 @@
 */
 
 #include "SnakeGame.hpp"
-#include "IDisplayModule.hpp"
 
 #include <random>
 
