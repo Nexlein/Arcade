@@ -10,7 +10,6 @@
 /// the Arcade project.
 
 #include "SDL2Display.hpp"
-#include "IDisplayModule.hpp"
 
 #include <algorithm>
 #include <array>
