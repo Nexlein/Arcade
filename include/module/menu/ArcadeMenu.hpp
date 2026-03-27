@@ -82,10 +82,6 @@ namespace arcade {
         /// @brief A vector of file paths for available game modules.
         std::vector<std::string> _gamePaths;
 
-        /// @brief A vector of entities to be rendered for the menu visuals.
-        std::vector<Entity> _entities;
-        /// @brief A vector of text elements to be rendered for the menu UI.
-        std::vector<Text> _uiText;
         /// @brief The current section of the menu that the user is navigating (graphics or games).
         CurrentChoice _currentSection;
         /// @brief The section of the menu that the user has validated (graphics or games).

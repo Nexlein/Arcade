@@ -52,9 +52,6 @@ namespace arcade {
         std::deque<Position> _snakeBody;
         std::vector<Position> _fruits;
 
-        mutable std::vector<Entity> _entities;
-        mutable std::vector<Text> _uiTexts;
-
         /// @brief Move the snake in the current direction, handle collisions and fruit consumption
         void moveSnake();
 

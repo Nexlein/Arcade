@@ -35,15 +35,61 @@ void arcade::AGameModule::resume()
 
 void arcade::AGameModule::init() { restart(); }
 
-void arcade::AGameModule::appendCommonUITexts(std::vector<arcade::Text>& uiTexts) const
+void arcade::AGameModule::appendCommonUITexts()
 {
-    float yPos = static_cast<float>(_context.height);
+    float midX = static_cast<float>(_context.width) / 2;
+    float midY = static_cast<float>(_context.height) / 2;
 
-    // Bottom left summary
-    uiTexts.push_back(Text("[R] Restart  [P] Pause  [M] Menu", 1, yPos, Anchor::BOTTOM_LEFT, Colors::WHITE, 16));
+    // Score display at top left
+    std::string scoreStr = "Score: " + std::to_string(_score);
+    _uiText.push_back(Text(
+        scoreStr,
+        1,
+        0,
+        Anchor::TOP_LEFT,
+        Colors::WHITE,
+        20
+    ));
 
-    if (_state == GameState::PAUSED) {
-        uiTexts.push_back(Text("PAUSED", static_cast<float>(_context.width) / 2, static_cast<float>(_context.height) / 2, Anchor::CENTER, Colors::YELLOW, 30));
-    }
+    // Game title centered at the top
+    _uiText.push_back(Text(
+        _name,
+        midX,
+        0,
+        Anchor::TOP_CENTER,
+        Colors::WHITE,
+        20
+    ));
+
+    // Bottom left key summary
+    _uiText.push_back(Text(
+        "[R] Restart  [P] Pause  [M] Menu",
+        1,
+        static_cast<float>(_context.height),
+        Anchor::BOTTOM_LEFT,
+        Colors::WHITE,
+        16
+    ));
+
+    // If paused, add a large "PAUSED" text in the center
+    if (_state == GameState::PAUSED)
+        _uiText.push_back(Text(
+            "PAUSED",
+            midX,
+            midY,
+            Anchor::CENTER,
+            Colors::YELLOW,
+            30
+        ));
+
+    // If game over, add a large "GAME OVER" text in the center
+    if (_state == GameState::GAME_OVER)
+        _uiText.push_back(Text(
+            "GAME OVER",
+            midX,
+            midY,
+            Anchor::CENTER,
+            Colors::RED,
+            30
+        ));
 }
-
