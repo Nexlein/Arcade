@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include "IDisplayModule.hpp"
 #include "IGameModule.hpp"
 
 namespace arcade {
