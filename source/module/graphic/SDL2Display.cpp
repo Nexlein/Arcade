@@ -37,10 +37,10 @@ static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
     {SDLK_ESCAPE, arcade::Key::EXIT},
     {SDLK_BACKSPACE, arcade::Key::BACKSPACE},
     {SDLK_0, arcade::Key::NUM_0},
-    {SDLK_1, arcade::Key::NUM_1},
-    {SDLK_2, arcade::Key::NUM_2},
-    {SDLK_3, arcade::Key::NUM_3},
-    {SDLK_4, arcade::Key::NUM_4},
+    {SDLK_1, arcade::Key::PREV_GAME},
+    {SDLK_2, arcade::Key::NEXT_GAME},
+    {SDLK_3, arcade::Key::PREV_GRAPHICS},
+    {SDLK_4, arcade::Key::NEXT_GRAPHICS},
     {SDLK_5, arcade::Key::NUM_5},
     {SDLK_6, arcade::Key::NUM_6},
     {SDLK_7, arcade::Key::NUM_7},
@@ -71,7 +71,8 @@ static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
     {SDLK_w, arcade::Key::W},
     {SDLK_x, arcade::Key::X},
     {SDLK_y, arcade::Key::Y},
-    {SDLK_z, arcade::Key::Z}};
+    {SDLK_z, arcade::Key::Z}
+};
 
 /// @brief Mapping of SDL mouse button codes to arcade::Key values
 static const std::unordered_map<SDL_Keycode, arcade::Key> MOUSE_BINDINGS = {
@@ -155,21 +156,19 @@ void arcade::SDL2Display::pollEvents()
 {
     SDL_Event event;
 
-    _keyEvent = {};
-    _mouseEvent = {};
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) _win = nullptr;
         if (event.type == SDL_KEYDOWN) {
             auto it = KEY_BINDINGS.find(event.key.keysym.sym);
-            _keyEvent.push(it != KEY_BINDINGS.end() ? it->second : Key::UNKNOWN);
+            if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             float x = static_cast<float>(event.button.x);
             float y = static_cast<float>(event.button.y);
 
             auto it = MOUSE_BINDINGS.find(event.button.button);
-            _mouseEvent.push(it != MOUSE_BINDINGS.end() ? MouseEvent{{x, y}, it->second}
-                                                        : MouseEvent{Position{}, Key::UNKNOWN});
+            if (it != MOUSE_BINDINGS.end()) _mouseEvent.push(MouseEvent{{x, y}, it->second});
+            else _mouseEvent.push(MouseEvent{Position{}, Key::UNKNOWN});
         }
     }
 }

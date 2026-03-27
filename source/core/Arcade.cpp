@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 #include "IMenuModule.hpp"
 
@@ -118,17 +119,52 @@ float arcade::Arcade::computeElapsedTime(
     return elapsedTime;
 }
 
-bool arcade::Arcade::processInputs(arcade::Key& key)
+bool arcade::Arcade::processInputs()
 {
     _graphicInstance->pollEvents();
-    key = _graphicInstance->getKey();
 
-    if (key == Key::ESCAPE) {
-        _isRunning = false;
-        return false;
+    arcade::Key key;
+    while ((key = _graphicInstance->getKey()) != Key::UNKNOWN) {
+        if (key == Key::EXIT) {
+            _isRunning = false;
+            return false;
+        }
+
+        if (key == Key::MENU && _gameState == GameState::RUNNING) {
+            menuManager();
+            continue;
+        }
+        else if (key == Key::NEXT_GRAPHICS && !_displayPaths.empty()) {
+            int nextIdx = (_displayIdx + 1) % _displayPaths.size();
+            loadDisplayFromPath(_displayPaths[nextIdx]);
+            continue;
+        }
+        else if (key == Key::PREV_GRAPHICS && !_displayPaths.empty()) {
+            int prevIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
+            loadDisplayFromPath(_displayPaths[prevIdx]);
+            continue;
+        }
+        else if (key == Key::NEXT_GAME && !_gamePaths.empty() && _gameState == GameState::RUNNING) {
+            int nextIdx = (_gameIdx + 1) % _gamePaths.size();
+            loadGameFromPath(_gamePaths[nextIdx]);
+            continue;
+        }
+        else if (key == Key::PREV_GAME && !_gamePaths.empty() && _gameState == GameState::RUNNING) {
+            int prevIdx = (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
+            loadGameFromPath(_gamePaths[prevIdx]);
+            continue;
+        }
+        else if (key == Key::RESTART && _gameState == GameState::RUNNING) {
+            _gameInstance->restart();
+            continue;
+        }
+
+        _gameInstance->handleInput(key);
     }
 
-    if (key != Key::UNKNOWN) _gameInstance->handleInput(key);
+    arcade::MouseEvent mouseEvent;
+    while ((mouseEvent = _graphicInstance->getMouseEvent()).button != Key::UNKNOWN)
+        _gameInstance->handleInput(mouseEvent);
 
     return true;
 }
@@ -151,6 +187,12 @@ void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
         _gameLoader = std::move(newGameLoader);
         _gameInstance = newGameInstance;
         _gameState = GameState::RUNNING;
+
+        // Update the selected game index in the menu
+        auto it = std::find(_gamePaths.begin(), _gamePaths.end(), selectedGame);
+        if (it != _gamePaths.end())
+            _gameIdx = std::distance(_gamePaths.begin(), it);
+
     } catch (const DLLoader<IGameModule>::DLLoaderException& e) {
         throw std::runtime_error(selectedGame + ": " + e.what());
     }
@@ -172,6 +214,11 @@ void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
         _graphicInstance = newGraphicInstance;
         _graphicInstance->setRenderContext(_gameInstance->getRenderContext());
         _graphicInstance->init();
+
+        auto it = std::find(_displayPaths.begin(), _displayPaths.end(), selectedGraphic);
+        if (it != _displayPaths.end())
+            _displayIdx = std::distance(_displayPaths.begin(), it);
+
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
         throw std::runtime_error(selectedGraphic + ": " + e.what());
     }
@@ -194,12 +241,10 @@ void arcade::Arcade::handleMenuSelection()
     _gameInstance->restart();
 }
 
-void arcade::Arcade::handleStateTransitions(arcade::Key key)
+void arcade::Arcade::handleStateTransitions()
 {
     if (_gameState == GameState::MENU && _gameInstance->getState() == GameState::WON)
         handleMenuSelection();
-    else if (_gameState == GameState::RUNNING && key == Key::MENU)
-        menuManager();
 }
 
 void arcade::Arcade::renderFrame()
@@ -238,12 +283,11 @@ int arcade::Arcade::run()
 
     while (_isRunning && _graphicInstance && _graphicInstance->isOpen()) {
         float elapsedTime = computeElapsedTime(lastTime);
-        arcade::Key key = Key::UNKNOWN;
 
-        if (!processInputs(key)) break;
+        if (!processInputs()) break;
 
         _gameInstance->update(elapsedTime);
-        handleStateTransitions(key);
+        handleStateTransitions();
         renderFrame();
     }
 

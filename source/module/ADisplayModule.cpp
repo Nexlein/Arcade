@@ -23,16 +23,21 @@ arcade::ADisplayModule::ADisplayModule(std::string name, RenderContext context)
 
 arcade::Key arcade::ADisplayModule::getKey()
 {
-    Key lastKey = _keyEvent.empty() ? Key::UNKNOWN : _keyEvent.front();
-    if (!_keyEvent.empty()) _keyEvent.pop();
+    if (_keyEvent.empty()) return Key::UNKNOWN;
+
+    Key lastKey = _keyEvent.front();
+    _keyEvent.pop();
+
     return lastKey;
 }
 
 arcade::MouseEvent arcade::ADisplayModule::getMouseEvent()
 {
-    MouseEvent lastMouse =
-        _mouseEvent.empty() ? MouseEvent{{0, 0}, Key::UNKNOWN} : _mouseEvent.front();
-    if (!_mouseEvent.empty()) _mouseEvent.pop();
+    if (_mouseEvent.empty()) return MouseEvent{{0, 0}, Key::UNKNOWN};
+
+    MouseEvent lastMouse = _mouseEvent.front();
+    _mouseEvent.pop();
+
     return lastMouse;
 }
 
