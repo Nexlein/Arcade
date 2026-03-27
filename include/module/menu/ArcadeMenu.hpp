@@ -57,10 +57,6 @@ namespace arcade {
         /// @brief Gets the UI text elements to be rendered for the menu.
         /// @return A constant reference to a vector of text elements representing the menu UI.
         const std::vector<Text>& getUIText() const override;
-        /// @brief Gets the render context for the menu.
-        /// @return The render context containing dimensions and coordinate space information for
-        /// rendering the menu.
-        RenderContext getRenderContext() const override;
 
         /// @brief Gets the currently selected game.
         /// @return A constant reference to the selected game's name.

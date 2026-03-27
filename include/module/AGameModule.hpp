@@ -23,8 +23,12 @@ namespace arcade {
     class AGameModule : public IGameModule {
         public:
         /// @brief Virtual destructor
-        AGameModule(std::string name = "Unnamed Game", GameState initialState = GameState::MENU, int width = 800, int height = 600);
+        AGameModule(std::string name = "Unnamed Game", GameState initialState = GameState::MENU, RenderContext context = RenderContext(800, 600, CoordinateSpace::PIXEL));
         virtual ~AGameModule() = default;
+
+        /// @brief Get the render context of the current game (window size, space coordinate)
+        /// @return RenderContext containing rendering parameters for this game
+        RenderContext getRenderContext() const override;
 
         /// @brief Get the type of this module
         /// @return ModuleType::GAME
@@ -61,8 +65,7 @@ namespace arcade {
         std::string _name;
         GameState _state;
 
-        int _width;
-        int _height;
+        RenderContext _context;
 
         int _score;
     };

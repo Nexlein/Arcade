@@ -7,19 +7,15 @@
 
 #include "AGameModule.hpp"
 
-arcade::AGameModule::AGameModule(std::string name, GameState initialState, int width, int height) 
-    : _name(name), _state(initialState), _width(width), _height(height), _score(0)
+arcade::AGameModule::AGameModule(std::string name, GameState initialState, RenderContext context)
+    : _name(name), _state(initialState), _context(context), _score(0)
 {}
 
-arcade::ModuleType arcade::AGameModule::getType() const
-{
-    return ModuleType::GAME;
-}
+arcade::RenderContext arcade::AGameModule::getRenderContext() const { return _context; }
 
-const std::string& arcade::AGameModule::getName() const
-{
-    return _name;
-}
+arcade::ModuleType arcade::AGameModule::getType() const { return ModuleType::GAME; }
+
+const std::string& arcade::AGameModule::getName() const { return _name; }
 
 arcade::GameState arcade::AGameModule::getState() const { return _state; }
 
@@ -37,20 +33,17 @@ void arcade::AGameModule::resume()
     if (_state == GameState::PAUSED) _state = GameState::RUNNING;
 }
 
-void arcade::AGameModule::init()
-{
-    restart();
-}
+void arcade::AGameModule::init() { restart(); }
 
 void arcade::AGameModule::appendCommonUITexts(std::vector<arcade::Text>& uiTexts) const
 {
-    float yPos = static_cast<float>(_height);
-    
+    float yPos = static_cast<float>(_context.height);
+
     // Bottom left summary
     uiTexts.push_back(Text("[R] Restart  [P] Pause  [M] Menu", 1, yPos, Anchor::BOTTOM_LEFT, Colors::WHITE, 16));
 
     if (_state == GameState::PAUSED) {
-        uiTexts.push_back(Text("PAUSED", _width / 2, _height / 2, Anchor::CENTER, Colors::YELLOW, 30));
+        uiTexts.push_back(Text("PAUSED", static_cast<float>(_context.width) / 2, static_cast<float>(_context.height) / 2, Anchor::CENTER, Colors::YELLOW, 30));
     }
 }
 

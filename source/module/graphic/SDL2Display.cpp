@@ -81,10 +81,8 @@ static const std::unordered_map<SDL_Keycode, arcade::Key> MOUSE_BINDINGS = {
 };
 
 // TODO: gestion des size/fullscreen a revoir.
-
 arcade::SDL2Display::SDL2Display() : ADisplayModule(DISPLAY_NAME), _win(nullptr), _renderer(nullptr)
-{
-}
+{}
 
 arcade::SDL2Display::~SDL2Display() { stop(); }
 
@@ -95,8 +93,9 @@ void arcade::SDL2Display::init()
         SDL_Quit();
         throw std::runtime_error(TTF_GetError());
     }
+
     _win = SDL_CreateWindow(_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                            _context.width, _context.height, 0);
+                            _context.width, _context.height, SDL_WINDOW_RESIZABLE);
     if (!_win) {
         TTF_Quit();
         SDL_Quit();
@@ -119,7 +118,36 @@ void arcade::SDL2Display::clear()
     SDL_RenderClear(_renderer);
 }
 
-void arcade::SDL2Display::display() { SDL_RenderPresent(_renderer); }
+void arcade::SDL2Display::stopFont()
+{
+    for (auto& [key, font] : _fontCache) TTF_CloseFont(font);
+    _fontCache.clear();
+}
+
+void arcade::SDL2Display::stopSprite()
+{
+    for (auto& [path, texture] : _spriteCache) SDL_DestroyTexture(texture);
+    _spriteCache.clear();
+}
+
+void arcade::SDL2Display::stop()
+{
+    stopFont();
+    stopSprite();
+
+    if (_renderer) {
+        SDL_DestroyRenderer(_renderer);
+        _renderer = nullptr;
+    }
+    if (_win) {
+        SDL_DestroyWindow(_win);
+        _win = nullptr;
+    }
+
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
+}
 
 bool arcade::SDL2Display::isOpen() const { return _win != nullptr; }
 
@@ -173,11 +201,28 @@ SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
     return texture;
 }
 
+void arcade::SDL2Display::applyScaling(SDL_Rect& dst)
+{
+    if (_context.space == CoordinateSpace::GRID) {
+        int winW, winH;
+        SDL_GetWindowSize(_win, &winW, &winH);
+
+        float ratioX = static_cast<float>(winW) / _context.width;
+        float ratioY = static_cast<float>(winH) / _context.height;
+
+        dst.x = static_cast<int>(dst.x * ratioX);
+        dst.y = static_cast<int>(dst.y * ratioY);
+        dst.w = static_cast<int>(dst.w * ratioX);
+        dst.h = static_cast<int>(dst.h * ratioY);
+    }
+}
+
 void arcade::SDL2Display::drawEntity(const Entity& entity)
 {
     SDL_Rect dst = {static_cast<int>(entity.pos.x), static_cast<int>(entity.pos.y),
                 static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
 
+    applyScaling(dst);
     applyAnchor(entity.anchor, dst);
 
     SDL_Texture* sprite = nullptr;
@@ -228,21 +273,6 @@ TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
     return newFont;
 }
 
-void arcade::SDL2Display::applyAnchor(Anchor anchor, SDL_Rect& dst)
-{
-    switch (anchor) {
-    case Anchor::TOP_LEFT: break;
-    case Anchor::TOP_CENTER:    dst.x -= dst.w / 2; break;
-    case Anchor::TOP_RIGHT:     dst.x -= dst.w; break;
-    case Anchor::MIDDLE_LEFT:   dst.y -= dst.h / 2; break;
-    case Anchor::CENTER:        dst.x -= dst.w / 2; dst.y -= dst.h / 2; break;
-    case Anchor::MIDDLE_RIGHT:  dst.x -= dst.w; dst.y -= dst.h / 2; break;
-    case Anchor::BOTTOM_LEFT:   dst.y -= dst.h; break;
-    case Anchor::BOTTOM_CENTER: dst.x -= dst.w / 2; dst.y -= dst.h; break;
-    case Anchor::BOTTOM_RIGHT:  dst.x -= dst.w; dst.y -= dst.h; break;
-    }
-}
-
 void arcade::SDL2Display::drawText(const Text& text)
 {
     TTF_Font* font = getFont(text.fontPath, text.fontSize);
@@ -254,6 +284,7 @@ void arcade::SDL2Display::drawText(const Text& text)
     SDL_FreeSurface(surface);
 
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
+    applyScaling(dst);
     SDL_QueryTexture(texture, nullptr, nullptr, &dst.w, &dst.h);
     applyAnchor(text.anchor, dst);
 
@@ -270,36 +301,22 @@ void arcade::SDL2Display::drawRectangle(const Rect& rect, const Color& color)
     SDL_RenderFillRect(_renderer, &sdlRect);
 }
 
-void arcade::SDL2Display::stopFont()
+void arcade::SDL2Display::applyAnchor(Anchor anchor, SDL_Rect& dst)
 {
-    for (auto& [key, font] : _fontCache) TTF_CloseFont(font);
-    _fontCache.clear();
+    switch (anchor) {
+    case Anchor::TOP_LEFT: break;
+    case Anchor::TOP_CENTER:    dst.x -= dst.w / 2; break;
+    case Anchor::TOP_RIGHT:     dst.x -= dst.w; break;
+    case Anchor::MIDDLE_LEFT:   dst.y -= dst.h / 2; break;
+    case Anchor::CENTER:        dst.x -= dst.w / 2; dst.y -= dst.h / 2; break;
+    case Anchor::MIDDLE_RIGHT:  dst.x -= dst.w; dst.y -= dst.h / 2; break;
+    case Anchor::BOTTOM_LEFT:   dst.y -= dst.h; break;
+    case Anchor::BOTTOM_CENTER: dst.x -= dst.w / 2; dst.y -= dst.h; break;
+    case Anchor::BOTTOM_RIGHT:  dst.x -= dst.w; dst.y -= dst.h; break;
+    }
 }
 
-void arcade::SDL2Display::stopSprite()
-{
-    for (auto& [path, texture] : _spriteCache) SDL_DestroyTexture(texture);
-    _spriteCache.clear();
-}
-
-void arcade::SDL2Display::stop()
-{
-    stopFont();
-    stopSprite();
-    
-    if (_renderer) {
-        SDL_DestroyRenderer(_renderer);
-        _renderer = nullptr;
-    }
-    if (_win) {
-        SDL_DestroyWindow(_win);
-        _win = nullptr;
-    }
-    
-    TTF_Quit();
-    IMG_Quit();
-    SDL_Quit();
-}
+void arcade::SDL2Display::display() { SDL_RenderPresent(_renderer); }
 
 extern "C" {
     arcade::IModule* entryPoint() {

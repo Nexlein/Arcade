@@ -11,7 +11,7 @@
 
 const std::string GAMENAME = "Snake";
 
-arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING) { init(); }
+arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(40, 30, CoordinateSpace::GRID)) { init(); }
 
 void arcade::SnakeGame::update(float elapsedTime)
 {
@@ -61,6 +61,7 @@ const std::vector<arcade::Entity>& arcade::SnakeGame::getEntities() const
     for (size_t i = 0; i < _snakeBody.size(); ++i) {
         Entity part;
         part.pos = _snakeBody[i];
+        part.size = {1, 1};
 
         if (i == 0) {
             part.character = 'O';
@@ -77,38 +78,43 @@ const std::vector<arcade::Entity>& arcade::SnakeGame::getEntities() const
     for (const auto& fruitPos : _fruits) {
         Entity fruit;
         fruit.pos = fruitPos;
+        fruit.size = {1, 1};
         fruit.character = '#';
         fruit.color = Colors::RED;
         fruit.spritePath = "sprite/fruit.png";
         _entities.push_back(fruit);
     }
 
-    for (int x = 0; x < _width; x++) {
+    for (int x = 0; x < _context.width; x++) {
         Entity wallTop;
         wallTop.pos = {static_cast<float>(x), 0};
+        wallTop.size = {1, 1};
         wallTop.character = '#';
         wallTop.color = Colors::MAGENTA;
         wallTop.spritePath = "sprite/wall.png";
         _entities.push_back(wallTop);
 
         Entity wallBottom;
-        wallBottom.pos = {static_cast<float>(x), static_cast<float>(_height - 1)};
+        wallBottom.pos = {static_cast<float>(x), static_cast<float>(_context.height - 1)};
+        wallBottom.size = {1, 1};
         wallBottom.character = '#';
         wallBottom.color = Colors::MAGENTA;
         wallBottom.spritePath = "sprite/wall.png";
         _entities.push_back(wallBottom);
     }
 
-    for (int y = 0; y < _height; y++) {
+    for (int y = 0; y < _context.height; y++) {
         Entity wallLeft;
         wallLeft.pos = {0, static_cast<float>(y)};
+        wallLeft.size = {1, 1};
         wallLeft.character = '#';
         wallLeft.color = Colors::MAGENTA;
         wallLeft.spritePath = "sprite/wall.png";
         _entities.push_back(wallLeft);
 
         Entity wallRight;
-        wallRight.pos = {static_cast<float>(_width - 1), static_cast<float>(y)};
+        wallRight.pos = {static_cast<float>(_context.width - 1), static_cast<float>(y)};
+        wallRight.size = {1, 1};
         wallRight.character = '#';
         wallRight.color = Colors::MAGENTA;
         wallRight.spritePath = "sprite/wall.png";
@@ -126,7 +132,7 @@ const std::vector<arcade::Text>& arcade::SnakeGame::getUIText() const
     _uiTexts.push_back(Text(scoreStr, 1, 0, Anchor::TOP_LEFT, Colors::WHITE, 20));
 
     if (_state == GameState::GAME_OVER)
-        _uiTexts.push_back(Text("GAME OVER", _width / 2, _height / 2, Anchor::CENTER, Colors::RED, 30));
+        _uiTexts.push_back(Text("GAME OVER", static_cast<float>(_context.width) / 2, static_cast<float>(_context.height) / 2, Anchor::CENTER, Colors::RED, 30));
 
     appendCommonUITexts(_uiTexts);
 
@@ -143,8 +149,8 @@ void arcade::SnakeGame::restart()
     _nextDir = Direction::NONE;
 
     _snakeBody.clear();
-    int midX = _width / 2;
-    int midY = _height / 2;
+    int midX = _context.width / 2;
+    int midY = _context.height / 2;
     _snakeBody.push_back({static_cast<float>(midX), static_cast<float>(midY)});
     _snakeBody.push_back({static_cast<float>(midX - 1), static_cast<float>(midY)});
     _snakeBody.push_back({static_cast<float>(midX - 2), static_cast<float>(midY)});
@@ -152,12 +158,6 @@ void arcade::SnakeGame::restart()
 
     _fruits.clear();
     spawnFruit();
-}
-
-arcade::RenderContext arcade::SnakeGame::getRenderContext() const
-{
-    static RenderContext context(_width, _height, CoordinateSpace::GRID);
-    return context;
 }
 
 void arcade::SnakeGame::moveSnake()
@@ -193,7 +193,7 @@ void arcade::SnakeGame::moveSnake()
     }
 
     /// Wall Collision (Game Over)
-    if (nextHead.x < 1 || nextHead.x >= _width - 1 || nextHead.y < 1 || nextHead.y >= _height - 1) {
+    if (nextHead.x < 1 || nextHead.x >= _context.width - 1 || nextHead.y < 1 || nextHead.y >= _context.height - 1) {
         _state = GameState::GAME_OVER;
         return;
     }
@@ -227,8 +227,8 @@ void arcade::SnakeGame::moveSnake()
 void arcade::SnakeGame::spawnFruit()
 {
     static thread_local std::mt19937 rng{std::random_device{}()};
-    std::uniform_int_distribution<int> distX(1, _width - 2);
-    std::uniform_int_distribution<int> distY(1, _height - 2);
+    std::uniform_int_distribution<int> distX(1, _context.width - 2);
+    std::uniform_int_distribution<int> distY(1, _context.height - 2);
 
     bool validPosition = false;
     float randX = 0;

@@ -170,6 +170,7 @@ void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
 
         _graphicLoader = std::move(newGraphicLoader);
         _graphicInstance = newGraphicInstance;
+        _graphicInstance->setRenderContext(_gameInstance->getRenderContext());
         _graphicInstance->init();
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
         throw std::runtime_error(selectedGraphic + ": " + e.what());
