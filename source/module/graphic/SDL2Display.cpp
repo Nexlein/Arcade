@@ -167,10 +167,8 @@ SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
     if (!isValidFormat(path)) return nullptr;
 
     SDL_Texture* texture = IMG_LoadTexture(_renderer, path.c_str());
-    if (!texture) {
-        // printf("IMG_LoadTexture error: %s\n", IMG_GetError()); // throw ?
+    if (!texture)
         return nullptr;
-    }
     _spriteCache[path] = texture;
     return texture;
 }
