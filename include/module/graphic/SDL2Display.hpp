@@ -13,12 +13,10 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
-
 #include <SDL_rect.h>
 #include <map>
 
 #include "ADisplayModule.hpp"
-#include "IDisplayModule.hpp"
 
 namespace arcade {
     class SDL2Display : public ADisplayModule {
