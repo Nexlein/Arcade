@@ -12,7 +12,6 @@
 #include "ArcadeMenu.hpp"
 
 #include "IDisplayModule.hpp"
-#include <chrono>
 #include <cstddef>
 
 static const std::string GAMENAME = "ArcadeMenu";
@@ -101,7 +100,6 @@ void arcade::ArcadeMenu::switchChoice(const Key& key)
 
 void arcade::ArcadeMenu::handleInput(MouseEvent mouseEvent) { (void)mouseEvent; }
 
-// pk Entity dans update?
 void arcade::ArcadeMenu::update(float elapsedTime)
 {
     static float midX = _width / 2.0f;
@@ -113,14 +111,6 @@ void arcade::ArcadeMenu::update(float elapsedTime)
 
     /// Title
     _uiText.push_back(Text("Start Game", static_cast<float>(_width) / 2, 70, Anchor::CENTER, Colors::YELLOW, 40, "font/arcadeStyleFont/arcadeStyleFont.ttf"));
-
-    // Background
-    // Entity bg;
-    // bg.pos = {0, 0};
-    // bg.size = {static_cast<float>(_width), static_cast<float>(_height)};
-    // bg.color = Colors::WHITE;
-    // bg.spritePath = "sprite/beachBg.jpg";
-    // _entities.push_back(bg);
 
     /// Draw a vertical line separating the columns in the middle
     Entity lineBar;
