@@ -125,7 +125,7 @@ bool arcade::Arcade::processInputs()
 
     arcade::Key key;
     while ((key = _graphicInstance->getKey()) != Key::UNKNOWN) {
-        if (key == Key::ESCAPE) {
+        if (key == Key::EXIT) {
             _isRunning = false;
             return false;
         }
