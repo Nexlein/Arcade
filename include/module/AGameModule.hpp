@@ -60,13 +60,22 @@ namespace arcade {
 
         protected:
         /// @brief Append common UI texts (controls) to the given vector
-        void appendCommonUITexts(std::vector<Text>& uiTexts) const;
+        void appendCommonUITexts();
 
+        /// @brief A vector of entities to be rendered for the menu visuals.
+        std::vector<Entity> _entities;
+        /// @brief A vector of text elements to be rendered for the menu UI.
+        std::vector<Text> _uiText;
+
+        /// @brief The name of the game module
         std::string _name;
+        /// @brief The current state of the game (menu, running, paused, game over, won)
         GameState _state;
 
+        /// @brief The rendering context for this game (window size, coordinate space)
         RenderContext _context;
 
+        /// @brief The player's current score
         int _score;
     };
 }  // namespace arcade
