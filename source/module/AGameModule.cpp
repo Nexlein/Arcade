@@ -6,7 +6,6 @@
 */
 
 #include "AGameModule.hpp"
-#include "IDisplayModule.hpp"
 
 arcade::AGameModule::AGameModule(std::string name, GameState initialState, RenderContext context)
     : _name(name), _state(initialState), _context(context), _score(0)
