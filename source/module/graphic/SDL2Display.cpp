@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
-#include <iostream>
 #include <unordered_map>
 
 /// @brief Name of the SDL2 display module
@@ -29,10 +28,10 @@ static const std::vector<std::string> FALLBACK_FONTS = {
 
 /// @brief Mapping of SDL key codes to arcade::Key values
 static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
-    {SDLK_UP, arcade::Key::NEXT_GAME},
-    {SDLK_DOWN, arcade::Key::PREV_GAME},
-    {SDLK_LEFT, arcade::Key::PREV_GRAPHICS},
-    {SDLK_RIGHT, arcade::Key::NEXT_GRAPHICS},
+    {SDLK_UP, arcade::Key::UP},
+    {SDLK_DOWN, arcade::Key::DOWN},
+    {SDLK_LEFT, arcade::Key::LEFT},
+    {SDLK_RIGHT, arcade::Key::RIGHT},
     {SDLK_SPACE, arcade::Key::SPACE},
     {SDLK_RETURN, arcade::Key::ENTER},
     {SDLK_ESCAPE, arcade::Key::EXIT},
@@ -96,7 +95,6 @@ void arcade::SDL2Display::init()
         SDL_Quit();
         throw std::runtime_error(TTF_GetError());
     }
-
     _win = SDL_CreateWindow(_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                             _context.width, _context.height, 0);
     if (!_win) {
@@ -115,7 +113,11 @@ void arcade::SDL2Display::init()
     }
 }
 
-void arcade::SDL2Display::clear() { SDL_RenderClear(_renderer); }
+void arcade::SDL2Display::clear()
+{
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+    SDL_RenderClear(_renderer);
+}
 
 void arcade::SDL2Display::display() { SDL_RenderPresent(_renderer); }
 
@@ -164,20 +166,30 @@ SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
 
     if (!isValidFormat(path)) return nullptr;
 
-    SDL_Texture* texture = IMG_LoadTexture(_renderer, "assets/sprite.png");
-    if (!texture) throw std::runtime_error(IMG_GetError());
+    SDL_Texture* texture = IMG_LoadTexture(_renderer, path.c_str());
+    if (!texture)
+        return nullptr;
     _spriteCache[path] = texture;
     return texture;
 }
 
 void arcade::SDL2Display::drawEntity(const Entity& entity)
 {
-    SDL_Texture* sprite = getSprite(entity.spritePath);
-
-    // if (!sprite) throw
     SDL_Rect dst = {static_cast<int>(entity.pos.x), static_cast<int>(entity.pos.y),
-                    static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
-    SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
+                static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
+
+    applyAnchor(entity.anchor, dst);
+
+    SDL_Texture* sprite = nullptr;
+    if (!entity.spritePath.empty())
+        sprite = getSprite(entity.spritePath);
+
+    if (sprite) {
+        SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
+    } else {
+        SDL_SetRenderDrawColor(_renderer, entity.color.r, entity.color.g, entity.color.b, entity.color.a);
+        SDL_RenderFillRect(_renderer, &dst);
+    }
 }
 
 TTF_Font* arcade::SDL2Display::tryOpenFont(const std::string& fontPath, int size)
@@ -216,6 +228,21 @@ TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
     return newFont;
 }
 
+void arcade::SDL2Display::applyAnchor(Anchor anchor, SDL_Rect& dst)
+{
+    switch (anchor) {
+    case Anchor::TOP_LEFT: break;
+    case Anchor::TOP_CENTER:    dst.x -= dst.w / 2; break;
+    case Anchor::TOP_RIGHT:     dst.x -= dst.w; break;
+    case Anchor::MIDDLE_LEFT:   dst.y -= dst.h / 2; break;
+    case Anchor::CENTER:        dst.x -= dst.w / 2; dst.y -= dst.h / 2; break;
+    case Anchor::MIDDLE_RIGHT:  dst.x -= dst.w; dst.y -= dst.h / 2; break;
+    case Anchor::BOTTOM_LEFT:   dst.y -= dst.h; break;
+    case Anchor::BOTTOM_CENTER: dst.x -= dst.w / 2; dst.y -= dst.h; break;
+    case Anchor::BOTTOM_RIGHT:  dst.x -= dst.w; dst.y -= dst.h; break;
+    }
+}
+
 void arcade::SDL2Display::drawText(const Text& text)
 {
     TTF_Font* font = getFont(text.fontPath, text.fontSize);
@@ -228,7 +255,7 @@ void arcade::SDL2Display::drawText(const Text& text)
 
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
     SDL_QueryTexture(texture, nullptr, nullptr, &dst.w, &dst.h);
-    // TODO: gestion anchor ici
+    applyAnchor(text.anchor, dst);
 
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
     SDL_DestroyTexture(texture);

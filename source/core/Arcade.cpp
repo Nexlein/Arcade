@@ -37,19 +37,20 @@ arcade::Arcade::Arcade(int ac, char* av[])
     // Load every lib
     loadLibrairies("./lib");
 
+    // Start the menu
+    menuManager();
+
     // Load the initial graphic library
     try {
         _graphicLoader = std::make_unique<DLLoader<IDisplayModule>>(av[1]);
         _graphicInstance = _graphicLoader->getInstance();
         if (_graphicInstance->getType() != ModuleType::DISPLAY)
             throw std::invalid_argument(std::string(av[1]) + ": Not a display module.");
+        _graphicInstance->setRenderContext(_gameInstance->getRenderContext());
         _graphicInstance->init();
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
         throw std::invalid_argument("Failed to load graphic library.");
     }
-
-    // Start the menu
-    menuManager();
 }
 
 void arcade::Arcade::loadLibrairies(const std::string& loadPath)

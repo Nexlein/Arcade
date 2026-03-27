@@ -12,12 +12,13 @@
 #include "ArcadeMenu.hpp"
 
 #include "IDisplayModule.hpp"
+#include <cstddef>
 
 static const std::string GAMENAME = "ArcadeMenu";
 static const std::string EMPTY = "";
 
 arcade::ArcadeMenu::ArcadeMenu()
-    : AGameModule(GAMENAME, GameState::MENU, 50, 50),
+    : AGameModule(GAMENAME, GameState::MENU),
       _currentSection(CurrentChoice::ONGRAPHIC),
       _validatedSection(CurrentChoice::ONGRAPHIC),
       _hasValidatedSelection(false),
@@ -31,6 +32,7 @@ void arcade::ArcadeMenu::setDisplayPaths(const std::vector<std::string>& paths)
 {
     _displayPaths = paths;
 }
+
 void arcade::ArcadeMenu::setGamePaths(const std::vector<std::string>& paths) { _gamePaths = paths; }
 
 void arcade::ArcadeMenu::restart()
@@ -53,8 +55,6 @@ void arcade::ArcadeMenu::handleInput(Key key)
             downKey();
             break;
         case Key::LEFT:
-            switchChoice(key);
-            break;
         case Key::RIGHT:
             switchChoice(key);
             break;
@@ -102,47 +102,51 @@ void arcade::ArcadeMenu::handleInput(MouseEvent mouseEvent) { (void)mouseEvent; 
 
 void arcade::ArcadeMenu::update(float elapsedTime)
 {
+    static float midX = _width / 2.0f;
+    static float midY = _height / 2.0f;
+
     (void)elapsedTime;
     _uiText.clear();
     _entities.clear();
 
     /// Title
-    _uiText.push_back(Text("Arcade Menu", _width / 2, 2, Anchor::CENTER, Colors::YELLOW, 40));
+    _uiText.push_back(Text("Start Game", static_cast<float>(_width) / 2, 70, Anchor::CENTER, Colors::YELLOW, 40, "font/arcadeStyleFont/arcadeStyleFont.ttf"));
 
     /// Draw a vertical line separating the columns in the middle
-    int midX = _width / 2;
-    for (int y = 5; y < _height - 2; y++) {
-        Entity linePart;
-        linePart.pos = {static_cast<float>(midX), static_cast<float>(y)};
-        linePart.character = '|';
-        linePart.color = Colors::WHITE;
-        _entities.push_back(linePart);
-    }
+    Entity lineBar;
+    lineBar.pos = {midX, midY};
+    lineBar.anchor = Anchor::CENTER;
+    lineBar.size = {2.0f, 320.0f};
+    lineBar.character = '|';
+    lineBar.color = Colors::WHITE;
+    lineBar.spritePath = "";
+    _entities.push_back(lineBar);
 
     /// Graphics section
-    int leftColX = midX / 2;
-    _uiText.push_back(Text("Graphics:", leftColX, 6, Anchor::TOP_CENTER, Colors::CYAN, 30));
+    float leftColX = midX / 2;
+    float ColY = midY - (150);
+    _uiText.push_back(Text("Graphics:", leftColX, ColY, Anchor::CENTER, Colors::CYAN, 30));
 
-    int y = 10;
+    int y = 200;
     for (size_t i = 0; i < _displayPaths.size(); i++) {
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGRAPHIC && i == static_cast<size_t>(_displayIdx))
             color = Colors::RED;
-        _uiText.push_back(Text(_displayPaths[i], leftColX, y, Anchor::TOP_CENTER, color, 30));
-        y += 3;
+        _uiText.push_back(Text(_displayPaths[i], leftColX, y, Anchor::CENTER, color, 15));
+        y += 40;
     }
 
     /// Games section
-    int rightColX = midX + (midX / 2);
-    _uiText.push_back(Text("Games:", rightColX, 6, Anchor::TOP_CENTER, Colors::CYAN, 30));
+    float rightColX = midX + (midX / 2);
+    _uiText.push_back(Text("Games:", rightColX, ColY, Anchor::CENTER, Colors::CYAN, 30));
 
-    y = 10;
+    y = 200;
     for (size_t i = 0; i < _gamePaths.size(); i++) {
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx))
             color = Colors::RED;
-        _uiText.push_back(Text(_gamePaths[i], rightColX, y, Anchor::TOP_CENTER, color, 30));
-        y += 3;
+        _uiText.push_back(Text(_gamePaths[i], rightColX, y, Anchor::CENTER, color, 15));
+        y += 40;
     }
 }
 
@@ -152,7 +156,8 @@ const std::vector<arcade::Text>& arcade::ArcadeMenu::getUIText() const { return 
 
 arcade::RenderContext arcade::ArcadeMenu::getRenderContext() const
 {
-    return RenderContext(_width, _height, CoordinateSpace::GRID);
+    static RenderContext context(_width, _height, CoordinateSpace::GRID);
+    return context;
 }
 
 const std::string& arcade::ArcadeMenu::getSelectedGame() const
