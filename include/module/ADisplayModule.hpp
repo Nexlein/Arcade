@@ -24,7 +24,7 @@ namespace arcade {
         public:
         /// @brief Constructor for the ADisplayModule class
         /// @param name The name of the display module (default is "Unnamed Display")
-        /// @param context The context of the current display module (default if 800x600 in PIXEL mode)
+        /// @param context The context of the current display module (default is 800x600 in PIXEL mode)
         ADisplayModule(std::string name = "Unnamed Display", RenderContext context = {800, 600, CoordinateSpace::PIXEL});
         virtual ~ADisplayModule() = default;
 
