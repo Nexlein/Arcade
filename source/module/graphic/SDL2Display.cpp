@@ -37,10 +37,10 @@ static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
     {SDLK_ESCAPE, arcade::Key::EXIT},
     {SDLK_BACKSPACE, arcade::Key::BACKSPACE},
     {SDLK_0, arcade::Key::NUM_0},
-    {SDLK_1, arcade::Key::NUM_1},
-    {SDLK_2, arcade::Key::NUM_2},
-    {SDLK_3, arcade::Key::NUM_3},
-    {SDLK_4, arcade::Key::NUM_4},
+    {SDLK_1, arcade::Key::PREV_GAME},
+    {SDLK_2, arcade::Key::NEXT_GAME},
+    {SDLK_3, arcade::Key::PREV_GRAPHICS},
+    {SDLK_4, arcade::Key::NEXT_GRAPHICS},
     {SDLK_5, arcade::Key::NUM_5},
     {SDLK_6, arcade::Key::NUM_6},
     {SDLK_7, arcade::Key::NUM_7},
@@ -71,7 +71,8 @@ static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
     {SDLK_w, arcade::Key::W},
     {SDLK_x, arcade::Key::X},
     {SDLK_y, arcade::Key::Y},
-    {SDLK_z, arcade::Key::Z}};
+    {SDLK_z, arcade::Key::Z}
+};
 
 /// @brief Mapping of SDL mouse button codes to arcade::Key values
 static const std::unordered_map<SDL_Keycode, arcade::Key> MOUSE_BINDINGS = {
