@@ -18,7 +18,7 @@ static const std::string GAMENAME = "ArcadeMenu";
 static const std::string EMPTY = "";
 
 arcade::ArcadeMenu::ArcadeMenu()
-    : AGameModule(GAMENAME, GameState::MENU),
+    : AGameModule(GAMENAME, GameState::MENU, RenderContext(800, 600, CoordinateSpace::PIXEL)),
       _currentSection(CurrentChoice::ONGRAPHIC),
       _validatedSection(CurrentChoice::ONGRAPHIC),
       _hasValidatedSelection(false),
@@ -102,15 +102,15 @@ void arcade::ArcadeMenu::handleInput(MouseEvent mouseEvent) { (void)mouseEvent; 
 
 void arcade::ArcadeMenu::update(float elapsedTime)
 {
-    static float midX = _width / 2.0f;
-    static float midY = _height / 2.0f;
+    static float midX = _context.width / 2.0f;
+    static float midY = _context.height / 2.0f;
 
     (void)elapsedTime;
     _uiText.clear();
     _entities.clear();
 
     /// Title
-    _uiText.push_back(Text("Start Game", static_cast<float>(_width) / 2, 70, Anchor::CENTER, Colors::YELLOW, 40, "font/arcadeStyleFont/arcadeStyleFont.ttf"));
+    _uiText.push_back(Text("Start Game", midX, 70, Anchor::CENTER, Colors::YELLOW, 40, "font/arcadeStyleFont/arcadeStyleFont.ttf"));
 
     /// Draw a vertical line separating the columns in the middle
     Entity lineBar;
@@ -154,11 +154,6 @@ const std::vector<arcade::Entity>& arcade::ArcadeMenu::getEntities() const { ret
 
 const std::vector<arcade::Text>& arcade::ArcadeMenu::getUIText() const { return _uiText; }
 
-arcade::RenderContext arcade::ArcadeMenu::getRenderContext() const
-{
-    static RenderContext context(_width, _height, CoordinateSpace::GRID);
-    return context;
-}
 
 const std::string& arcade::ArcadeMenu::getSelectedGame() const
 {

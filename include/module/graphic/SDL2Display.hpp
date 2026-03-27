@@ -93,6 +93,7 @@ namespace arcade {
         void stopSprite();
 
         void applyAnchor(Anchor anchor, SDL_Rect& dst);
+        void applyScaling(SDL_Rect& dst);
 
         /// @brief The SDL2 window
         SDL_Window* _win;

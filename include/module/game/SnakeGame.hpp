@@ -40,10 +40,6 @@ namespace arcade {
         /// @brief Restart the game
         void restart() override;
 
-        /// @brief Get the render context for this game (e.g., window size, coordinate space)
-        /// @return RenderContext containing rendering parameters for this game
-        RenderContext getRenderContext() const override;
-
         private:
         enum class Direction { UP, DOWN, LEFT, RIGHT, NONE };
 

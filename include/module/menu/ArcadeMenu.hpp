@@ -60,7 +60,6 @@ namespace arcade {
         /// @brief Gets the render context for the menu.
         /// @return The render context containing dimensions and coordinate space information for
         /// rendering the menu.
-        RenderContext getRenderContext() const override;
 
         /// @brief Gets the currently selected game.
         /// @return A constant reference to the selected game's name.
