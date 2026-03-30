@@ -23,6 +23,10 @@ namespace arcade {
             /// @param paths The paths of the available game libraries
             virtual void setGamePaths(const std::vector<std::string>& paths) = 0;
 
+            /// @brief Set the index of the currently loaded graphic library.
+            /// @param idx index of the display library currently loaded.
+            virtual void setDisplayIdx(const int idx) = 0;
+
             /// @brief Gets the path of the selected game library
             /// @return The path of the selected game library
             virtual const std::string& getSelectedGame() const = 0;

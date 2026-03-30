@@ -202,18 +202,16 @@ SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
 
 void arcade::SDL2Display::applyScaling(SDL_Rect& dst)
 {
-    if (_context.space == CoordinateSpace::GRID) {
-        int winW, winH;
-        SDL_GetWindowSize(_win, &winW, &winH);
+    int winW, winH;
+    SDL_GetWindowSize(_win, &winW, &winH);
 
-        float ratioX = static_cast<float>(winW) / _context.width;
-        float ratioY = static_cast<float>(winH) / _context.height;
+    float ratioX = static_cast<float>(winW) / _context.width;
+    float ratioY = static_cast<float>(winH) / _context.height;
 
-        dst.x = static_cast<int>(dst.x * ratioX);
-        dst.y = static_cast<int>(dst.y * ratioY);
-        dst.w = static_cast<int>(dst.w * ratioX);
-        dst.h = static_cast<int>(dst.h * ratioY);
-    }
+    dst.x = static_cast<int>(dst.x * ratioX);
+    dst.y = static_cast<int>(dst.y * ratioY);
+    dst.w = static_cast<int>(dst.w * ratioX);
+    dst.h = static_cast<int>(dst.h * ratioY);
 }
 
 void arcade::SDL2Display::drawEntity(const Entity& entity)

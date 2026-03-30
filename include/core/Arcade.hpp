@@ -42,8 +42,9 @@ namespace arcade {
         /// @param programName The name of the program (typically argv[0])
         void printUsage(const std::string& programName) const;
         /// @brief Loads the libraries from the specified path
-        /// @param loadPath The path from which to load the libraries (default is "./lib")
-        void loadLibrairies(const std::string& loadPath = "lib");
+        /// @param loadPath The path from which to load the libraries
+        /// @param graphicPath The path of the initially loaded graphic library
+        void loadLibrairies(const std::string& loadPath, const std::string& graphicPath);
 
         /// @brief Computes the elapsed time since the last frame
         /// @param lastTime The time of the last frame

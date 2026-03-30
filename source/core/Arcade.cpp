@@ -24,7 +24,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
       _gameLoader(nullptr),
       _graphicInstance(nullptr),
       _gameInstance(nullptr),
-      _displayIdx(-1),
+      _displayIdx(0),
       _gameIdx(-1),
       _gameState(GameState::MENU),
       _playerName(""),
@@ -36,7 +36,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
     }
 
     // Load every lib
-    loadLibrairies("./lib");
+    loadLibrairies("lib", av[1]);
 
     // Start the menu
     menuManager();
@@ -54,7 +54,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
     }
 }
 
-void arcade::Arcade::loadLibrairies(const std::string& loadPath)
+void arcade::Arcade::loadLibrairies(const std::string& loadPath, const std::string& graphicPath)
 {
     if (!std::filesystem::exists(loadPath))
         throw std::runtime_error(loadPath + ": Directory not found.");
@@ -80,6 +80,10 @@ void arcade::Arcade::loadLibrairies(const std::string& loadPath)
             }
         }
     }
+    for (const auto& displayPath : _displayPaths) {
+        if (displayPath == graphicPath) break;
+        _displayIdx += 1;
+    }
 }
 
 void arcade::Arcade::menuManager()
@@ -104,6 +108,7 @@ void arcade::Arcade::menuManager()
     if (menu) {
         menu->setDisplayPaths(_displayPaths);
         menu->setGamePaths(_gamePaths);
+        menu->setDisplayIdx(_displayIdx);
     }
 
     _gameState = GameState::MENU;
@@ -233,7 +238,10 @@ void arcade::Arcade::handleMenuSelection()
     std::string selectedGraphic = menu->getSelectedGraphic();
     std::string selectedGame = menu->getSelectedGame();
 
-    if (!selectedGraphic.empty()) loadDisplayFromPath(selectedGraphic);
+    if (!selectedGraphic.empty()) {
+        loadDisplayFromPath(selectedGraphic);
+        menu->setDisplayIdx(_displayIdx);
+    }
     if (!selectedGame.empty()) {
         loadGameFromPath(selectedGame);
         return;
