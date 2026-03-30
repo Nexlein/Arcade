@@ -46,6 +46,10 @@ namespace arcade {
         /// @return Player's current score
         int getScore() const override;
 
+        /// @brief Set the index of the currently loaded graphic library.
+        /// @param idx index of the display library currently loaded.
+        void setDisplayIdx(const int idx);
+
         /// @brief Stop the game and clean up resources
         void stop() override;
 
