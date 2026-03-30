@@ -71,12 +71,10 @@ void arcade::ArcadeMenu::handleInput(Key key)
 void arcade::ArcadeMenu::upKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
-        _displayIdx -= 1;
+        _displayIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
         if (_displayIdx == _currentDisplayIdx) _displayIdx -= 1;
-        if (_displayIdx < 0) _displayIdx = static_cast<int>(_displayPaths.size()) - 1;
     } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
-        _gameIdx -= 1;
-        if (_gameIdx < 0) _gameIdx = static_cast<int>(_gamePaths.size()) - 1;
+        _gameIdx = (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
     }
 }
 
@@ -84,6 +82,7 @@ void arcade::ArcadeMenu::downKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
         _displayIdx = (_displayIdx + 1) % _displayPaths.size();
+        if (_displayIdx == _currentDisplayIdx) _displayIdx += 1;
     } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
         _gameIdx = (_gameIdx + 1) % _gamePaths.size();
     }
