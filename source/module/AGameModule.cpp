@@ -21,6 +21,8 @@ arcade::GameState arcade::AGameModule::getState() const { return _state; }
 
 int arcade::AGameModule::getScore() const { return _score; }
 
+void arcade::AGameModule::setDisplayIdx(const int idx) { _currentDisplayIdx = idx; }
+
 void arcade::AGameModule::stop() {}
 
 void arcade::AGameModule::pause()

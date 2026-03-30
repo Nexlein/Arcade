@@ -91,11 +91,9 @@ namespace arcade {
         CurrentChoice _validatedSection;
         /// @brief Flag indicating whether the user has made a selection in the menu.
         bool _hasValidatedSelection;
+
         /// @brief The index of the currently selected graphic library in the menu.
         int _displayIdx;
-
-        /// @brief The index of the currently loaded graphic library in the arcade.
-        int _currentDisplayIdx;
         /// @brief The index of the currently selected game library in the menu.
         int _gameIdx;
     };
