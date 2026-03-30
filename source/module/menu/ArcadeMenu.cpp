@@ -72,6 +72,7 @@ void arcade::ArcadeMenu::upKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
         _displayIdx -= 1;
+        if (_displayIdx == _currentDisplayIdx) _displayIdx -= 1;
         if (_displayIdx < 0) _displayIdx = static_cast<int>(_displayPaths.size()) - 1;
     } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
         _gameIdx -= 1;
