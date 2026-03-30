@@ -72,20 +72,20 @@ void arcade::ArcadeMenu::upKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
         _displayIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
-        if (_displayIdx == _currentDisplayIdx) _displayIdx -= 1;
-    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
+        if (_displayIdx == _currentDisplayIdx)
+             _displayIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
+    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty())
         _gameIdx = (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
-    }
 }
 
 void arcade::ArcadeMenu::downKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
         _displayIdx = (_displayIdx + 1) % _displayPaths.size();
-        if (_displayIdx == _currentDisplayIdx) _displayIdx += 1;
-    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
+        if (_displayIdx == _currentDisplayIdx)
+             _displayIdx = (_displayIdx + 1) % _displayPaths.size();
+    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty())
         _gameIdx = (_gameIdx + 1) % _gamePaths.size();
-    }
 }
 
 void arcade::ArcadeMenu::switchChoice(const Key& key)
