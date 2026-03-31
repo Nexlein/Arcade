@@ -28,6 +28,13 @@ namespace arcade {
         ADisplayModule(std::string name = "Unnamed Display", RenderContext context = {800, 600, CoordinateSpace::PIXEL});
         virtual ~ADisplayModule() = default;
 
+        /// @brief Struct containing information about the viewport for rendering
+        struct Viewport {
+            float scale;
+            int offsetX;
+            int offsetY;
+        };
+
         // --- Getters ---
 
         /// @brief Gets the type of the display module
@@ -78,6 +85,11 @@ namespace arcade {
         void setRenderContext(const RenderContext& context) override;
 
         protected:
+
+        /// @brief Compute the viewport for rendering based on the current window size and render context
+        /// @return The computed viewport containing scale and offsets for rendering
+        virtual Viewport computeViewport() const = 0;
+
         /// @brief The name of the display module
         std::string _name;
 

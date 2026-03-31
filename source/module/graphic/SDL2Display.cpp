@@ -10,6 +10,7 @@
 /// the Arcade project.
 
 #include "SDL2Display.hpp"
+#include "ADisplayModule.hpp"
 
 #include <algorithm>
 #include <array>
@@ -200,20 +201,34 @@ SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
     return texture;
 }
 
+arcade::ADisplayModule::Viewport arcade::SDL2Display::computeViewport() const
+{
+    int winW, winH;
+    SDL_GetWindowSize(_win, &winW, &winH);
+
+    float scaleX = static_cast<float>(winW) / _context.width;
+    float scaleY = static_cast<float>(winH) / _context.height;
+    float scale  = std::min(scaleX, scaleY);
+
+    int offsetX = static_cast<int>((winW - _context.width  * scale) / 2.0f);
+    int offsetY = static_cast<int>((winH - _context.height * scale) / 2.0f);
+
+    return {scale, offsetX, offsetY};
+}
+
 void arcade::SDL2Display::applyScaling(SDL_Rect& dst)
 {
-    if (_context.space == CoordinateSpace::GRID) {
-        int winW, winH;
-        SDL_GetWindowSize(_win, &winW, &winH);
+    auto [scale, offsetX, offsetY] = computeViewport();
 
-        float ratioX = static_cast<float>(winW) / _context.width;
-        float ratioY = static_cast<float>(winH) / _context.height;
+    float x0 = dst.x * scale;
+    float y0 = dst.y * scale;
+    float x1 = (dst.x + dst.w) * scale;
+    float y1 = (dst.y + dst.h) * scale;
 
-        dst.x = static_cast<int>(dst.x * ratioX);
-        dst.y = static_cast<int>(dst.y * ratioY);
-        dst.w = static_cast<int>(dst.w * ratioX);
-        dst.h = static_cast<int>(dst.h * ratioY);
-    }
+    dst.x = static_cast<int>(std::floor(x0)) + offsetX;
+    dst.y = static_cast<int>(std::floor(y0)) + offsetY;
+    dst.w = static_cast<int>(std::ceil(x1)) - static_cast<int>(std::floor(x0));
+    dst.h = static_cast<int>(std::ceil(y1)) - static_cast<int>(std::floor(y0));
 }
 
 void arcade::SDL2Display::drawEntity(const Entity& entity)

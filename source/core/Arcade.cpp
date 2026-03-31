@@ -36,7 +36,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
     }
 
     // Load every lib
-    loadLibrairies("./lib");
+    loadLibrairies("lib", av[1]);
 
     // Start the menu
     menuManager();
@@ -54,7 +54,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
     }
 }
 
-void arcade::Arcade::loadLibrairies(const std::string& loadPath)
+void arcade::Arcade::loadLibrairies(const std::string& loadPath, const std::string& initGraphicPath)
 {
     if (!std::filesystem::exists(loadPath))
         throw std::runtime_error(loadPath + ": Directory not found.");
@@ -80,6 +80,7 @@ void arcade::Arcade::loadLibrairies(const std::string& loadPath)
             }
         }
     }
+    setDisplayIdx(initGraphicPath);
 }
 
 void arcade::Arcade::menuManager()
@@ -104,6 +105,7 @@ void arcade::Arcade::menuManager()
     if (menu) {
         menu->setDisplayPaths(_displayPaths);
         menu->setGamePaths(_gamePaths);
+        menu->setDisplayIdx(_displayIdx);
     }
 
     _gameState = GameState::MENU;
@@ -218,7 +220,6 @@ void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
         auto it = std::find(_displayPaths.begin(), _displayPaths.end(), selectedGraphic);
         if (it != _displayPaths.end())
             _displayIdx = std::distance(_displayPaths.begin(), it);
-
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
         throw std::runtime_error(selectedGraphic + ": " + e.what());
     }
@@ -233,7 +234,10 @@ void arcade::Arcade::handleMenuSelection()
     std::string selectedGraphic = menu->getSelectedGraphic();
     std::string selectedGame = menu->getSelectedGame();
 
-    if (!selectedGraphic.empty()) loadDisplayFromPath(selectedGraphic);
+    if (!selectedGraphic.empty()) {
+        loadDisplayFromPath(selectedGraphic);
+        menu->setDisplayIdx(_displayIdx);
+    }
     if (!selectedGame.empty()) {
         loadGameFromPath(selectedGame);
         return;
@@ -275,6 +279,17 @@ void arcade::Arcade::cleanupResources()
     // Reset loaders
     _gameLoader.reset();
     _graphicLoader.reset();
+}
+
+void arcade::Arcade::setDisplayIdx(const std::string& initGraphicPath)
+{
+    int idx = 0;
+
+    for (const auto& displayPath : _displayPaths) {
+        if (displayPath == initGraphicPath) break;
+        idx += 1;
+    }
+    _displayIdx = (idx < static_cast<int>(_displayPaths.size())) ? idx : -1;
 }
 
 int arcade::Arcade::run()

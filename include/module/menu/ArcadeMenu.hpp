@@ -36,6 +36,9 @@ namespace arcade {
         /// @brief Sets the paths for the available game libraries.
         /// @param paths The vector of game library paths.
         void setGamePaths(const std::vector<std::string>& paths) override;
+        /// @brief Set the index of the currently loaded graphic library.
+        /// @param idx index of the display library currently loaded.
+        void setDisplayIdx(const int idx) override;
 
         /// @brief Restarts the menu, resetting selections and state.
         /// @note This function resets the menu to its initial state, clearing any user selections.
@@ -88,10 +91,13 @@ namespace arcade {
         CurrentChoice _validatedSection;
         /// @brief Flag indicating whether the user has made a selection in the menu.
         bool _hasValidatedSelection;
+
         /// @brief The index of the currently selected graphic library in the menu.
         int _displayIdx;
         /// @brief The index of the currently selected game library in the menu.
         int _gameIdx;
+        /// @brief The index of the currently loaded graphic library.
+        int _currentDisplayIdx;
     };
 }  // namespace arcade
 

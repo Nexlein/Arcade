@@ -42,8 +42,9 @@ namespace arcade {
         /// @param programName The name of the program (typically argv[0])
         void printUsage(const std::string& programName) const;
         /// @brief Loads the libraries from the specified path
-        /// @param loadPath The path from which to load the libraries (default is "./lib")
-        void loadLibrairies(const std::string& loadPath = "lib");
+        /// @param loadPath The path from which to load the libraries
+        /// @param graphicPath The path of the initially loaded graphic library
+        void loadLibrairies(const std::string& loadPath, const std::string& graphicPath);
 
         /// @brief Computes the elapsed time since the last frame
         /// @param lastTime The time of the last frame
@@ -74,6 +75,9 @@ namespace arcade {
         void renderFrame();
         /// @brief Cleans up resources by stopping and deleting the game and display instances
         void cleanupResources();
+
+        /// @brief Sets the display index based on the initially loaded graphic library
+        void setDisplayIdx(const std::string& initGraphicPath);
 
         /// @brief A unique pointer that manages the loading of the display module, ensuring proper
         /// cleanup when the Arcade instance is destroyed
