@@ -114,8 +114,8 @@ void arcade::ArcadeMenu::update(float elapsedTime)
     /// Graphics section
     float leftColX = (midX / 2);
     float rightColX = midX + (midX / 2);
-    float leftBarX = leftColX / 2 - 40;
-    float rightBarX = rightColX - 165;
+    float leftBarX = leftColX / 2;
+    float rightBarX = rightColX - 150;
     float ColY = midY - (150);
     _uiText.push_back(Text("Graphics", leftBarX + 35, ColY, Anchor::MIDDLE_LEFT, Colors::CYAN, 30));
 
