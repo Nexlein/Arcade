@@ -223,7 +223,6 @@ void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
         auto it = std::find(_displayPaths.begin(), _displayPaths.end(), selectedGraphic);
         if (it != _displayPaths.end())
             _displayIdx = std::distance(_displayPaths.begin(), it);
-
     } catch (const DLLoader<IDisplayModule>::DLLoaderException& e) {
         throw std::runtime_error(selectedGraphic + ": " + e.what());
     }
