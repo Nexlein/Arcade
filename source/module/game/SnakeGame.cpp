@@ -11,7 +11,7 @@
 
 const std::string GAMENAME = "Snake";
 
-arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(40, 30, CoordinateSpace::GRID)) { init(); }
+arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(26, 22, CoordinateSpace::GRID)) { init(); }
 
 void arcade::SnakeGame::update(float elapsedTime)
 {
