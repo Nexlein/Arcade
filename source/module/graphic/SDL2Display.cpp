@@ -23,10 +23,6 @@ static const std::string DISPLAY_NAME = "ArcadeMenu";
 /// @brief Valid image formats for sprites
 static const std::array<std::string_view, 3> VALID_FORMATS = {".png", ".jpg", ".jpeg"};
 
-/// @brief Fallback font paths to try if the specified font cannot be loaded
-static const std::vector<std::string> FALLBACK_FONTS = {
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"};
-
 /// @brief Mapping of SDL key codes to arcade::Key values
 static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
     {SDLK_UP, arcade::Key::UP},
@@ -259,8 +255,16 @@ TTF_Font* arcade::SDL2Display::tryOpenFont(const std::string& fontPath, int size
 
 TTF_Font* arcade::SDL2Display::getFallbackFont(int size)
 {
-    for (const auto& fontPath : FALLBACK_FONTS) {
-        TTF_Font* font = tryOpenFont(fontPath, size);
+    // List of common fallback font paths to try
+    std::vector<std::string> fallbackFonts = {
+        "font/defaultFont.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/Library/Fonts/Arial.ttf",
+        "C:\\Windows\\Fonts\\Arial.ttf"
+    };
+
+    for (const auto& path : fallbackFonts) {
+        TTF_Font* font = tryOpenFont(path, size);
         if (font) return font;
     }
     return nullptr;
@@ -269,29 +273,27 @@ TTF_Font* arcade::SDL2Display::getFallbackFont(int size)
 TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
 {
     auto key = std::make_pair(path, size);
-    auto it = _fontCache.find(key);
 
+    // Check if the font is already loaded in the cache
+    auto it = _fontCache.find(key);
     if (it != _fontCache.end()) return it->second;
 
-    std::string fontPath = path.empty() ? "font/defaultFont.ttf" : path;
-    TTF_Font* newFont = tryOpenFont(fontPath, size);
+    TTF_Font* font = tryOpenFont(path, size);
 
     // If the specified font is not found, try fallback fonts
-    if (!newFont) newFont = getFallbackFont(size);
+    if (!font) font = getFallbackFont(size);
 
-    if (!newFont)
-        throw std::runtime_error("Failed to load font: " + fontPath +
-                                 " and no fallback font available");
+    if (!font)
+        throw std::runtime_error("Failed to load font: " + path);
 
-    _fontCache[key] = newFont;
-    return newFont;
+    _fontCache[key] = font;
+    return font;
 }
 
 void arcade::SDL2Display::drawText(const Text& text)
 {
     TTF_Font* font = getFont(text.fontPath, text.fontSize);
 
-    // if (!font) throw;
     SDL_Color color = {text.color.r, text.color.g, text.color.b, text.color.a};
     SDL_Surface* surface = TTF_RenderText_Blended(font, text.content.c_str(), color);
     SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
