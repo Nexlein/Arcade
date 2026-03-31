@@ -76,6 +76,7 @@ namespace arcade {
         /// @brief Cleans up resources by stopping and deleting the game and display instances
         void cleanupResources();
 
+        /// @brief Sets the display index based on the initially loaded graphic library
         void setDisplayIdx(const std::string& initGraphicPath);
 
         /// @brief A unique pointer that manages the loading of the display module, ensuring proper
