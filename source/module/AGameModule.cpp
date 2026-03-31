@@ -68,7 +68,7 @@ void arcade::AGameModule::appendCommonUITexts()
         static_cast<float>(_context.height),
         Anchor::BOTTOM_LEFT,
         Colors::WHITE,
-        16
+        20
     ));
 
     // If paused, add a large "PAUSED" text in the center
