@@ -19,8 +19,7 @@
 #include "ADisplayModule.hpp"
 
 namespace arcade {
-    // Dans SDL2Display.hpp
-
+    /// @brief SDL2 implementation of the IDisplayModule interface
     class SDL2Display : public ADisplayModule {
         public:
         SDL2Display();
