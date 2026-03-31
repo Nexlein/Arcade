@@ -109,16 +109,19 @@ void arcade::ArcadeMenu::update(float elapsedTime)
     _entities.clear();
 
     /// Title
-    _uiText.push_back(Text("Start Game", midX, 70, Anchor::CENTER, Colors::YELLOW, 40, "font/arcadeStyleFont/arcadeStyleFont.ttf"));
+    _uiText.push_back(Text("Start Game", midX, 65, Anchor::CENTER, Colors::YELLOW, 40, "font/arcadeStyleFont/arcadeStyleFont.ttf"));
 
     /// Graphics section
     float leftColX = (midX / 2);
+    float rightColX = midX + (midX / 2);
+    float leftBarX = leftColX / 2 - 40;
+    float rightBarX = rightColX - 165;
     float ColY = midY - (150);
-    _uiText.push_back(Text("Graphics:", leftColX + 15, ColY, Anchor::CENTER, Colors::CYAN, 30));
+    _uiText.push_back(Text("Graphics", leftBarX + 35, ColY, Anchor::MIDDLE_LEFT, Colors::CYAN, 30));
 
     /// Draw a vertical line separating the columns in the middle
     Entity graphicLineBar;
-    graphicLineBar.pos = {leftColX / 2, midY};
+    graphicLineBar.pos = {leftBarX, midY};
     graphicLineBar.anchor = Anchor::CENTER;
     graphicLineBar.size = {2.0f, 320.0f};
     graphicLineBar.character = '|';
@@ -132,7 +135,7 @@ void arcade::ArcadeMenu::update(float elapsedTime)
     selector.color = Colors::RED;
     selector.spritePath = "sprite/arrow3.png";
     selector.anchor = Anchor::CENTER;
-    selector.size = {60, 60};
+    selector.size = {65, 65};
 
     for (size_t i = 0; i < _displayPaths.size(); i++) {
         Color color = Colors::WHITE;
@@ -140,19 +143,18 @@ void arcade::ArcadeMenu::update(float elapsedTime)
             color = Colors::GREEN;
         if (_currentSection == CurrentChoice::ONGRAPHIC && i == static_cast<size_t>(_displayIdx)) {
             color = Colors::RED;
-            selector.pos = {leftColX - 78, static_cast<float>(y)};
+            selector.pos = {leftBarX + 20, static_cast<float>(y)};
             _entities.push_back(selector);
         }
-        _uiText.push_back(Text(_displayPaths[i], leftColX - 62, y, Anchor::MIDDLE_LEFT, color, 15));
+        _uiText.push_back(Text(_displayPaths[i], leftBarX + 40, y, Anchor::MIDDLE_LEFT, color, 10));
         y += 40;
     }
 
     /// Games section
-    float rightColX = midX + (midX / 2);
-    _uiText.push_back(Text("Games:", rightColX - 35, ColY, Anchor::CENTER, Colors::CYAN, 30));
+    _uiText.push_back(Text("Games", rightBarX + 35, ColY, Anchor::MIDDLE_LEFT, Colors::CYAN, 30));
 
     Entity gameLineBar;
-    gameLineBar.pos = {rightColX - 150, midY};
+    gameLineBar.pos = {rightBarX, midY};
     gameLineBar.anchor = Anchor::CENTER;
     gameLineBar.size = {2.0f, 320.0f};
     gameLineBar.character = '|';
@@ -165,10 +167,10 @@ void arcade::ArcadeMenu::update(float elapsedTime)
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx)) {
             color = Colors::RED;
-            selector.pos = {rightColX - 124, static_cast<float>(y)};
+            selector.pos = {rightBarX + 20, static_cast<float>(y)};
             _entities.push_back(selector);
         }
-        _uiText.push_back(Text(_gamePaths[i], rightColX - 40, y, Anchor::CENTER, color, 15));
+        _uiText.push_back(Text(_gamePaths[i], rightBarX + 40, y, Anchor::MIDDLE_LEFT, color, 10));
         y += 40;
     }
 }
