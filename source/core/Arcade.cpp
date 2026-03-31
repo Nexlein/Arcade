@@ -24,7 +24,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
       _gameLoader(nullptr),
       _graphicInstance(nullptr),
       _gameInstance(nullptr),
-      _displayIdx(0),
+      _displayIdx(-1),
       _gameIdx(-1),
       _gameState(GameState::MENU),
       _playerName(""),
@@ -54,7 +54,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
     }
 }
 
-void arcade::Arcade::loadLibrairies(const std::string& loadPath, const std::string& graphicPath)
+void arcade::Arcade::loadLibrairies(const std::string& loadPath, const std::string& initGraphicPath)
 {
     if (!std::filesystem::exists(loadPath))
         throw std::runtime_error(loadPath + ": Directory not found.");
@@ -80,10 +80,7 @@ void arcade::Arcade::loadLibrairies(const std::string& loadPath, const std::stri
             }
         }
     }
-    for (const auto& displayPath : _displayPaths) {
-        if (displayPath == graphicPath) break;
-        _displayIdx += 1;
-    }
+    setDisplayIdx(initGraphicPath);
 }
 
 void arcade::Arcade::menuManager()
@@ -282,6 +279,17 @@ void arcade::Arcade::cleanupResources()
     // Reset loaders
     _gameLoader.reset();
     _graphicLoader.reset();
+}
+
+void arcade::Arcade::setDisplayIdx(const std::string& initGraphicPath)
+{
+    int idx = 0;
+
+    for (const auto& displayPath : _displayPaths) {
+        if (displayPath == initGraphicPath) break;
+        idx += 1;
+    }
+    _displayIdx = (idx < static_cast<int>(_displayPaths.size())) ? idx : -1;
 }
 
 int arcade::Arcade::run()

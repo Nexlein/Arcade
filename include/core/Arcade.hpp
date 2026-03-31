@@ -76,6 +76,8 @@ namespace arcade {
         /// @brief Cleans up resources by stopping and deleting the game and display instances
         void cleanupResources();
 
+        void setDisplayIdx(const std::string& initGraphicPath);
+
         /// @brief A unique pointer that manages the loading of the display module, ensuring proper
         /// cleanup when the Arcade instance is destroyed
         std::unique_ptr<DLLoader<IDisplayModule>> _graphicLoader;
