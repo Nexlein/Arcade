@@ -202,6 +202,7 @@ void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
 
 void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
 {
+    if (selectedGraphic == _displayPaths[_displayIdx]) return;
     try {
         if (_graphicInstance != nullptr) {
             _graphicInstance->stop();
