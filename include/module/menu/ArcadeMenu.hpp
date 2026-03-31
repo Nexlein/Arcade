@@ -96,6 +96,8 @@ namespace arcade {
         int _displayIdx;
         /// @brief The index of the currently selected game library in the menu.
         int _gameIdx;
+        /// @brief The index of the currently loaded graphic library.
+        int _currentDisplayIdx;
     };
 }  // namespace arcade
 
