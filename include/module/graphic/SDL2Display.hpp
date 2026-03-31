@@ -19,6 +19,8 @@
 #include "ADisplayModule.hpp"
 
 namespace arcade {
+    // Dans SDL2Display.hpp
+
     class SDL2Display : public ADisplayModule {
         public:
         SDL2Display();
@@ -94,6 +96,7 @@ namespace arcade {
 
         void applyAnchor(Anchor anchor, SDL_Rect& dst);
         void applyScaling(SDL_Rect& dst);
+        Viewport computeViewport() const override;
 
         /// @brief The SDL2 window
         SDL_Window* _win;

@@ -149,7 +149,7 @@ void arcade::ArcadeMenu::update(float elapsedTime)
 
     /// Games section
     float rightColX = midX + (midX / 2);
-    _uiText.push_back(Text("Games:", rightColX - 55, ColY, Anchor::CENTER, Colors::CYAN, 30));
+    _uiText.push_back(Text("Games:", rightColX - 35, ColY, Anchor::CENTER, Colors::CYAN, 30));
 
     Entity gameLineBar;
     gameLineBar.pos = {rightColX - 150, midY};
@@ -165,7 +165,7 @@ void arcade::ArcadeMenu::update(float elapsedTime)
         Color color = Colors::WHITE;
         if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx)) {
             color = Colors::RED;
-            selector.pos = {rightColX - 126, static_cast<float>(y)};
+            selector.pos = {rightColX - 124, static_cast<float>(y)};
             _entities.push_back(selector);
         }
         _uiText.push_back(Text(_gamePaths[i], rightColX - 40, y, Anchor::CENTER, color, 15));
