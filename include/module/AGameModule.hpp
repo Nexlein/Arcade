@@ -33,6 +33,14 @@ namespace arcade {
         AGameModule(std::string name = "Unnamed Game", GameState initialState = GameState::MENU, RenderContext context = RenderContext(800, 600, CoordinateSpace::PIXEL));
         virtual ~AGameModule() = default;
 
+        /// @brief get all entities to be rendered
+        /// @return Const reference to vector of entities to render
+        const std::vector<Entity>& getEntities() const override;
+
+        /// @brief get all UI text elements to be rendered
+        /// @return Const reference to vector of text elements to render
+        const std::vector<Text>& getUIText() const override;
+
         /// @brief Get the render context of the current game (window size, space coordinate)
         /// @return RenderContext containing rendering parameters for this game
         RenderContext getRenderContext() const override;

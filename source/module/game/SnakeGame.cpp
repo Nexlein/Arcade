@@ -221,16 +221,6 @@ void arcade::SnakeGame::handleInput(MouseEvent mouseEvent)
     (void)mouseEvent;
 }
 
-const std::vector<arcade::Entity>& arcade::SnakeGame::getEntities() const
-{
-    return _entities;
-}
-
-const std::vector<arcade::Text>& arcade::SnakeGame::getUIText() const
-{
-    return _uiText;
-}
-
 void arcade::SnakeGame::restart()
 {
     _state = GameState::RUNNING;

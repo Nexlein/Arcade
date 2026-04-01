@@ -11,6 +11,10 @@ arcade::AGameModule::AGameModule(std::string name, GameState initialState, Rende
     : _name(name), _state(initialState), _context(context), _score(0)
 {}
 
+const std::vector<arcade::Entity>& arcade::AGameModule::getEntities() const { return _entities; }
+
+const std::vector<arcade::Text>& arcade::AGameModule::getUIText() const { return _uiText; }
+
 arcade::RenderContext arcade::AGameModule::getRenderContext() const { return _context; }
 
 arcade::ModuleType arcade::AGameModule::getType() const { return ModuleType::GAME; }
