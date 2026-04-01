@@ -18,7 +18,7 @@
 #include <unordered_map>
 
 /// @brief Name of the SDL2 display module
-static const std::string DISPLAY_NAME = "ArcadeMenu";
+static const std::string DISPLAY_NAME = "SDL2";
 
 /// @brief Valid image formats for sprites
 static const std::array<std::string_view, 3> VALID_FORMATS = {".png", ".jpg", ".jpeg"};
