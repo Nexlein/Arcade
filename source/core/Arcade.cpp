@@ -124,25 +124,28 @@ float arcade::Arcade::computeElapsedTime(
 void arcade::Arcade::moduleSwitcher(arcade::Key key)
 {
     int idx = 0;
-    IMenuModule* menu = dynamic_cast<IMenuModule*>(_gameInstance);
 
     switch (key) {
         case Key::NEXT_GRAPHICS:
-        case Key::PREV_GRAPHICS:
-            if (!_displayPaths.empty()) {
-                idx = (key == Key::NEXT_GRAPHICS) ? (_displayIdx + 1) % _displayPaths.size()
-                                    : (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
-                loadDisplayFromPath(_displayPaths[idx]);
-                if (menu) menu->setDisplayIdx(_displayIdx);
-            }
+        case Key::PREV_GRAPHICS: {
+            if (_displayPaths.empty()) return;
+            if (key == Key::NEXT_GRAPHICS) 
+                idx = (_displayIdx + 1) % _displayPaths.size();
+            else
+                idx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
+            loadDisplayFromPath(_displayPaths[idx]);
+            IMenuModule* menu = dynamic_cast<IMenuModule*>(_gameInstance);
+            if (menu) menu->setDisplayIdx(_displayIdx);
             break;
+        }
         case Key::NEXT_GAME:
         case Key::PREV_GAME:
-            if (!_gamePaths.empty() && _gameState == GameState::RUNNING) {
-                idx = (key == Key::NEXT_GAME) ? (_gameIdx + 1) % _gamePaths.size()
-                                : (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
-                loadGameFromPath(_gamePaths[idx]);
-            }
+            if (_gamePaths.empty() || _gameState != GameState::RUNNING) return;
+            if (key == Key::NEXT_GAME)
+                idx = (_gameIdx + 1) % _gamePaths.size();
+            else
+                idx = (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
+            loadGameFromPath(_gamePaths[idx]);
             break;
         default:
             break;
@@ -161,9 +164,10 @@ bool arcade::Arcade::processKeys()
             menuManager();
         else if (key == Key::RESTART && _gameState == GameState::RUNNING)
             _gameInstance->restart();
-        else
+        else if (key == Key::PREV_GAME || key == Key::NEXT_GAME || key == Key::PREV_GRAPHICS || key == Key::NEXT_GRAPHICS)
             moduleSwitcher(key);
-        _gameInstance->handleInput(key);
+        else
+            _gameInstance->handleInput(key);
     }
     return true;
 }
