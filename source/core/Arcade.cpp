@@ -302,11 +302,9 @@ void arcade::Arcade::setDisplayIdx(const std::string& initGraphicPath)
 int arcade::Arcade::run()
 {
     while (_isRunning && _graphicInstance && _graphicInstance->isOpen()) {
-        float elapsedTime = _graphicInstance->getDeltaTime();
-
         if (!inputsManager()) break;
 
-        _gameInstance->update(elapsedTime);
+        _gameInstance->update(_graphicInstance->getDeltaTime());
         handleStateTransitions();
         renderFrame();
     }
