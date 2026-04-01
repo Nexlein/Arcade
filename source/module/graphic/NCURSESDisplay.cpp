@@ -1,0 +1,289 @@
+/*
+** EPITECH PROJECT, 2026
+** Arcade
+** File description:
+** NCURSESDisplay
+*/
+
+/// @file NCURSESDisplay.cpp
+/// @brief NCURSES implementation
+
+#include "NCURSESDisplay.hpp"
+
+#include <stdexcept>
+#include <unordered_map>
+
+/// @brief Name of the NCURSES display module
+static const std::string DISPLAY_NAME = "NCURSES";
+
+arcade::NCURSESDisplay::NCURSESDisplay()
+    : ADisplayModule(DISPLAY_NAME), _win(nullptr), _nextColorPairId(0)
+{}
+
+arcade::NCURSESDisplay::~NCURSESDisplay() { stop(); }
+
+void arcade::NCURSESDisplay::init()
+{
+    // Initialize NCURSES
+    initscr();
+
+    // Check if the terminal supports colors and initialize color mode
+    if (has_colors()) start_color();
+
+    // Enable cbreak mode to allow immediate input without waiting for Enter
+    cbreak();
+    // Disable echoing of typed characters
+    noecho();
+    // Enable special keys
+    keypad(stdscr, TRUE);
+    // Make getch non-blocking
+    nodelay(stdscr, TRUE);
+
+    _win = stdscr;
+}
+
+void arcade::NCURSESDisplay::stop()
+{
+    // Clear color pair cache
+    _colorPairs.clear();
+    _nextColorPairId = 0;
+
+    // End NCURSES mode
+    endwin();
+}
+
+void arcade::NCURSESDisplay::clear() { wclear(_win); }
+
+void arcade::NCURSESDisplay::display() { wrefresh(_win); }
+
+void arcade::NCURSESDisplay::drawEntity(const Entity& entity)
+{
+    Viewport vp = computeViewport();
+    int x = static_cast<int>(entity.pos.x * vp.scale) + vp.offsetX;
+    int y = static_cast<int>(entity.pos.y * vp.scale) + vp.offsetY;
+
+    int width = entity.size.x > 0 ? static_cast<int>(entity.size.x * vp.scale) : 1;
+    int height = entity.size.y > 0 ? static_cast<int>(entity.size.y * vp.scale) : 1;
+    applyAnchor(x, y, width, height, entity.anchor);
+
+    // Set color and draw the character
+    short colorPair = getColorPair(entity.color, entity.backgroundColor);
+    attron(COLOR_PAIR(colorPair));
+    mvwaddch(_win, y, x, entity.character);
+    attroff(COLOR_PAIR(colorPair));
+}
+
+void arcade::NCURSESDisplay::drawText(const Text& text)
+{
+    Viewport vp = computeViewport();
+    int x = static_cast<int>(text.pos.x * vp.scale) + vp.offsetX;
+    int y = static_cast<int>(text.pos.y * vp.scale) + vp.offsetY;
+
+    int textWidth = static_cast<int>(text.content.length());
+    applyAnchor(x, y, textWidth, 1, text.anchor);
+
+    // Set color and draw the text
+    short colorPair = getColorPair(text.color, {0, 0, 0});
+    attron(COLOR_PAIR(colorPair));
+    mvwprintw(_win, y, x, "%s", text.content.c_str());
+    attroff(COLOR_PAIR(colorPair));
+}
+
+void arcade::NCURSESDisplay::drawRectangle(const Rect& rect, const Color& color)
+{
+    Viewport vp = computeViewport();
+    int x0 = static_cast<int>(rect.x * vp.scale) + vp.offsetX;
+    int y0 = static_cast<int>(rect.y * vp.scale) + vp.offsetY;
+    int x1 = static_cast<int>((rect.x + rect.width) * vp.scale) + vp.offsetX;
+    int y1 = static_cast<int>((rect.y + rect.height) * vp.scale) + vp.offsetY;
+
+    short colorPair = getColorPair(color, color);
+    attron(COLOR_PAIR(colorPair));
+    for (int y = y0; y < y1; ++y) {
+        for (int x = x0; x < x1; ++x) {
+            mvwaddch(_win, y, x, ' ');
+        }
+    }
+    attroff(COLOR_PAIR(colorPair));
+}
+
+/// @brief Mapping of NCURSES key codes to arcade::Key values
+static const std::unordered_map<int, arcade::Key> KEY_BINDINGS = {
+    {'a', arcade::Key::A},
+    {'A', arcade::Key::A},
+    {'b', arcade::Key::B},
+    {'B', arcade::Key::B},
+    {'c', arcade::Key::C},
+    {'C', arcade::Key::C},
+    {'d', arcade::Key::D},
+    {'D', arcade::Key::D},
+    {'e', arcade::Key::E},
+    {'E', arcade::Key::E},
+    {'f', arcade::Key::F},
+    {'F', arcade::Key::F},
+    {'g', arcade::Key::G},
+    {'G', arcade::Key::G},
+    {'h', arcade::Key::H},
+    {'H', arcade::Key::H},
+    {'i', arcade::Key::I},
+    {'I', arcade::Key::I},
+    {'j', arcade::Key::J},
+    {'J', arcade::Key::J},
+    {'k', arcade::Key::K},
+    {'K', arcade::Key::K},
+    {'l', arcade::Key::L},
+    {'L', arcade::Key::L},
+    {'m', arcade::Key::MENU},
+    {'M', arcade::Key::MENU},
+    {'n', arcade::Key::N},
+    {'N', arcade::Key::N},
+    {'o', arcade::Key::O},
+    {'O', arcade::Key::O},
+    {'p', arcade::Key::P},
+    {'P', arcade::Key::P},
+    {'q', arcade::Key::Q},
+    {'Q', arcade::Key::Q},
+    {'r', arcade::Key::RESTART},
+    {'R', arcade::Key::RESTART},
+    {'s', arcade::Key::S},
+    {'S', arcade::Key::S},
+    {'t', arcade::Key::T},
+    {'T', arcade::Key::T},
+    {'u', arcade::Key::U},
+    {'U', arcade::Key::U},
+    {'v', arcade::Key::V},
+    {'V', arcade::Key::V},
+    {'w', arcade::Key::W},
+    {'W', arcade::Key::W},
+    {'x', arcade::Key::X},
+    {'X', arcade::Key::X},
+    {'y', arcade::Key::Y},
+    {'Y', arcade::Key::Y},
+    {'z', arcade::Key::Z},
+    {'Z', arcade::Key::Z},
+    {'0', arcade::Key::NUM_0},
+    {'1', arcade::Key::PREV_GAME},
+    {'2', arcade::Key::NEXT_GAME},
+    {'3', arcade::Key::PREV_GRAPHICS},
+    {'4', arcade::Key::NEXT_GRAPHICS},
+    {'5', arcade::Key::NUM_5},
+    {'6', arcade::Key::NUM_6},
+    {'7', arcade::Key::NUM_7},
+    {'8', arcade::Key::NUM_8},
+    {'9', arcade::Key::NUM_9},
+    {' ', arcade::Key::SPACE},
+    {KEY_ENTER, arcade::Key::ENTER},
+    {10, arcade::Key::ENTER},
+    {'\n', arcade::Key::ENTER},
+    {13, arcade::Key::ENTER},
+    {27, arcade::Key::EXIT},
+    {KEY_BACKSPACE, arcade::Key::BACKSPACE},
+    {KEY_UP, arcade::Key::UP},
+    {KEY_DOWN, arcade::Key::DOWN},
+    {KEY_LEFT, arcade::Key::LEFT},
+    {KEY_RIGHT, arcade::Key::RIGHT}
+};
+
+void arcade::NCURSESDisplay::pollEvents()
+{
+    updateDeltaTime();
+
+    int ch;
+    while ((ch = wgetch(_win)) != ERR) {
+        auto it = KEY_BINDINGS.find(ch);
+        if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
+    }
+}
+
+bool arcade::NCURSESDisplay::isOpen() const { return _win != nullptr; }
+
+arcade::ADisplayModule::Viewport arcade::NCURSESDisplay::computeViewport() const
+{
+    int winW, winH;
+    getmaxyx(_win, winH, winW);
+
+    float scale = 1.0f;
+
+    // Pixel Mode
+    if (_context.space == CoordinateSpace::PIXEL) {
+        float scaleX = static_cast<float>(winW) / _context.width;
+        float scaleY = static_cast<float>(winH) / _context.height;
+        scale = std::min(scaleX, scaleY);
+    }
+    // Grid Mode
+    else scale = 1.0f;
+
+    // Center the content
+    int offsetX = static_cast<int>((winW - _context.width * scale) / 2.0f);
+    int offsetY = static_cast<int>((winH - _context.height * scale) / 2.0f);
+
+    return {scale, offsetX, offsetY};
+}
+
+void arcade::NCURSESDisplay::applyAnchor(int& x, int& y, int width, int height, Anchor anchor) const
+{
+    switch (anchor) {
+        case Anchor::TOP_LEFT: break;
+        case Anchor::TOP_CENTER: x -= width / 2; break;
+        case Anchor::TOP_RIGHT: x -= width; break;
+        case Anchor::MIDDLE_LEFT: y -= height / 2; break;
+        case Anchor::CENTER: x -= width / 2; y -= height / 2; break;
+        case Anchor::MIDDLE_RIGHT: x -= width; y -= height / 2; break;
+        case Anchor::BOTTOM_LEFT: y -= height; break;
+        case Anchor::BOTTOM_CENTER: x -= width / 2; y -= height; break;
+        case Anchor::BOTTOM_RIGHT: x -= width; y -= height; break;
+    }
+}
+
+short arcade::NCURSESDisplay::getClosestNcursesColor(const Color& color) const
+{
+    // Simple mapping of RGB to 8 basic colors (0-7)
+    if (color.r > 128) {
+        if (color.g > 128) {
+            if (color.b > 128)
+                return COLOR_WHITE;
+            else
+                return COLOR_YELLOW;
+        } else {
+            if (color.b > 128)
+                return COLOR_MAGENTA;
+            else
+                return COLOR_RED;
+        }
+    } else {
+        if (color.g > 128) {
+            if (color.b > 128)
+                return COLOR_CYAN;
+            else
+                return COLOR_GREEN;
+        } else {
+            if (color.b > 128)
+                return COLOR_BLUE;
+            else
+                return COLOR_BLACK;
+        }
+    }
+}
+
+short arcade::NCURSESDisplay::getColorPair(const Color& fg, const Color& bg)
+{
+    short fgColor = getClosestNcursesColor(fg);
+    short bgColor = getClosestNcursesColor(bg);
+
+    std::pair<short, short> key = {fgColor, bgColor};
+    auto it = _colorPairs.find(key);
+    if (it != _colorPairs.end()) return it->second;
+
+    if (_nextColorPairId >= COLOR_PAIRS) return 0;
+
+    short pairId = _nextColorPairId++;
+    init_pair(pairId, fgColor, bgColor);
+    _colorPairs[key] = pairId;
+    return pairId;
+}
+
+extern "C" {
+    arcade::IModule* entryPoint() {
+        return new arcade::NCURSESDisplay();
+    }
+}
