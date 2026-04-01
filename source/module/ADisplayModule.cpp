@@ -16,8 +16,8 @@ arcade::ADisplayModule::ADisplayModule(std::string name, RenderContext context)
       _title(""),
       _context(context),
       _fullScreen(false),
-      _currentTime(0),
-      _lastTime(0)
+      _deltaTime(0),
+      _lastTime(std::chrono::high_resolution_clock::now())
 {
 }
 
@@ -45,7 +45,16 @@ arcade::MouseEvent arcade::ADisplayModule::getMouseEvent()
 
 arcade::ModuleType arcade::ADisplayModule::getType() const { return ModuleType::DISPLAY; }
 const std::string& arcade::ADisplayModule::getName() const { return _name; }
-float arcade::ADisplayModule::getDeltaTime() const { return _currentTime - _lastTime; }
+
+void arcade::ADisplayModule::updateDeltaTime()
+{
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    _deltaTime = std::chrono::duration<float>(currentTime - _lastTime).count();
+    _lastTime = currentTime;
+}
+
+float arcade::ADisplayModule::getDeltaTime() const { return _deltaTime; }
+
 int arcade::ADisplayModule::getWidth() const { return _context.width; }
 int arcade::ADisplayModule::getHeight() const { return _context.height; }
 

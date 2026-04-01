@@ -111,16 +111,6 @@ void arcade::Arcade::menuManager()
     _gameState = GameState::MENU;
 }
 
-float arcade::Arcade::computeElapsedTime(
-    std::chrono::high_resolution_clock::time_point& lastTime) const
-{
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float elapsedTime = std::chrono::duration<float>(currentTime - lastTime).count();
-
-    lastTime = currentTime;
-    return elapsedTime;
-}
-
 void arcade::Arcade::moduleSwitcher(arcade::Key key)
 {
     int idx = 0;
@@ -311,10 +301,8 @@ void arcade::Arcade::setDisplayIdx(const std::string& initGraphicPath)
 
 int arcade::Arcade::run()
 {
-    auto lastTime = std::chrono::high_resolution_clock::now();
-
     while (_isRunning && _graphicInstance && _graphicInstance->isOpen()) {
-        float elapsedTime = computeElapsedTime(lastTime);
+        float elapsedTime = _graphicInstance->getDeltaTime();
 
         if (!inputsManager()) break;
 

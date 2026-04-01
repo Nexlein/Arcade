@@ -46,10 +46,6 @@ namespace arcade {
         /// @param graphicPath The path of the initially loaded graphic library
         void loadLibrairies(const std::string& loadPath, const std::string& graphicPath);
 
-        /// @brief Computes the elapsed time since the last frame
-        /// @param lastTime The time of the last frame
-        /// @return The elapsed time in seconds
-        float computeElapsedTime(std::chrono::high_resolution_clock::time_point& lastTime) const;
         /// @brief Processes the inputs from the user
         /// @param key The key that was pressed
         /// @return True if the input was processed, false otherwise
