@@ -247,12 +247,8 @@ void arcade::SDL2Display::drawEntity(const Entity& entity)
     if (!entity.spritePath.empty())
         sprite = getSprite(entity.spritePath);
 
-    if (sprite) {
-        SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
-    } else {
-        drawRectangle({static_cast<float>(dst.x), static_cast<float>(dst.y), 
-                       static_cast<float>(dst.w), static_cast<float>(dst.h)}, entity.color);
-    }
+    if (sprite) SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
+    else drawRectangle({dst.x, dst.y, dst.w, dst.h}, entity.color);
 }
 
 TTF_Font* arcade::SDL2Display::tryOpenFont(const std::string& fontPath, int size)
@@ -330,13 +326,11 @@ void arcade::SDL2Display::drawText(const Text& text)
     applyAnchor(text.anchor, dst);
 
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
-    SDL_DestroyTexture(texture);
 }
 
 void arcade::SDL2Display::drawRectangle(const Rect& rect, const Color& color)
 {
-    SDL_Rect sdlRect = {static_cast<int>(rect.x), static_cast<int>(rect.y),
-                        static_cast<int>(rect.width), static_cast<int>(rect.height)};
+    SDL_Rect sdlRect = {rect.x, rect.y, rect.width, rect.height};
 
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(_renderer, &sdlRect);
