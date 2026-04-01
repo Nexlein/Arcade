@@ -93,6 +93,9 @@ namespace arcade {
         /// @brief Cleanup all loaded sprites
         void stopSprite();
 
+        /// @brief Cleanup all loaded text textures
+        void stopText();
+
         void applyAnchor(Anchor anchor, SDL_Rect& dst);
         void applyScaling(SDL_Rect& dst);
         Viewport computeViewport() const override;
@@ -108,5 +111,8 @@ namespace arcade {
 
         /// @brief Cache for loaded sprites, keyed by file path
         std::map<std::string, SDL_Texture*> _spriteCache;
+
+        /// @brief Cache for generated text textures, keyed by a unique string
+        std::map<std::string, SDL_Texture*> _textCache;
     };
 }  // namespace arcade

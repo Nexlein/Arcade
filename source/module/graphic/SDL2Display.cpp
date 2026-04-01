@@ -128,11 +128,18 @@ void arcade::SDL2Display::stopSprite()
     _spriteCache.clear();
 }
 
+void arcade::SDL2Display::stopText()
+{
+    for (auto& [key, texture] : _textCache)
+        if (texture) SDL_DestroyTexture(texture);
+    _textCache.clear();
+}
+
 void arcade::SDL2Display::stop()
 {
     stopFont();
     stopSprite();
-
+    stopText();
     if (_renderer) {
         SDL_DestroyRenderer(_renderer);
         _renderer = nullptr;
@@ -293,12 +300,29 @@ TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
 
 void arcade::SDL2Display::drawText(const Text& text)
 {
-    TTF_Font* font = getFont(text.fontPath, text.fontSize);
+    // Create a unique key (content + font path + size + color)
+    std::string key = text.content + "_" + text.fontPath + "_" + std::to_string(text.fontSize) + "_" +
+                      std::to_string(text.color.r) + std::to_string(text.color.g) + std::to_string(text.color.b);
 
-    SDL_Color color = {text.color.r, text.color.g, text.color.b, text.color.a};
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text.content.c_str(), color);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
-    SDL_FreeSurface(surface);
+    SDL_Texture* texture = nullptr;
+    auto it = _textCache.find(key);
+
+    if (it != _textCache.end()) texture = it->second;
+    else {
+        if (_textCache.size() > 100) stopText();
+
+        TTF_Font* font = getFont(text.fontPath, text.fontSize);
+        SDL_Color color = {text.color.r, text.color.g, text.color.b, text.color.a};
+        SDL_Surface* surface = TTF_RenderText_Blended(font, text.content.c_str(), color);
+
+        if (surface) {
+            texture = SDL_CreateTextureFromSurface(_renderer, surface);
+            SDL_FreeSurface(surface);
+            _textCache[key] = texture;
+        }
+    }
+
+    if (!texture) return;
 
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
     applyScaling(dst);
