@@ -63,6 +63,7 @@ foreach(file IN LISTS GAME_FILES)
 endforeach()
 
 # --- GRAPHIC MODULES ---
+# --- SDL2 ---
 add_library(arcade_sdl2 SHARED 
     source/module/graphic/SDL2Display.cpp 
     source/module/ADisplayModule.cpp
@@ -76,6 +77,26 @@ target_link_libraries(arcade_sdl2 PRIVATE
 )
 
 set_target_properties(arcade_sdl2 PROPERTIES 
+    PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
+)
+
+# --- NCURSES ---
+find_package(Curses REQUIRED)
+
+add_library(arcade_ncurses SHARED 
+    source/module/graphic/NCURSESDisplay.cpp 
+    source/module/ADisplayModule.cpp
+)
+
+target_include_directories(arcade_ncurses PRIVATE ${CURSES_INCLUDE_DIRS})
+
+target_link_libraries(arcade_ncurses PRIVATE 
+    arcadeGlobal 
+    ${CURSES_LIBRARIES}
+)
+
+set_target_properties(arcade_ncurses PROPERTIES 
     PREFIX ""
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
 )
