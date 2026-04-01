@@ -137,7 +137,7 @@ void arcade::SnakeGame::restart()
     _state = GameState::RUNNING;
     _score = 0;
     _timeSinceLastMove = static_cast<float>(0.0);
-    _moveInterval = static_cast<float>(0.15);
+    _moveInterval = static_cast<float>(0.10);
     _currentDir = Direction::NONE;
     _nextDir = Direction::NONE;
 
@@ -160,7 +160,7 @@ void arcade::SnakeGame::moveSnake()
             _currentDir = _nextDir;
         else if (_nextDir == Direction::DOWN && _currentDir != Direction::UP)
             _currentDir = _nextDir;
-        else if (_nextDir == Direction::LEFT && _currentDir != Direction::RIGHT)
+        else if (_nextDir == Direction::LEFT && _currentDir != Direction::RIGHT && _currentDir != Direction::NONE)
             _currentDir = _nextDir;
         else if (_nextDir == Direction::RIGHT && _currentDir != Direction::LEFT)
             _currentDir = _nextDir;
