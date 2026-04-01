@@ -121,54 +121,67 @@ float arcade::Arcade::computeElapsedTime(
     return elapsedTime;
 }
 
-bool arcade::Arcade::processInputs()
+void arcade::Arcade::moduleSwitcher(arcade::Key key)
 {
-    _graphicInstance->pollEvents();
+    int idx = 0;
+    IMenuModule* menu = dynamic_cast<IMenuModule*>(_gameInstance);
 
+    switch (key) {
+        case Key::NEXT_GRAPHICS:
+        case Key::PREV_GRAPHICS:
+            if (!_displayPaths.empty()) {
+                idx = (key == Key::NEXT_GRAPHICS) ? (_displayIdx + 1) % _displayPaths.size()
+                                    : (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
+                loadDisplayFromPath(_displayPaths[idx]);
+                if (menu) menu->setDisplayIdx(_displayIdx);
+            }
+            break;
+        case Key::NEXT_GAME:
+        case Key::PREV_GAME:
+            if (!_gamePaths.empty() && _gameState == GameState::RUNNING) {
+                idx = (key == Key::NEXT_GAME) ? (_gameIdx + 1) % _gamePaths.size()
+                                : (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
+                loadGameFromPath(_gamePaths[idx]);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+bool arcade::Arcade::processKeys()
+{
     arcade::Key key;
+
     while ((key = _graphicInstance->getKey()) != Key::UNKNOWN) {
         if (key == Key::EXIT) {
             _isRunning = false;
             return false;
-        }
-
-        if (key == Key::MENU && _gameState == GameState::RUNNING) {
+        } else if (key == Key::MENU && _gameState == GameState::RUNNING)
             menuManager();
-            continue;
-        }
-        else if (key == Key::NEXT_GRAPHICS && !_displayPaths.empty()) {
-            int nextIdx = (_displayIdx + 1) % _displayPaths.size();
-            loadDisplayFromPath(_displayPaths[nextIdx]);
-            continue;
-        }
-        else if (key == Key::PREV_GRAPHICS && !_displayPaths.empty()) {
-            int prevIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
-            loadDisplayFromPath(_displayPaths[prevIdx]);
-            continue;
-        }
-        else if (key == Key::NEXT_GAME && !_gamePaths.empty() && _gameState == GameState::RUNNING) {
-            int nextIdx = (_gameIdx + 1) % _gamePaths.size();
-            loadGameFromPath(_gamePaths[nextIdx]);
-            continue;
-        }
-        else if (key == Key::PREV_GAME && !_gamePaths.empty() && _gameState == GameState::RUNNING) {
-            int prevIdx = (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
-            loadGameFromPath(_gamePaths[prevIdx]);
-            continue;
-        }
-        else if (key == Key::RESTART && _gameState == GameState::RUNNING) {
+        else if (key == Key::RESTART && _gameState == GameState::RUNNING)
             _gameInstance->restart();
-            continue;
-        }
-
+        else
+            moduleSwitcher(key);
         _gameInstance->handleInput(key);
     }
+    return true;
+}
 
+bool arcade::Arcade::processMouseEvents()
+{
     arcade::MouseEvent mouseEvent;
     while ((mouseEvent = _graphicInstance->getMouseEvent()).button != Key::UNKNOWN)
         _gameInstance->handleInput(mouseEvent);
-
     return true;
+
+}
+
+bool arcade::Arcade::inputsManager()
+{
+    _graphicInstance->pollEvents();
+
+    return processKeys() && processMouseEvents();
 }
 
 void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
@@ -299,7 +312,7 @@ int arcade::Arcade::run()
     while (_isRunning && _graphicInstance && _graphicInstance->isOpen()) {
         float elapsedTime = computeElapsedTime(lastTime);
 
-        if (!processInputs()) break;
+        if (!inputsManager()) break;
 
         _gameInstance->update(elapsedTime);
         handleStateTransitions();

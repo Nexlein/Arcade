@@ -53,7 +53,13 @@ namespace arcade {
         /// @brief Processes the inputs from the user
         /// @param key The key that was pressed
         /// @return True if the input was processed, false otherwise
-        bool processInputs();
+        bool inputsManager();
+
+        /// @brief Key processing function.
+        bool processKeys();
+
+        /// @brief Mouse events processing function.
+        bool processMouseEvents();
 
         /// @brief Loads a game module from the specified path and starts it
         /// @param selectedGame The path of the selected game module
@@ -78,6 +84,10 @@ namespace arcade {
 
         /// @brief Sets the display index based on the initially loaded graphic library
         void setDisplayIdx(const std::string& initGraphicPath);
+
+        /// @brief Manages the switching of keys based on the current game state
+        /// @param key The key detected by a DisplayModule
+        void moduleSwitcher(Key key);
 
         /// @brief A unique pointer that manages the loading of the display module, ensuring proper
         /// cleanup when the Arcade instance is destroyed
