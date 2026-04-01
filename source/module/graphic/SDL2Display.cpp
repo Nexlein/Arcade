@@ -151,6 +151,7 @@ bool arcade::SDL2Display::isOpen() const { return _win != nullptr; }
 
 void arcade::SDL2Display::pollEvents()
 {
+    updateDeltaTime();
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {

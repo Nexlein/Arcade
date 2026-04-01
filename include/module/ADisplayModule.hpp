@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <queue>
 #include <string>
 
@@ -90,6 +91,9 @@ namespace arcade {
         /// @return The computed viewport containing scale and offsets for rendering
         virtual Viewport computeViewport() const = 0;
 
+        /// @brief Update the delta time, meant to be called once per frame (e.g. in pollEvents)
+        void updateDeltaTime();
+
         /// @brief The name of the display module
         std::string _name;
 
@@ -102,11 +106,11 @@ namespace arcade {
         /// @brief Whether the display is in fullscreen mode
         bool _fullScreen;
 
-        /// @brief Timing variables for delta time calculation
-        float _currentTime;
+        /// @brief The calculated delta time for the current frame
+        float _deltaTime;
 
         /// @brief The last recorded time for delta time calculation
-        float _lastTime;
+        std::chrono::high_resolution_clock::time_point _lastTime;
 
         /// @brief Queue to store key events
         std::queue<Key> _keyEvent;
