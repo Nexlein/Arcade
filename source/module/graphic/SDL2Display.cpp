@@ -243,8 +243,8 @@ void arcade::SDL2Display::drawEntity(const Entity& entity)
     if (sprite) {
         SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
     } else {
-        SDL_SetRenderDrawColor(_renderer, entity.color.r, entity.color.g, entity.color.b, entity.color.a);
-        SDL_RenderFillRect(_renderer, &dst);
+        drawRectangle({static_cast<float>(dst.x), static_cast<float>(dst.y), 
+                       static_cast<float>(dst.w), static_cast<float>(dst.h)}, entity.color);
     }
 }
 
