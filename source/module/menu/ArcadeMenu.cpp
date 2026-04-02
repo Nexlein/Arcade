@@ -23,16 +23,27 @@ arcade::ArcadeMenu::ArcadeMenu()
       _validatedSection(CurrentChoice::ONGRAPHIC),
       _hasValidatedSelection(false),
       _displayIdx(0),
-      _gameIdx(0)
+      _gameIdx(0),
+      _needsUpdate(true)
 {
     init();
 }
 
-void arcade::ArcadeMenu::setDisplayPaths(const std::vector<std::string>& paths) { _displayPaths = paths; }
+void arcade::ArcadeMenu::setDisplayPaths(const std::vector<std::string>& paths) {
+    _displayPaths = paths;
+    _needsUpdate = true;
+}
 
-void arcade::ArcadeMenu::setGamePaths(const std::vector<std::string>& paths) { _gamePaths = paths; }
+void arcade::ArcadeMenu::setGamePaths(const std::vector<std::string>& paths) {
+    _gamePaths = paths;
+    _needsUpdate = true;
+}
 
-void arcade::ArcadeMenu::setDisplayIdx(const int idx) { _currentDisplayIdx = idx; }
+void arcade::ArcadeMenu::setDisplayIdx(const int idx)
+{
+    _currentDisplayIdx = idx;
+    _needsUpdate = true;
+}
 
 void arcade::ArcadeMenu::restart()
 {
@@ -42,10 +53,12 @@ void arcade::ArcadeMenu::restart()
     _currentSection = CurrentChoice::ONGRAPHIC;
     _validatedSection = CurrentChoice::ONGRAPHIC;
     _hasValidatedSelection = false;
+    _needsUpdate = true;
 }
 
 void arcade::ArcadeMenu::handleInput(Key key)
 {
+    _needsUpdate = true;
     switch (key) {
         case Key::UP:
             upKey();
@@ -97,14 +110,32 @@ void arcade::ArcadeMenu::switchChoice(const Key& key)
     }
 }
 
-void arcade::ArcadeMenu::handleInput(MouseEvent mouseEvent) { (void)mouseEvent; }
+void arcade::ArcadeMenu::handleInput([[maybe_unused]] MouseEvent mouseEvent) {}
 
-void arcade::ArcadeMenu::update(float elapsedTime)
+void arcade::ArcadeMenu::isResized()
 {
-    static float midX = _context.width / 2.0f;
-    static float midY = _context.height / 2.0f;
+    static float lastWidth = -1;
+    static float lastHeight = -1;
 
-    (void)elapsedTime;
+    if (lastWidth != _context.width || lastHeight != _context.height) {
+        lastWidth = _context.width;
+        lastHeight = _context.height;
+        _needsUpdate = true;
+    }
+}
+
+void arcade::ArcadeMenu::update([[maybe_unused]] float elapsedTime)
+{
+    isResized();
+
+    if (!_needsUpdate)
+        return;
+
+    _needsUpdate = false;
+
+    float midX = _context.width / 2.0f;
+    float midY = _context.height / 2.0f;
+
     _uiText.clear();
     _entities.clear();
 

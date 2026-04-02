@@ -69,12 +69,16 @@ namespace arcade {
         const std::string& getSelectedGraphic() const override;
 
         private:
+        void isResized();
+
         /// @brief Current menu section being navigated (graphics or games)
         enum class CurrentChoice { ONGRAPHIC, ONGAME };
+
         /// @brief Handles the up key input to navigate upwards in the menu.
         void upKey();
         /// @brief Handles the down key input to navigate downwards in the menu.
         void downKey();
+
         /// @brief Handles left/right key input to switch between graphic and game selection
         /// sections.
         /// @param key The key that was pressed (LEFT or RIGHT)
@@ -98,6 +102,9 @@ namespace arcade {
         int _gameIdx;
         /// @brief The index of the currently loaded graphic library.
         int _currentDisplayIdx;
+
+        /// @brief Flag to ensure we don't update uselessly unless input or window changes
+        bool _needsUpdate;
     };
 }  // namespace arcade
 
