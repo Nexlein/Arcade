@@ -11,7 +11,41 @@
 
 const std::string GAMENAME = "Snake";
 
-arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(26, 22, CoordinateSpace::GRID)) { init(); }
+arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(26, 22, CoordinateSpace::GRID))
+{
+    setSnakeOrientedSprites();
+    init(); 
+}
+
+void arcade::SnakeGame::setSnakeOrientedSprites()
+{
+    setOrientedSprite("head", Orientation::UP, "sprite/snake/head/snakeHeadTop.png");
+    setOrientedSprite("head", Orientation::DOWN, "sprite/snake/head/snakeHeadDown.png");
+    setOrientedSprite("head", Orientation::LEFT, "sprite/snake/head/snakeHeadLeft.png");
+    setOrientedSprite("head", Orientation::RIGHT, "sprite/snake/head/snakeHeadRight.png");
+    setOrientedSprite("head", Orientation::NONE, "sprite/snake/head/snakeHeadRight.png");
+
+    setOrientedSprite("body", Orientation::UP, "sprite/snake/body/snakeBodyY.png");
+    setOrientedSprite("body", Orientation::DOWN, "sprite/snake/body/snakeBodyY.png");
+    setOrientedSprite("body", Orientation::LEFT, "sprite/snake/body/snakeBodyX.png");
+    setOrientedSprite("body", Orientation::RIGHT, "sprite/snake/body/snakeBodyX.png");
+    setOrientedSprite("body", Orientation::NONE, "sprite/snake/body/snakeBodyX.png");
+
+    setOrientedSprite("tail", Orientation::UP, "sprite/snake/tail/snakeTailTop.png");
+    setOrientedSprite("tail", Orientation::DOWN, "sprite/snake/tail/snakeTailDown.png");
+    setOrientedSprite("tail", Orientation::LEFT, "sprite/snake/tail/snakeTailLeft.png");
+    setOrientedSprite("tail", Orientation::RIGHT, "sprite/snake/tail/snakeTailRight.png");
+    setOrientedSprite("tail", Orientation::NONE, "sprite/snake/tail/snakeTailRight.png");
+
+    setOrientedSprite("angleTopLeft", Orientation::NONE, "sprite/snake/angle/snakeAngleTopLeft.png");
+    setOrientedSprite("angleTopRight", Orientation::NONE, "sprite/snake/angle/snakeAngleTopRight.png");
+    setOrientedSprite("angleDownLeft", Orientation::NONE, "sprite/snake/angle/snakeAngleDownLeft.png");
+    setOrientedSprite("angleDownRight", Orientation::NONE, "sprite/snake/angle/snakeAngleDownRight.png");
+
+    setOrientedSprite("fruit", Orientation::NONE, "sprite/snake/fruit.png");
+    setOrientedSprite("wall", Orientation::NONE, "sprite/snake/wall.png");
+    setOrientedSprite("floor", Orientation::NONE, "sprite/snake/floor.png");
+}
 
 void arcade::SnakeGame::update(float elapsedTime)
 {
@@ -26,6 +60,26 @@ void arcade::SnakeGame::update(float elapsedTime)
     _uiText.clear();
     _entities.clear();
 
+    updateFloorEntities();
+    updateSnakeEntities();
+    updateFruitEntities();
+    updateWallEntities();
+
+    // Update UI texts
+    appendCommonUITexts();
+}
+
+void arcade::SnakeGame::updateSnakeEntities()
+{
+    // Helper to calculate orientation from one body part to another
+    auto getOr = [](const Position& from, const Position& to) {
+        if (from.x > to.x) return Orientation::RIGHT;
+        if (from.x < to.x) return Orientation::LEFT;
+        if (from.y > to.y) return Orientation::DOWN;
+        if (from.y < to.y) return Orientation::UP;
+        return Orientation::NONE;
+    };
+
     // Update snake body / head entities
     for (size_t i = 0; i < _snakeBody.size(); ++i) {
         Entity part;
@@ -34,39 +88,93 @@ void arcade::SnakeGame::update(float elapsedTime)
         if (i == 0) {
             part.character = 'O';
             part.color = Colors::YELLOW;
-            part.spritePath = "sprite/snakeHead.png";
+            part.spritePath = getOrientedSprite("head", _currentDir);
+        } else if (i == _snakeBody.size() - 1) {
+            part.character = '.';
+            part.color = Colors::GREEN;
+            Orientation tailDir = getOr(_snakeBody[i-1], _snakeBody[i]);
+            part.spritePath = getOrientedSprite("tail", tailDir);
         } else {
             part.character = 'o';
             part.color = Colors::GREEN;
-            part.spritePath = "sprite/snakeBody.png";
+            
+            Orientation dir1 = getOr(_snakeBody[i-1], _snakeBody[i]);
+            Orientation dir2 = getOr(_snakeBody[i+1], _snakeBody[i]);
+            
+            bool isAngle = false;
+            std::string angleSprite = "";
+
+            if ((dir1 == Orientation::UP && dir2 == Orientation::LEFT) ||
+                (dir1 == Orientation::LEFT && dir2 == Orientation::UP)) {
+                isAngle = true;
+                angleSprite = getOrientedSprite("angleTopLeft", Orientation::NONE);
+            } else if ((dir1 == Orientation::UP && dir2 == Orientation::RIGHT) ||
+                       (dir1 == Orientation::RIGHT && dir2 == Orientation::UP)) {
+                isAngle = true;
+                angleSprite = getOrientedSprite("angleTopRight", Orientation::NONE);
+            } else if ((dir1 == Orientation::DOWN && dir2 == Orientation::LEFT) ||
+                       (dir1 == Orientation::LEFT && dir2 == Orientation::DOWN)) {
+                isAngle = true;
+                angleSprite = getOrientedSprite("angleDownLeft", Orientation::NONE);
+            } else if ((dir1 == Orientation::DOWN && dir2 == Orientation::RIGHT) ||
+                       (dir1 == Orientation::RIGHT && dir2 == Orientation::DOWN)) {
+                isAngle = true;
+                angleSprite = getOrientedSprite("angleDownRight", Orientation::NONE);
+            }
+
+            if (isAngle) part.spritePath = angleSprite;
+            else part.spritePath = getOrientedSprite("body", dir1);
         }
         _entities.push_back(part);
     }
+}
 
+void arcade::SnakeGame::updateFruitEntities()
+{
     // Update fruit entities
     for (const auto& fruitPos : _fruits) {
         Entity fruit;
         fruit.pos = fruitPos;
         fruit.character = '#';
         fruit.color = Colors::RED;
-        fruit.spritePath = "sprite/fruit.png";
+        fruit.spritePath = getOrientedSprite("fruit", Orientation::NONE);
         _entities.push_back(fruit);
     }
+}
 
+void arcade::SnakeGame::updateFloorEntities()
+{
+    Color floorColor = {246, 236, 215};
+    // Update floor entities (Inside the walls)
+    for (int y = 1; y < _context.height - 1; y++) {
+        for (int x = 1; x < _context.width - 1; x++) {
+            Entity floor;
+            floor.pos = {static_cast<float>(x), static_cast<float>(y)};
+            floor.character = ' ';
+            floor.color = floorColor;
+            floor.spritePath = getOrientedSprite("floor", Orientation::NONE);
+            _entities.push_back(floor);
+        }
+    }
+}
+
+void arcade::SnakeGame::updateWallEntities()
+{
+    Color wallColor = {92, 64, 51};
     // Update wall entities (Top and Bottom)
     for (int x = 0; x < _context.width; x++) {
         Entity wallTop;
         wallTop.pos = {static_cast<float>(x), 0};
         wallTop.character = '#';
-        wallTop.color = Colors::MAGENTA;
-        wallTop.spritePath = "sprite/wall.png";
+        wallTop.color = wallColor;
+        wallTop.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallTop);
 
         Entity wallBottom;
         wallBottom.pos = {static_cast<float>(x), static_cast<float>(_context.height - 1)};
         wallBottom.character = '#';
-        wallBottom.color = Colors::MAGENTA;
-        wallBottom.spritePath = "sprite/wall.png";
+        wallBottom.color = wallColor;
+        wallBottom.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallBottom);
     }
 
@@ -75,20 +183,17 @@ void arcade::SnakeGame::update(float elapsedTime)
         Entity wallLeft;
         wallLeft.pos = {0, static_cast<float>(y)};
         wallLeft.character = '#';
-        wallLeft.color = Colors::MAGENTA;
-        wallLeft.spritePath = "sprite/wall.png";
+        wallLeft.color = wallColor;
+        wallLeft.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallLeft);
 
         Entity wallRight;
         wallRight.pos = {static_cast<float>(_context.width - 1), static_cast<float>(y)};
         wallRight.character = '#';
-        wallRight.color = Colors::MAGENTA;
-        wallRight.spritePath = "sprite/wall.png";
+        wallRight.color = wallColor;
+        wallRight.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallRight);
     }
-
-    // Update UI texts
-    appendCommonUITexts();
 }
 
 void arcade::SnakeGame::handleInput(Key key)
@@ -102,13 +207,13 @@ void arcade::SnakeGame::handleInput(Key key)
     }
 
     if (key == Key::UP || key == Key::Z)
-        if (_currentDir != Direction::DOWN) _nextDir = Direction::UP;
+        if (_currentDir != Orientation::DOWN) _nextDir = Orientation::UP;
     if (key == Key::DOWN || key == Key::S)
-        if (_currentDir != Direction::UP) _nextDir = Direction::DOWN;
+        if (_currentDir != Orientation::UP) _nextDir = Orientation::DOWN;
     if (key == Key::LEFT || key == Key::Q)
-        if (_currentDir != Direction::RIGHT) _nextDir = Direction::LEFT;
+        if (_currentDir != Orientation::RIGHT) _nextDir = Orientation::LEFT;
     if (key == Key::RIGHT || key == Key::D)
-        if (_currentDir != Direction::LEFT) _nextDir = Direction::RIGHT;
+        if (_currentDir != Orientation::LEFT) _nextDir = Orientation::RIGHT;
 }
 
 void arcade::SnakeGame::handleInput(MouseEvent mouseEvent)
@@ -132,8 +237,8 @@ void arcade::SnakeGame::restart()
     _score = 0;
     _timeSinceLastMove = static_cast<float>(0.0);
     _moveInterval = static_cast<float>(0.10);
-    _currentDir = Direction::NONE;
-    _nextDir = Direction::NONE;
+    _currentDir = Orientation::NONE;
+    _nextDir = Orientation::NONE;
 
     _snakeBody.clear();
     int midX = _context.width / 2;
@@ -149,33 +254,33 @@ void arcade::SnakeGame::restart()
 
 void arcade::SnakeGame::moveSnake()
 {
-    if (_nextDir != Direction::NONE) {
-        if (_nextDir == Direction::UP && _currentDir != Direction::DOWN)
+    if (_nextDir != Orientation::NONE) {
+        if (_nextDir == Orientation::UP && _currentDir != Orientation::DOWN)
             _currentDir = _nextDir;
-        else if (_nextDir == Direction::DOWN && _currentDir != Direction::UP)
+        else if (_nextDir == Orientation::DOWN && _currentDir != Orientation::UP)
             _currentDir = _nextDir;
-        else if (_nextDir == Direction::LEFT && _currentDir != Direction::RIGHT && _currentDir != Direction::NONE)
+        else if (_nextDir == Orientation::LEFT && _currentDir != Orientation::RIGHT && _currentDir != Orientation::NONE)
             _currentDir = _nextDir;
-        else if (_nextDir == Direction::RIGHT && _currentDir != Direction::LEFT)
+        else if (_nextDir == Orientation::RIGHT && _currentDir != Orientation::LEFT)
             _currentDir = _nextDir;
     }
 
     Position nextHead = _snakeBody.front();
 
     switch (_currentDir) {
-        case Direction::UP:
+        case Orientation::UP:
             nextHead.y -= 1;
             break;
-        case Direction::DOWN:
+        case Orientation::DOWN:
             nextHead.y += 1;
             break;
-        case Direction::LEFT:
+        case Orientation::LEFT:
             nextHead.x -= 1;
             break;
-        case Direction::RIGHT:
+        case Orientation::RIGHT:
             nextHead.x += 1;
             break;
-        case Direction::NONE:
+        case Orientation::NONE:
             return;
     }
 

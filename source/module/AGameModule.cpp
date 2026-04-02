@@ -93,3 +93,16 @@ void arcade::AGameModule::appendCommonUITexts()
             30
         ));
 }
+
+std::string arcade::AGameModule::getOrientedSprite(const std::string& key, Orientation orientation) const
+{
+    auto it = _orientedSprites.find({key, orientation});
+    if (it != _orientedSprites.end())
+        return it->second;
+    return "";
+}
+
+void arcade::AGameModule::setOrientedSprite(const std::string& key, Orientation orientation, const std::string& spritePath)
+{
+    _orientedSprites[{key, orientation}] = spritePath;
+}
