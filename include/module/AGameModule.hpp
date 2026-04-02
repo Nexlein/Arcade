@@ -107,5 +107,11 @@ namespace arcade {
 
         /// @brief The player's current score
         int _score;
+
+        /// @brief Time tracking for game updates
+        float _timeSinceLastMove;
+
+        /// @brief Interval between game updates (e.g., snake movement speed)
+        float _moveInterval;
     };
 }  // namespace arcade
