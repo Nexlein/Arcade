@@ -144,13 +144,14 @@ void arcade::SnakeGame::updateFruitEntities()
 
 void arcade::SnakeGame::updateFloorEntities()
 {
+    Color floorColor = {246, 236, 215};
     // Update floor entities (Inside the walls)
     for (int y = 1; y < _context.height - 1; y++) {
         for (int x = 1; x < _context.width - 1; x++) {
             Entity floor;
             floor.pos = {static_cast<float>(x), static_cast<float>(y)};
             floor.character = ' ';
-            floor.color = Colors::BLACK;
+            floor.color = floorColor;
             floor.spritePath = getOrientedSprite("floor", Orientation::NONE);
             _entities.push_back(floor);
         }
@@ -159,19 +160,20 @@ void arcade::SnakeGame::updateFloorEntities()
 
 void arcade::SnakeGame::updateWallEntities()
 {
+    Color wallColor = {92, 64, 51};
     // Update wall entities (Top and Bottom)
     for (int x = 0; x < _context.width; x++) {
         Entity wallTop;
         wallTop.pos = {static_cast<float>(x), 0};
         wallTop.character = '#';
-        wallTop.color = Colors::MAGENTA;
+        wallTop.color = wallColor;
         wallTop.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallTop);
 
         Entity wallBottom;
         wallBottom.pos = {static_cast<float>(x), static_cast<float>(_context.height - 1)};
         wallBottom.character = '#';
-        wallBottom.color = Colors::MAGENTA;
+        wallBottom.color = wallColor;
         wallBottom.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallBottom);
     }
@@ -181,14 +183,14 @@ void arcade::SnakeGame::updateWallEntities()
         Entity wallLeft;
         wallLeft.pos = {0, static_cast<float>(y)};
         wallLeft.character = '#';
-        wallLeft.color = Colors::MAGENTA;
+        wallLeft.color = wallColor;
         wallLeft.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallLeft);
 
         Entity wallRight;
         wallRight.pos = {static_cast<float>(_context.width - 1), static_cast<float>(y)};
         wallRight.character = '#';
-        wallRight.color = Colors::MAGENTA;
+        wallRight.color = wallColor;
         wallRight.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallRight);
     }
