@@ -38,6 +38,8 @@ void arcade::NCURSESDisplay::init()
     keypad(stdscr, TRUE);
     // Make getch non-blocking
     nodelay(stdscr, TRUE);
+    // Hide the cursor
+    curs_set(0);
 
     _win = stdscr;
 }
