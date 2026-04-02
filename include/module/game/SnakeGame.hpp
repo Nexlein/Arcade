@@ -41,13 +41,11 @@ namespace arcade {
         void restart() override;
 
         private:
-        enum class Direction { UP, DOWN, LEFT, RIGHT, NONE };
-
         float _timeSinceLastMove;
         float _moveInterval;
 
-        Direction _currentDir;
-        Direction _nextDir;
+        Orientation _currentDir;
+        Orientation _nextDir;
 
         std::deque<Position> _snakeBody;
         std::vector<Position> _fruits;
@@ -57,5 +55,20 @@ namespace arcade {
 
         /// @brief Spawn a fruit at a random position not occupied
         void spawnFruit();
+
+        /// @brief Update the snake body and head entities
+        void updateSnakeEntities();
+
+        /// @brief Update the fruit entities
+        void updateFruitEntities();
+
+        /// @brief Update the wall entities
+        void updateWallEntities();
+
+        /// @brief Update the floor entities
+        void updateFloorEntities();
+
+        /// @brief Set the oriented sprites for snake
+        void setSnakeOrientedSprites();
     };
 }  // namespace arcade
