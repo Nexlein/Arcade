@@ -30,7 +30,6 @@ void arcade::SnakeGame::update(float elapsedTime)
     for (size_t i = 0; i < _snakeBody.size(); ++i) {
         Entity part;
         part.pos = _snakeBody[i];
-        part.size = {1, 1};
 
         if (i == 0) {
             part.character = 'O';
@@ -48,7 +47,6 @@ void arcade::SnakeGame::update(float elapsedTime)
     for (const auto& fruitPos : _fruits) {
         Entity fruit;
         fruit.pos = fruitPos;
-        fruit.size = {1, 1};
         fruit.character = '#';
         fruit.color = Colors::RED;
         fruit.spritePath = "sprite/fruit.png";
@@ -59,7 +57,6 @@ void arcade::SnakeGame::update(float elapsedTime)
     for (int x = 0; x < _context.width; x++) {
         Entity wallTop;
         wallTop.pos = {static_cast<float>(x), 0};
-        wallTop.size = {1, 1};
         wallTop.character = '#';
         wallTop.color = Colors::MAGENTA;
         wallTop.spritePath = "sprite/wall.png";
@@ -67,7 +64,6 @@ void arcade::SnakeGame::update(float elapsedTime)
 
         Entity wallBottom;
         wallBottom.pos = {static_cast<float>(x), static_cast<float>(_context.height - 1)};
-        wallBottom.size = {1, 1};
         wallBottom.character = '#';
         wallBottom.color = Colors::MAGENTA;
         wallBottom.spritePath = "sprite/wall.png";
@@ -78,7 +74,6 @@ void arcade::SnakeGame::update(float elapsedTime)
     for (int y = 0; y < _context.height; y++) {
         Entity wallLeft;
         wallLeft.pos = {0, static_cast<float>(y)};
-        wallLeft.size = {1, 1};
         wallLeft.character = '#';
         wallLeft.color = Colors::MAGENTA;
         wallLeft.spritePath = "sprite/wall.png";
@@ -86,7 +81,6 @@ void arcade::SnakeGame::update(float elapsedTime)
 
         Entity wallRight;
         wallRight.pos = {static_cast<float>(_context.width - 1), static_cast<float>(y)};
-        wallRight.size = {1, 1};
         wallRight.character = '#';
         wallRight.color = Colors::MAGENTA;
         wallRight.spritePath = "sprite/wall.png";

@@ -237,8 +237,11 @@ void arcade::SDL2Display::applyScaling(SDL_Rect& dst)
 
 void arcade::SDL2Display::drawEntity(const Entity& entity)
 {
+    float width = entity.size.x > 0 ? entity.size.x : 1;
+    float height = entity.size.y > 0 ? entity.size.y : 1;
+
     SDL_Rect dst = {static_cast<int>(entity.pos.x), static_cast<int>(entity.pos.y),
-                static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
+                static_cast<int>(width), static_cast<int>(height)};
 
     applyScaling(dst);
     applyAnchor(entity.anchor, dst);
@@ -330,7 +333,9 @@ void arcade::SDL2Display::drawText(const Text& text)
 
 void arcade::SDL2Display::drawRectangle(const Rect& rect, const Color& color)
 {
-    SDL_Rect sdlRect = {rect.x, rect.y, rect.width, rect.height};
+    int width = rect.width > 0 ? rect.width : 1;
+    int height = rect.height > 0 ? rect.height : 1;
+    SDL_Rect sdlRect = {rect.x, rect.y, width, height};
 
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(_renderer, &sdlRect);
