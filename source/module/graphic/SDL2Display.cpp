@@ -18,7 +18,7 @@
 #include <unordered_map>
 
 /// @brief Name of the SDL2 display module
-static const std::string DISPLAY_NAME = "ArcadeMenu";
+static const std::string DISPLAY_NAME = "SDL2";
 
 /// @brief Valid image formats for sprites
 static const std::array<std::string_view, 3> VALID_FORMATS = {".png", ".jpg", ".jpeg"};
@@ -128,11 +128,18 @@ void arcade::SDL2Display::stopSprite()
     _spriteCache.clear();
 }
 
+void arcade::SDL2Display::stopText()
+{
+    for (auto& [key, texture] : _textCache)
+        if (texture) SDL_DestroyTexture(texture);
+    _textCache.clear();
+}
+
 void arcade::SDL2Display::stop()
 {
     stopFont();
     stopSprite();
-
+    stopText();
     if (_renderer) {
         SDL_DestroyRenderer(_renderer);
         _renderer = nullptr;
@@ -230,8 +237,11 @@ void arcade::SDL2Display::applyScaling(SDL_Rect& dst)
 
 void arcade::SDL2Display::drawEntity(const Entity& entity)
 {
+    float width = entity.size.x > 0 ? entity.size.x : 1;
+    float height = entity.size.y > 0 ? entity.size.y : 1;
+
     SDL_Rect dst = {static_cast<int>(entity.pos.x), static_cast<int>(entity.pos.y),
-                static_cast<int>(entity.size.x), static_cast<int>(entity.size.y)};
+                static_cast<int>(width), static_cast<int>(height)};
 
     applyScaling(dst);
     applyAnchor(entity.anchor, dst);
@@ -240,12 +250,8 @@ void arcade::SDL2Display::drawEntity(const Entity& entity)
     if (!entity.spritePath.empty())
         sprite = getSprite(entity.spritePath);
 
-    if (sprite) {
-        SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
-    } else {
-        SDL_SetRenderDrawColor(_renderer, entity.color.r, entity.color.g, entity.color.b, entity.color.a);
-        SDL_RenderFillRect(_renderer, &dst);
-    }
+    if (sprite) SDL_RenderCopy(_renderer, sprite, nullptr, &dst);
+    else drawRectangle({dst.x, dst.y, dst.w, dst.h}, entity.color);
 }
 
 TTF_Font* arcade::SDL2Display::tryOpenFont(const std::string& fontPath, int size)
@@ -293,12 +299,29 @@ TTF_Font* arcade::SDL2Display::getFont(const std::string& path, int size)
 
 void arcade::SDL2Display::drawText(const Text& text)
 {
-    TTF_Font* font = getFont(text.fontPath, text.fontSize);
+    // Create a unique key (content + font path + size + color)
+    std::string key = text.content + "_" + text.fontPath + "_" + std::to_string(text.fontSize) + "_" +
+                      std::to_string(text.color.r) + std::to_string(text.color.g) + std::to_string(text.color.b);
 
-    SDL_Color color = {text.color.r, text.color.g, text.color.b, text.color.a};
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text.content.c_str(), color);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
-    SDL_FreeSurface(surface);
+    SDL_Texture* texture = nullptr;
+    auto it = _textCache.find(key);
+
+    if (it != _textCache.end()) texture = it->second;
+    else {
+        if (_textCache.size() > 100) stopText();
+
+        TTF_Font* font = getFont(text.fontPath, text.fontSize);
+        SDL_Color color = {text.color.r, text.color.g, text.color.b, text.color.a};
+        SDL_Surface* surface = TTF_RenderText_Blended(font, text.content.c_str(), color);
+
+        if (surface) {
+            texture = SDL_CreateTextureFromSurface(_renderer, surface);
+            SDL_FreeSurface(surface);
+            _textCache[key] = texture;
+        }
+    }
+
+    if (!texture) return;
 
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
     applyScaling(dst);
@@ -306,13 +329,13 @@ void arcade::SDL2Display::drawText(const Text& text)
     applyAnchor(text.anchor, dst);
 
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
-    SDL_DestroyTexture(texture);
 }
 
 void arcade::SDL2Display::drawRectangle(const Rect& rect, const Color& color)
 {
-    SDL_Rect sdlRect = {static_cast<int>(rect.x), static_cast<int>(rect.y),
-                        static_cast<int>(rect.width), static_cast<int>(rect.height)};
+    int width = rect.width > 0 ? rect.width : 1;
+    int height = rect.height > 0 ? rect.height : 1;
+    SDL_Rect sdlRect = {rect.x, rect.y, width, height};
 
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(_renderer, &sdlRect);

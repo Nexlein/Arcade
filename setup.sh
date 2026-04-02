@@ -11,6 +11,7 @@ sudo apt-get install -y \
     libfreetype6-dev \
     libwayland-dev wayland-protocols libxkbcommon-dev \
     libx11-dev libxext-dev libgl1-mesa-dev \
-    libasound2-dev libpulse-dev
+    libasound2-dev libpulse-dev \
+    libncurses5-dev libncursesw5-dev
 
 echo "Dependencies installed successfully"

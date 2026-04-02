@@ -16,6 +16,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
+#include <thread>
 
 #include "IMenuModule.hpp"
 
@@ -302,11 +303,20 @@ void arcade::Arcade::setDisplayIdx(const std::string& initGraphicPath)
 int arcade::Arcade::run()
 {
     while (_isRunning && _graphicInstance && _graphicInstance->isOpen()) {
+        auto frameStart = std::chrono::high_resolution_clock::now();
+
         if (!inputsManager()) break;
 
         _gameInstance->update(_graphicInstance->getDeltaTime());
         handleStateTransitions();
         renderFrame();
+
+        auto frameEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> frameDuration = frameEnd - frameStart;
+
+        // Cap at ~60 FPS (1000 / 60 ≈ 16.66 ms)
+        if (frameDuration.count() < 16.66)
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(16.66 - frameDuration.count())));
     }
 
     cleanupResources();
