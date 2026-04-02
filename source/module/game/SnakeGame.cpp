@@ -165,14 +165,14 @@ void arcade::SnakeGame::updateWallEntities()
     for (int x = 0; x < _context.width; x++) {
         Entity wallTop;
         wallTop.pos = {static_cast<float>(x), 0};
-        wallTop.character = '#';
+        wallTop.character = '-';
         wallTop.color = wallColor;
         wallTop.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallTop);
 
         Entity wallBottom;
         wallBottom.pos = {static_cast<float>(x), static_cast<float>(_context.height - 1)};
-        wallBottom.character = '#';
+        wallBottom.character = '-';
         wallBottom.color = wallColor;
         wallBottom.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallBottom);
@@ -182,14 +182,14 @@ void arcade::SnakeGame::updateWallEntities()
     for (int y = 0; y < _context.height; y++) {
         Entity wallLeft;
         wallLeft.pos = {0, static_cast<float>(y)};
-        wallLeft.character = '#';
+        wallLeft.character = '|';
         wallLeft.color = wallColor;
         wallLeft.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallLeft);
 
         Entity wallRight;
         wallRight.pos = {static_cast<float>(_context.width - 1), static_cast<float>(y)};
-        wallRight.character = '#';
+        wallRight.character = '|';
         wallRight.color = wallColor;
         wallRight.spritePath = getOrientedSprite("wall", Orientation::NONE);
         _entities.push_back(wallRight);
