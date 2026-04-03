@@ -169,7 +169,6 @@ bool arcade::Arcade::processMouseEvents()
     while ((mouseEvent = _graphicInstance->getMouseEvent()).button != Key::UNKNOWN)
         _gameInstance->handleInput(mouseEvent);
     return true;
-
 }
 
 bool arcade::Arcade::inputsManager()
@@ -213,7 +212,6 @@ void arcade::Arcade::loadDisplayFromPath(const std::string& selectedGraphic)
     if (selectedGraphic == _displayPaths[_displayIdx]) return;
     try {
         if (_graphicInstance != nullptr) {
-            _graphicInstance->stop();
             delete _graphicInstance;
             _graphicInstance = nullptr;
         }

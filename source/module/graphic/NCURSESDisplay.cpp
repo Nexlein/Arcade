@@ -46,12 +46,15 @@ void arcade::NCURSESDisplay::init()
 
 void arcade::NCURSESDisplay::stop()
 {
-    // Clear color pair cache
-    _colorPairs.clear();
-    _nextColorPairId = 0;
+    if (_win) {
+        // Clear color pair cache
+        _colorPairs.clear();
+        _nextColorPairId = 0;
 
-    // End NCURSES mode
-    endwin();
+        // End NCURSES mode
+        endwin();
+        _win = nullptr;
+    }
 }
 
 void arcade::NCURSESDisplay::clear() { wclear(_win); }

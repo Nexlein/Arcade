@@ -25,7 +25,7 @@ namespace arcade {
         /// @brief Constructor that loads the shared library at the given filepath
         /// @param filepath The path to the shared library to load
         DLLoader(const std::string& filepath)
-            : _handle(dlopen(filepath.c_str(), RTLD_LAZY), [](void* handle) {
+            : _handle(dlopen(filepath.c_str(), RTLD_LAZY | RTLD_NODELETE), [](void* handle) {
                   if (handle) dlclose(handle);
               })
         {
