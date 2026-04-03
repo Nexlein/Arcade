@@ -9,6 +9,7 @@
 
 #include "AGameModule.hpp"
 #include "IDisplayModule.hpp"
+#include <vector>
 
 namespace arcade {
     /// @brief Solarfox game implementation
@@ -32,17 +33,35 @@ namespace arcade {
         void restart() override;
 
         private:
-        void moveSpaceship();
-        void rotateSpaceship(Key key);
+
         enum class Direction { UP, DOWN, LEFT, RIGHT, NONE };
+
+        struct Bullet {
+            Position pos;
+            Direction dir;
+            float distanceTraveled;
+        };
+
+        struct Powerup {
+            Position pos;
+            bool collected;
+        };
+
+        void updatePosition();
+        void handleSpaceshipDirection(Key key);
+        void initPowerups();
+        void detectCollisions();
+
+        Entity _ship;
+        std::string _currentSpritePath;
+        Position _shipPosition;
+        Direction _shipDirection;
+
+        std::vector<Bullet> _bullets;
+        std::vector<Powerup> _powerups;
+        int _level;
 
         float _timeSinceLastMove;
         float _moveInterval;
-
-        Entity _spaceship;
-        std::string _currentSpritePath;
-        Position _spaceshipPos;
-        Direction _nextDir;
-
     };
 }  // namespace arcade
