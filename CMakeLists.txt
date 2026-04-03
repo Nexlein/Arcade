@@ -14,14 +14,21 @@ include(FetchContent)
 set(SDL_SHARED ON CACHE BOOL "Build SDL shared library" FORCE)
 set(SDL_STATIC OFF CACHE BOOL "Build SDL static library" FORCE)
 
-# Fetch SDL2 libraries
-message(STATUS "Fetching SDL2 dependencies...")
-FetchContent_Declare(SDL2 GIT_REPOSITORY https://github.com/libsdl-org/SDL.git GIT_TAG release-2.30.0)
-FetchContent_Declare(SDL2_image GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git GIT_TAG release-2.8.2)
-FetchContent_Declare(SDL2_ttf GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git GIT_TAG release-2.22.0)
+# Try to find SDL2 libraries
+find_package(SDL2 QUIET)
+find_package(SDL2_image QUIET)
+find_package(SDL2_ttf QUIET)
 
-# MakeAvailable can take multiple arguments at once
-FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_ttf)
+# Fetch SDL2 libraries
+if(NOT SDL2_FOUND AND NOT SDL2_image_FOUND AND NOT SDL2_ttf_FOUND)
+    message(STATUS "Fetching SDL2 dependencies from GitHub...")
+    FetchContent_Declare(SDL2 GIT_REPOSITORY https://github.com/libsdl-org/SDL.git GIT_TAG release-2.30.0 GIT_SHALLOW TRUE)
+    FetchContent_Declare(SDL2_image GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git GIT_TAG release-2.8.2 GIT_SHALLOW TRUE)
+    FetchContent_Declare(SDL2_ttf GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git GIT_TAG release-2.22.0 GIT_SHALLOW TRUE)
+
+    # MakeAvailable can take multiple arguments at once
+    FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_ttf)
+endif()
 
 # --- INTERFACE TARGET ---
 add_library(arcadeGlobal INTERFACE)
