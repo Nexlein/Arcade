@@ -9,7 +9,9 @@
 
 #include "AGameModule.hpp"
 #include "IDisplayModule.hpp"
+#include <array>
 #include <vector>
+#include <random>
 
 namespace arcade {
     /// @brief Solarfox game implementation
@@ -47,19 +49,36 @@ namespace arcade {
             bool collected;
         };
 
+        struct Enemy {
+            Position pos;
+            Direction dir;
+            Direction shotDir;
+            float timeSinceLastShot;
+            std::string spritePath;
+            Anchor anchor;
+        };
+
         void updatePosition();
         void handleSpaceshipDirection(Key key);
         void initPowerups();
+        void initEnemies();
         void detectCollisions();
+        void nextLevel();
 
         Entity _ship;
         std::string _currentSpritePath;
         Position _shipPosition;
         Direction _shipDirection;
+        float _shipSpeed;
 
-        std::vector<Bullet> _bullets;
-        std::vector<Powerup> _powerups;
         int _level;
+        std::vector<Bullet> _bullets;
+        float _bulletSpeed;
+        std::vector<Powerup> _powerups;
+        std::array<Enemy, 4> _enemies;
+        std::vector<Bullet> _enemyBullets;
+        float _enemyFireRate;
+        std::mt19937 _rng;
 
         float _timeSinceLastMove;
         float _moveInterval;
