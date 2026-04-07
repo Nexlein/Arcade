@@ -30,6 +30,8 @@ namespace arcade {
         ArcadeMenu();
         ~ArcadeMenu() = default;
 
+        // Setters
+
         /// @brief Sets the paths for the available graphic libraries.
         /// @param paths The vector of graphic library paths.
         void setDisplayPaths(const std::vector<std::string>& paths) override;
@@ -39,6 +41,9 @@ namespace arcade {
         /// @brief Set the index of the currently loaded graphic library.
         /// @param idx index of the display library currently loaded.
         void setDisplayIdx(const int idx) override;
+        /// @brief Sets the player's name entered in the menu.
+        /// @param name The player's name to set.
+        void setPlayerName(const std::string& name) override;
 
         /// @brief Restarts the menu, resetting selections and state.
         /// @note This function resets the menu to its initial state, clearing any user selections.
@@ -54,19 +59,24 @@ namespace arcade {
         /// @brief Updates the menu state.
         /// @param elapsedTime The time elapsed since the last update.
         void update(float elapsedTime) override;
+
+        // Getters
+
         /// @brief Gets the entities to be rendered for the menu.
         /// @return A constant reference to a vector of entities representing the menu visuals.
         const std::vector<Entity>& getEntities() const override;
         /// @brief Gets the UI text elements to be rendered for the menu.
         /// @return A constant reference to a vector of text elements representing the menu UI.
         const std::vector<Text>& getUIText() const override;
-
         /// @brief Gets the currently selected game.
         /// @return A constant reference to the selected game's name.
         const std::string& getSelectedGame() const override;
         /// @brief Gets the currently selected graphic library.
         /// @return A constant reference to the selected graphic library's name.
         const std::string& getSelectedGraphic() const override;
+        /// @brief Gets the player's name entered in the menu.
+        /// @return A constant reference to the player's name.
+        const std::string& getPlayerName() const override;
 
         private:
         void isResized();

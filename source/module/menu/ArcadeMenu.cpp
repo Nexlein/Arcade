@@ -27,7 +27,7 @@ arcade::ArcadeMenu::ArcadeMenu()
       _displayIdx(0),
       _gameIdx(0),
       _needsUpdate(true),
-      _playerName("Press N to enter your name"),
+      _playerName("Guest"),
       _isInPlayerBox(false)
 {
     init();
@@ -244,6 +244,15 @@ void arcade::ArcadeMenu::drawGamesSection(float rightBarX, float ColY, float mid
 
 void arcade::ArcadeMenu::drawPlayerNameBox(float midX)
 {
+    _uiText.push_back(Text(
+        "Press N to enter your name",
+        midX,
+        static_cast<float>(_context.height - 80),
+        Anchor::CENTER,
+        Colors::YELLOW,
+        15
+    ));
+
     Entity playerNameBoxTop;
     playerNameBoxTop.pos = {midX, static_cast<float>(_context.height - 50)};
     playerNameBoxTop.anchor = Anchor::CENTER;
@@ -334,6 +343,10 @@ const std::string& arcade::ArcadeMenu::getSelectedGraphic() const
     return EMPTY;
 }
 
+const std::string& arcade::ArcadeMenu::getPlayerName() const { return _playerName; }
+
+void arcade::ArcadeMenu::setPlayerName(const std::string& name) { _playerName = name; }
+
 void arcade::ArcadeMenu::handlePlayerNameInput(Key key)
 {
     std::map<Key, char> keyNames = {
@@ -348,7 +361,7 @@ void arcade::ArcadeMenu::handlePlayerNameInput(Key key)
         {Key::NUM_8, '8'}, {Key::NUM_9, '9'}
     };
 
-    if (_playerName == "Press N to enter your name")
+    if (_playerName == "Guest")
             _playerName = "";
     if (key == Key::BACKSPACE && !_playerName.empty())
         _playerName.pop_back();
@@ -358,24 +371,9 @@ void arcade::ArcadeMenu::handlePlayerNameInput(Key key)
         _playerName += keyNames[key];
     else if (key == Key::ENTER) {
         _isInPlayerBox = false;
-        if (!_playerName.empty() && _playerName != "Press N to enter your name")
-            createPlayerSave();
-        else _playerName = "Press N to enter your name";
+        if (_playerName.empty()) _playerName = "Guest";
     }
 }
-
-void arcade::ArcadeMenu::createPlayerSave()
-{
-    std::string dirPath = ".saves/";
-    if (!std::filesystem::exists(dirPath))
-        std::filesystem::create_directory(dirPath);
-
-    std::string filePath = dirPath + _playerName;
-    if (!std::filesystem::exists(filePath)) {
-        std::ofstream saveFile(filePath);
-        saveFile.close();
-    }
-} 
 
 extern "C" {
     arcade::IModule* entryPoint() {
