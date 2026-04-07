@@ -13,8 +13,9 @@
 
 #include "IDisplayModule.hpp"
 #include <cstddef>
-#include <filesystem>
+#include <sstream>
 #include <fstream>
+#include <algorithm>
 
 static const std::string GAMENAME = "ArcadeMenu";
 static const std::string EMPTY = "";
@@ -302,6 +303,63 @@ void arcade::ArcadeMenu::drawPlayerNameBox(float midX)
     ));
 }
 
+void arcade::ArcadeMenu::drawScoreBoard(float boardX, float boardY)
+{
+    std::string gameName = "Scores";
+
+    if (!_gamePaths.empty() && _gameIdx >= 0 && _gameIdx < static_cast<int>(_gamePaths.size())) {
+        std::string path = _gamePaths[_gameIdx];
+        size_t startOffset = path.find_last_of('/');
+        startOffset = (startOffset == std::string::npos) ? 0 : startOffset + 1;
+
+        if (path.compare(startOffset, 7, "arcade_") == 0) startOffset += 7;
+
+        size_t endOffset = path.find_last_of('.');
+
+        if (endOffset != std::string::npos && endOffset > startOffset)
+            gameName = path.substr(startOffset, endOffset - startOffset);
+        else gameName = path.substr(startOffset);
+
+        if (!gameName.empty()) gameName[0] = std::toupper(gameName[0]);
+    }
+
+    _uiText.push_back(Text(
+        gameName + " Scores",
+        boardX,
+        boardY,
+        Anchor::MIDDLE_LEFT,
+        Colors::CYAN,
+        20
+    ));
+
+    auto topScores = getTopScores(gameName);
+
+    if (topScores.empty()) {
+        _uiText.push_back(Text(
+            "No scores yet",
+            boardX,
+            boardY + 30,
+            Anchor::MIDDLE_LEFT,
+            Colors::WHITE,
+            20
+        ));
+        return;
+    }
+
+    float currentY = boardY + 30;
+    for (const auto& [player, score] : topScores) {
+        _uiText.push_back(Text(
+            player + ": " + std::to_string(score),
+            boardX,
+            currentY,
+            Anchor::TOP_LEFT,
+            Colors::WHITE,
+            20
+        ));
+        currentY += 30;
+    }
+}
+
 void arcade::ArcadeMenu::update([[maybe_unused]] float elapsedTime)
 {
     isResized();
@@ -325,6 +383,7 @@ void arcade::ArcadeMenu::update([[maybe_unused]] float elapsedTime)
     drawGraphicsSection(choiceX, graphicY);
     drawGamesSection(choiceX, gameY);
     drawPlayerNameBox(midX);
+    drawScoreBoard(midX + 50, midY - 150);
 }
 
 const std::vector<arcade::Entity>& arcade::ArcadeMenu::getEntities() const { return _entities; }
@@ -377,6 +436,41 @@ void arcade::ArcadeMenu::handlePlayerNameInput(Key key)
         _isInPlayerBox = false;
         if (_playerName.empty()) _playerName = "Guest";
     }
+}
+
+std::vector<std::pair<std::string, int>> arcade::ArcadeMenu::getTopScores(const std::string& gameName) const
+{
+    std::vector<std::pair<std::string, int>> scores;
+    std::ifstream file("saves.csv");
+    std::string line;
+
+    if (!file.is_open()) return scores;
+
+    // Skip the header
+    std::getline(file, line);
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string player;
+        std::string scoreStr;
+        std::string game;
+
+        std::getline(ss, player, ',');
+        std::getline(ss, scoreStr, ',');
+        std::getline(ss, game, ',');
+
+        if (!gameName.empty() && game != gameName) continue;
+
+        scores.push_back({player, std::stoi(scoreStr)});
+    }
+
+    std::sort(scores.begin(), scores.end(), [](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+        return a.second > b.second;
+    });
+
+    if (scores.size() > 5) scores.resize(5);
+
+    return scores;
 }
 
 extern "C" {

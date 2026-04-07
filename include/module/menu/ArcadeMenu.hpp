@@ -78,6 +78,11 @@ namespace arcade {
         /// @return A constant reference to the player's name.
         const std::string& getPlayerName() const override;
 
+        /// @brief Gets the top 5 players and their scores from the saves.csv file.
+        /// @param gameName The name of the game to filter by.
+        /// @return A vector of pairs containing the player's name and their score.
+        std::vector<std::pair<std::string, int>> getTopScores(const std::string& gameName = "") const;
+
         private:
 
         /// @brief Initializes the oriented sprites for the menu.
@@ -151,6 +156,11 @@ namespace arcade {
         /// @brief draw the box for entering the player's name in the menu
         /// @param midX The x-coordinate of the middle of the screen, used for centering the name box
         void drawPlayerNameBox(float midX);
+
+        /// @brief draw the scoreboard with the top 5 players and their scores
+        /// @param boardX The x-coordinate of the left edge of the scoreboard
+        /// @param boardY The y-coordinate of the top edge of the scoreboard
+        void drawScoreBoard(float boardX, float boardY);
     };
 }  // namespace arcade
 
