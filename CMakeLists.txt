@@ -133,6 +133,35 @@ set_target_properties(ncurses PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
 )
 
+# --- ALLEGRO5 ---
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ALLEGRO5 REQUIRED allegro-5)
+pkg_check_modules(ALLEGRO5_IMAGE REQUIRED allegro_image-5)
+pkg_check_modules(ALLEGRO5_TTF REQUIRED allegro_ttf-5)
+
+add_library(arcade_allegro5 SHARED
+    source/module/graphic/ALLEGRO5Display.cpp
+    source/module/ADisplayModule.cpp
+)
+
+target_include_directories(arcade_allegro5 PRIVATE
+    ${ALLEGRO5_INCLUDE_DIRS}
+    ${ALLEGRO5_IMAGE_INCLUDE_DIRS}
+    ${ALLEGRO5_TTF_INCLUDE_DIRS}
+)
+
+target_link_libraries(arcade_allegro5 PRIVATE
+    arcadeGlobal
+    ${ALLEGRO5_LIBRARIES}
+    ${ALLEGRO5_IMAGE_LIBRARIES}
+    ${ALLEGRO5_TTF_LIBRARIES}
+)
+
+set_target_properties(arcade_allegro5 PROPERTIES
+    PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
+)
+
 # --- TESTS ---
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
