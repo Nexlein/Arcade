@@ -86,8 +86,7 @@ namespace arcade {
         void moduleSwitcher(Key key);
 
         /// @brief Saves the current session info to a csv file
-        /// @param stateStr The outcome of the game (Win or GameOver)
-        void saveScoreToFile(const std::string& stateStr);
+        void saveScoreToFile();
 
         /// @brief A unique pointer that manages the loading of the display module, ensuring proper
         /// cleanup when the Arcade instance is destroyed

@@ -265,21 +265,21 @@ void arcade::Arcade::handleStateTransitions()
         if (currentState == GameState::GAME_OVER || currentState == GameState::WON) {
             if (_gameState == GameState::RUNNING) {
                 _gameState = currentState;
-                saveScoreToFile(currentState == GameState::WON ? "Win" : "Loose");
+                saveScoreToFile();
             }
         } else if (currentState == GameState::RUNNING)
             _gameState = GameState::RUNNING;
     }
 }
 
-void arcade::Arcade::saveScoreToFile(const std::string& stateStr)
+void arcade::Arcade::saveScoreToFile()
 {
     std::ofstream file("saves.csv", std::ios::app);
 
     if (!file.is_open()) return;
+    if (file.tellp() == 0) file << "Player,Score,Game\n";
     file << _playerName << ","
          << _gameInstance->getScore() << ","
-         << stateStr << ","
          << _gameInstance->getName() << "\n";
     file.close();
 }
