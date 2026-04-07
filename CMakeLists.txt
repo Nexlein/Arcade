@@ -50,6 +50,7 @@ target_include_directories(arcadeGlobal INTERFACE
 # --- PROJECT CORE ---
 file(GLOB CORE_FILES CONFIGURE_DEPENDS "source/core/*.cpp")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_executable(arcade source/main.cpp ${CORE_FILES})
 target_link_libraries(arcade PRIVATE arcadeGlobal ${CMAKE_DL_LIBS}) 
 
