@@ -13,6 +13,8 @@
 
 #include "IDisplayModule.hpp"
 #include <cstddef>
+#include <filesystem>
+#include <fstream>
 
 static const std::string GAMENAME = "ArcadeMenu";
 static const std::string EMPTY = "";
@@ -24,7 +26,9 @@ arcade::ArcadeMenu::ArcadeMenu()
       _hasValidatedSelection(false),
       _displayIdx(0),
       _gameIdx(0),
-      _needsUpdate(true)
+      _needsUpdate(true),
+      _playerName("Press N to enter your name"),
+      _isInPlayerBox(false)
 {
     init();
 }
@@ -59,6 +63,10 @@ void arcade::ArcadeMenu::restart()
 void arcade::ArcadeMenu::handleInput(Key key)
 {
     _needsUpdate = true;
+    if (_isInPlayerBox) {
+        handlePlayerNameInput(key);
+        return;
+    }
     switch (key) {
         case Key::UP:
             upKey();
@@ -74,6 +82,9 @@ void arcade::ArcadeMenu::handleInput(Key key)
             _validatedSection = _currentSection;
             _hasValidatedSelection = true;
             _state = GameState::WON;
+            break;
+        case Key::N:
+            _isInPlayerBox = true;
             break;
         default:
             break;
@@ -124,6 +135,158 @@ void arcade::ArcadeMenu::isResized()
     }
 }
 
+void arcade::ArcadeMenu::drawTitle(float midX)
+{
+    _uiText.push_back(Text(
+        "Start Game",
+        midX,
+        65,
+        Anchor::CENTER,
+        Colors::YELLOW,
+        40
+    ));
+}
+
+void arcade::ArcadeMenu::drawGraphicsSection(float leftBarX, float ColY, float midY)
+{
+    _uiText.push_back(Text(
+        "Graphics",
+        leftBarX + 35,
+        ColY,
+        Anchor::MIDDLE_LEFT,
+        Colors::CYAN,
+        30
+    ));
+
+    Entity graphicLineBar;
+    graphicLineBar.pos = {leftBarX, midY};
+    graphicLineBar.anchor = Anchor::CENTER;
+    graphicLineBar.size = {2.0f, 320.0f};
+    graphicLineBar.character = '|';
+    graphicLineBar.color = Colors::WHITE;
+    graphicLineBar.spritePath = "";
+    _entities.push_back(graphicLineBar);
+
+    int y = 200;
+
+    Entity selector;
+    selector.color = Colors::RED;
+    selector.spritePath = "sprite/menu/arrow3.png";
+    selector.anchor = Anchor::CENTER;
+    selector.size = {65, 65};
+
+    for (size_t i = 0; i < _displayPaths.size(); i++) {
+        Color color = Colors::WHITE;
+        if (i == static_cast<size_t>(_currentDisplayIdx))
+            color = Colors::GREEN;
+        if (_currentSection == CurrentChoice::ONGRAPHIC && i == static_cast<size_t>(_displayIdx) && _isInPlayerBox == false) {
+            color = Colors::RED;
+            selector.pos = {leftBarX + 20, static_cast<float>(y)};
+            _entities.push_back(selector);
+        }
+        _uiText.push_back(Text(
+            _displayPaths[i],
+            leftBarX + 40,
+            y,
+            Anchor::MIDDLE_LEFT,
+            color,
+            10
+        ));
+        y += 40;
+    }
+}
+
+void arcade::ArcadeMenu::drawGamesSection(float rightBarX, float ColY, float midY)
+{
+    _uiText.push_back(Text(
+        "Games",
+        rightBarX + 35,
+        ColY,
+        Anchor::MIDDLE_LEFT,
+        Colors::CYAN,
+        30
+    ));
+
+    Entity gameLineBar;
+    gameLineBar.pos = {rightBarX, midY};
+    gameLineBar.anchor = Anchor::CENTER;
+    gameLineBar.size = {2.0f, 320.0f};
+    gameLineBar.character = '|';
+    gameLineBar.color = Colors::WHITE;
+    gameLineBar.spritePath = "";
+    _entities.push_back(gameLineBar);
+
+    int y = 200;
+    Entity selector;
+    selector.color = Colors::RED;
+    selector.spritePath = "sprite/menu/arrow3.png";
+    selector.anchor = Anchor::CENTER;
+    selector.size = {65, 65};
+
+    for (size_t i = 0; i < _gamePaths.size(); i++) {
+        Color color = Colors::WHITE;
+        if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx) && _isInPlayerBox == false) {
+            color = Colors::RED;
+            selector.pos = {rightBarX + 20, static_cast<float>(y)};
+            _entities.push_back(selector);
+        }
+        _uiText.push_back(Text(
+            _gamePaths[i],
+            rightBarX + 40,
+            y,
+            Anchor::MIDDLE_LEFT,
+            color,
+            10
+        ));
+        y += 40;
+    }
+}
+
+void arcade::ArcadeMenu::drawPlayerNameBox(float midX)
+{
+    Entity playerNameBoxTop;
+    playerNameBoxTop.pos = {midX, static_cast<float>(_context.height - 50)};
+    playerNameBoxTop.anchor = Anchor::CENTER;
+    playerNameBoxTop.size = {320, 1};
+    playerNameBoxTop.character = '-';
+    playerNameBoxTop.spritePath = "sprite/menu/playerNameBox.png";
+    _entities.push_back(playerNameBoxTop);
+
+    Entity playerNameBoxBottom;
+    playerNameBoxBottom.pos = {midX, static_cast<float>(_context.height - 30)};
+    playerNameBoxBottom.anchor = Anchor::CENTER;
+    playerNameBoxBottom.size = {320, 1};
+    playerNameBoxBottom.character = '-';
+    playerNameBoxBottom.spritePath = "sprite/menu/playerNameBox.png";
+    _entities.push_back(playerNameBoxBottom);
+
+    Entity playerNameBoxLeft;
+    playerNameBoxLeft.pos = {midX - 160, static_cast<float>(_context.height - 40)};
+    playerNameBoxLeft.anchor = Anchor::CENTER;
+    playerNameBoxLeft.size = {1, 20};
+    playerNameBoxLeft.character = '|';
+    playerNameBoxLeft.spritePath = "sprite/menu/playerNameBox.png";
+    _entities.push_back(playerNameBoxLeft);
+
+    Entity playerNameBoxRight;
+    playerNameBoxRight.pos = {midX + 160, static_cast<float>(_context.height - 40)};
+    playerNameBoxRight.anchor = Anchor::CENTER;
+    playerNameBoxRight.size = {1, 20};
+    playerNameBoxRight.character = '|';
+    playerNameBoxRight.spritePath = "sprite/menu/playerNameBox.png";
+    _entities.push_back(playerNameBoxRight);
+
+    Color nameColor = _isInPlayerBox ? Colors::YELLOW : Colors::WHITE;
+    _uiText.push_back(Text(
+        _playerName,
+        midX,
+        static_cast<float>(_context.height - 40),
+        Anchor::CENTER,
+        nameColor,
+        12
+    ));
+}
+
 void arcade::ArcadeMenu::update([[maybe_unused]] float elapsedTime)
 {
     isResized();
@@ -139,77 +302,21 @@ void arcade::ArcadeMenu::update([[maybe_unused]] float elapsedTime)
     _uiText.clear();
     _entities.clear();
 
-    /// Title
-    _uiText.push_back(Text("Start Game", midX, 65, Anchor::CENTER, Colors::YELLOW, 40, "font/arcadeStyleFont/arcadeStyleFont.ttf"));
+    float leftColX = (midX / 2.0f);
+    float rightColX = midX + (midX / 2.0f);
+    float leftBarX = leftColX / 2.0f;
+    float rightBarX = rightColX - 150.0f;
+    float ColY = midY - 150.0f;
 
-    /// Graphics section
-    float leftColX = (midX / 2);
-    float rightColX = midX + (midX / 2);
-    float leftBarX = leftColX / 2;
-    float rightBarX = rightColX - 150;
-    float ColY = midY - (150);
-    _uiText.push_back(Text("Graphics", leftBarX + 35, ColY, Anchor::MIDDLE_LEFT, Colors::CYAN, 30));
-
-    /// Draw a vertical line separating the columns in the middle
-    Entity graphicLineBar;
-    graphicLineBar.pos = {leftBarX, midY};
-    graphicLineBar.anchor = Anchor::CENTER;
-    graphicLineBar.size = {2.0f, 320.0f};
-    graphicLineBar.character = '|';
-    graphicLineBar.color = Colors::WHITE;
-    graphicLineBar.spritePath = "";
-    _entities.push_back(graphicLineBar);
-
-    int y = 200;
-
-    Entity selector;
-    selector.color = Colors::RED;
-    selector.spritePath = "sprite/arrow3.png";
-    selector.anchor = Anchor::CENTER;
-    selector.size = {65, 65};
-
-    for (size_t i = 0; i < _displayPaths.size(); i++) {
-        Color color = Colors::WHITE;
-        if (i == static_cast<size_t>(_currentDisplayIdx))
-            color = Colors::GREEN;
-        if (_currentSection == CurrentChoice::ONGRAPHIC && i == static_cast<size_t>(_displayIdx)) {
-            color = Colors::RED;
-            selector.pos = {leftBarX + 20, static_cast<float>(y)};
-            _entities.push_back(selector);
-        }
-        _uiText.push_back(Text(_displayPaths[i], leftBarX + 40, y, Anchor::MIDDLE_LEFT, color, 10));
-        y += 40;
-    }
-
-    /// Games section
-    _uiText.push_back(Text("Games", rightBarX + 35, ColY, Anchor::MIDDLE_LEFT, Colors::CYAN, 30));
-
-    Entity gameLineBar;
-    gameLineBar.pos = {rightBarX, midY};
-    gameLineBar.anchor = Anchor::CENTER;
-    gameLineBar.size = {2.0f, 320.0f};
-    gameLineBar.character = '|';
-    gameLineBar.color = Colors::WHITE;
-    gameLineBar.spritePath = "";
-    _entities.push_back(gameLineBar);
-
-    y = 200;
-    for (size_t i = 0; i < _gamePaths.size(); i++) {
-        Color color = Colors::WHITE;
-        if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx)) {
-            color = Colors::RED;
-            selector.pos = {rightBarX + 20, static_cast<float>(y)};
-            _entities.push_back(selector);
-        }
-        _uiText.push_back(Text(_gamePaths[i], rightBarX + 40, y, Anchor::MIDDLE_LEFT, color, 10));
-        y += 40;
-    }
+    drawTitle(midX);
+    drawGraphicsSection(leftBarX, ColY, midY);
+    drawGamesSection(rightBarX, ColY, midY);
+    drawPlayerNameBox(midX);
 }
 
 const std::vector<arcade::Entity>& arcade::ArcadeMenu::getEntities() const { return _entities; }
 
 const std::vector<arcade::Text>& arcade::ArcadeMenu::getUIText() const { return _uiText; }
-
 
 const std::string& arcade::ArcadeMenu::getSelectedGame() const
 {
@@ -226,6 +333,49 @@ const std::string& arcade::ArcadeMenu::getSelectedGraphic() const
         return _displayPaths[_displayIdx];
     return EMPTY;
 }
+
+void arcade::ArcadeMenu::handlePlayerNameInput(Key key)
+{
+    std::map<Key, char> keyNames = {
+        {Key::A, 'A'}, {Key::B, 'B'}, {Key::C, 'C'}, {Key::D, 'D'}, {Key::E, 'E'},
+        {Key::F, 'F'}, {Key::G, 'G'}, {Key::H, 'H'}, {Key::I, 'I'}, {Key::J, 'J'},
+        {Key::K, 'K'}, {Key::L, 'L'}, {Key::M, 'M'}, {Key::N, 'N'}, {Key::O, 'O'},
+        {Key::P, 'P'}, {Key::Q, 'Q'}, {Key::R, 'R'}, {Key::S, 'S'}, {Key::T, 'T'},
+        {Key::U, 'U'}, {Key::V, 'V'}, {Key::W, 'W'}, {Key::X, 'X'}, {Key::Y, 'Y'},
+        {Key::Z, 'Z'},
+        {Key::NUM_0, '0'}, {Key::NUM_1, '1'}, {Key::NUM_2, '2'}, {Key::NUM_3, '3'},
+        {Key::NUM_4, '4'}, {Key::NUM_5, '5'}, {Key::NUM_6, '6'}, {Key::NUM_7, '7'},
+        {Key::NUM_8, '8'}, {Key::NUM_9, '9'}
+    };
+
+    if (_playerName == "Press N to enter your name")
+            _playerName = "";
+    if (key == Key::BACKSPACE && !_playerName.empty())
+        _playerName.pop_back();
+    else if (key >= Key::A && key <= Key::Z)
+        _playerName += keyNames[key];
+    else if (key >= Key::NUM_0 && key <= Key::NUM_9)
+        _playerName += keyNames[key];
+    else if (key == Key::ENTER) {
+        _isInPlayerBox = false;
+        if (!_playerName.empty() && _playerName != "Press N to enter your name")
+            createPlayerSave();
+        else _playerName = "Press N to enter your name";
+    }
+}
+
+void arcade::ArcadeMenu::createPlayerSave()
+{
+    std::string dirPath = ".saves/";
+    if (!std::filesystem::exists(dirPath))
+        std::filesystem::create_directory(dirPath);
+
+    std::string filePath = dirPath + _playerName;
+    if (!std::filesystem::exists(filePath)) {
+        std::ofstream saveFile(filePath);
+        saveFile.close();
+    }
+} 
 
 extern "C" {
     arcade::IModule* entryPoint() {
