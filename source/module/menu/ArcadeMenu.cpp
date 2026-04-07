@@ -80,6 +80,8 @@ void arcade::ArcadeMenu::handleInput(Key key)
     }
 }
 
+void arcade::ArcadeMenu::handleInput([[maybe_unused]] MouseEvent mouseEvent) {}
+
 void arcade::ArcadeMenu::upKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
@@ -109,8 +111,6 @@ void arcade::ArcadeMenu::switchChoice(const Key& key)
             _currentSection = CurrentChoice::ONGRAPHIC;
     }
 }
-
-void arcade::ArcadeMenu::handleInput([[maybe_unused]] MouseEvent mouseEvent) {}
 
 void arcade::ArcadeMenu::isResized()
 {
