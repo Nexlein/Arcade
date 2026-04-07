@@ -13,6 +13,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
@@ -132,7 +133,7 @@ void arcade::Arcade::moduleSwitcher(arcade::Key key)
         }
         case Key::NEXT_GAME:
         case Key::PREV_GAME:
-            if (_gamePaths.empty() || _gameState != GameState::RUNNING) return;
+            if (_gamePaths.empty() || _gameState == GameState::MENU) return;
             if (key == Key::NEXT_GAME)
                 idx = (_gameIdx + 1) % _gamePaths.size();
             else
@@ -152,11 +153,12 @@ bool arcade::Arcade::processKeys()
         if (key == Key::EXIT) {
             _isRunning = false;
             return false;
-        } else if (key == Key::MENU && _gameState == GameState::RUNNING)
+        } else if (key == Key::MENU && _gameState != GameState::MENU)
             menuManager();
-        else if (key == Key::RESTART && _gameState == GameState::RUNNING)
+        else if (key == Key::RESTART && _gameState != GameState::MENU) {
             _gameInstance->restart();
-        else if (key == Key::PREV_GAME || key == Key::NEXT_GAME || key == Key::PREV_GRAPHICS || key == Key::NEXT_GRAPHICS)
+            _gameState = GameState::RUNNING;
+        } else if (key == Key::PREV_GAME || key == Key::NEXT_GAME || key == Key::PREV_GRAPHICS || key == Key::NEXT_GRAPHICS)
             moduleSwitcher(key);
         else
             _gameInstance->handleInput(key);
@@ -255,8 +257,31 @@ void arcade::Arcade::handleMenuSelection()
 
 void arcade::Arcade::handleStateTransitions()
 {
-    if (_gameState == GameState::MENU && _gameInstance->getState() == GameState::WON)
-        handleMenuSelection();
+    GameState currentState = _gameInstance->getState();
+
+    if (_gameState == GameState::MENU) {
+        if (currentState == GameState::WON) handleMenuSelection();
+    } else {
+        if (currentState == GameState::GAME_OVER || currentState == GameState::WON) {
+            if (_gameState == GameState::RUNNING) {
+                _gameState = currentState;
+                saveScoreToFile(currentState == GameState::WON ? "Win" : "Loose");
+            }
+        } else if (currentState == GameState::RUNNING)
+            _gameState = GameState::RUNNING;
+    }
+}
+
+void arcade::Arcade::saveScoreToFile(const std::string& stateStr)
+{
+    std::ofstream file("saves.csv", std::ios::app);
+
+    if (!file.is_open()) return;
+    file << _playerName << ","
+         << _gameInstance->getScore() << ","
+         << stateStr << ","
+         << _gameInstance->getName() << "\n";
+    file.close();
 }
 
 void arcade::Arcade::renderFrame()
