@@ -30,7 +30,14 @@ arcade::ArcadeMenu::ArcadeMenu()
       _playerName("Guest"),
       _isInPlayerBox(false)
 {
+    setMenuOrientedSprites();
     init();
+}
+
+void arcade::ArcadeMenu::setMenuOrientedSprites()
+{
+    setOrientedSprite("arrow", Orientation::LEFT, "sprite/menu/arrowLeft.png");
+    setOrientedSprite("arrow", Orientation::RIGHT, "sprite/menu/arrowRight.png");
 }
 
 void arcade::ArcadeMenu::setDisplayPaths(const std::vector<std::string>& paths) {
@@ -68,14 +75,14 @@ void arcade::ArcadeMenu::handleInput(Key key)
         return;
     }
     switch (key) {
-        case Key::UP:
-            upKey();
-            break;
-        case Key::DOWN:
-            downKey();
-            break;
         case Key::LEFT:
+            leftKey();
+            break;
         case Key::RIGHT:
+            rightKey();
+            break;
+        case Key::UP:
+        case Key::DOWN:
             switchChoice(key);
             break;
         case Key::ENTER:
@@ -93,33 +100,31 @@ void arcade::ArcadeMenu::handleInput(Key key)
 
 void arcade::ArcadeMenu::handleInput([[maybe_unused]] MouseEvent mouseEvent) {}
 
-void arcade::ArcadeMenu::upKey()
+void arcade::ArcadeMenu::leftKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
         _displayIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
-        if (_displayIdx == _currentDisplayIdx)
-             _displayIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
     } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty())
         _gameIdx = (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
 }
 
-void arcade::ArcadeMenu::downKey()
+void arcade::ArcadeMenu::rightKey()
 {
     if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
         _displayIdx = (_displayIdx + 1) % _displayPaths.size();
-        if (_displayIdx == _currentDisplayIdx)
-             _displayIdx = (_displayIdx + 1) % _displayPaths.size();
     } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty())
         _gameIdx = (_gameIdx + 1) % _gamePaths.size();
 }
 
 void arcade::ArcadeMenu::switchChoice(const Key& key)
 {
-    if (key == Key::LEFT || key == Key::RIGHT) {
-        if (_currentSection == CurrentChoice::ONGRAPHIC)
+    if (key == Key::UP || key == Key::DOWN) {
+        if (_currentSection == CurrentChoice::ONGRAPHIC) {
             _currentSection = CurrentChoice::ONGAME;
-        else
+            _displayIdx = _currentDisplayIdx;
+        } else {
             _currentSection = CurrentChoice::ONGRAPHIC;
+        }
     }
 }
 
@@ -147,99 +152,100 @@ void arcade::ArcadeMenu::drawTitle(float midX)
     ));
 }
 
-void arcade::ArcadeMenu::drawGraphicsSection(float leftBarX, float ColY, float midY)
+void arcade::ArcadeMenu::drawGraphicsSection(float choiceX, float graphicY)
 {
     _uiText.push_back(Text(
         "Graphics",
-        leftBarX + 35,
-        ColY,
+        choiceX + 35,
+        graphicY,
         Anchor::MIDDLE_LEFT,
         Colors::CYAN,
         30
     ));
 
-    Entity graphicLineBar;
-    graphicLineBar.pos = {leftBarX, midY};
-    graphicLineBar.anchor = Anchor::CENTER;
-    graphicLineBar.size = {2.0f, 320.0f};
-    graphicLineBar.character = '|';
-    graphicLineBar.color = Colors::WHITE;
-    graphicLineBar.spritePath = "";
-    _entities.push_back(graphicLineBar);
+    if (_displayPaths.empty()) return;
 
-    int y = 200;
+    int currentGraphicY = graphicY + 50;
 
-    Entity selector;
-    selector.color = Colors::RED;
-    selector.spritePath = "sprite/menu/arrow3.png";
-    selector.anchor = Anchor::CENTER;
-    selector.size = {65, 65};
+    Entity arrowLeft;
+    arrowLeft.color = Colors::RED;
+    arrowLeft.spritePath = getOrientedSprite("arrow", Orientation::LEFT);
+    arrowLeft.anchor = Anchor::CENTER;
+    arrowLeft.character = '<';
+    arrowLeft.size = {65, 65};
 
-    for (size_t i = 0; i < _displayPaths.size(); i++) {
-        Color color = Colors::WHITE;
-        if (i == static_cast<size_t>(_currentDisplayIdx))
-            color = Colors::GREEN;
-        if (_currentSection == CurrentChoice::ONGRAPHIC && i == static_cast<size_t>(_displayIdx) && _isInPlayerBox == false) {
-            color = Colors::RED;
-            selector.pos = {leftBarX + 20, static_cast<float>(y)};
-            _entities.push_back(selector);
-        }
-        _uiText.push_back(Text(
-            _displayPaths[i],
-            leftBarX + 40,
-            y,
-            Anchor::MIDDLE_LEFT,
-            color,
-            10
-        ));
-        y += 40;
+    Entity arrowRight;
+    arrowRight.color = Colors::RED;
+    arrowRight.spritePath = getOrientedSprite("arrow", Orientation::RIGHT);
+    arrowRight.anchor = Anchor::CENTER;
+    arrowRight.character = '>';
+    arrowRight.size = {65, 65};
+
+    Color color = Colors::GREEN;
+    if (_currentSection == CurrentChoice::ONGRAPHIC && !_isInPlayerBox) {
+        color = Colors::RED;
+        arrowLeft.pos = {choiceX + 20, static_cast<float>(currentGraphicY)};
+        arrowRight.pos = {choiceX + 300, static_cast<float>(currentGraphicY)};
+        _entities.push_back(arrowLeft);
+        _entities.push_back(arrowRight);
     }
+
+    _uiText.push_back(Text(
+        _displayPaths[_displayIdx],
+        choiceX + 40,
+        currentGraphicY,
+        Anchor::MIDDLE_LEFT,
+        color,
+        10
+    ));
 }
 
-void arcade::ArcadeMenu::drawGamesSection(float rightBarX, float ColY, float midY)
+void arcade::ArcadeMenu::drawGamesSection(float choiceX, float gameY)
 {
     _uiText.push_back(Text(
         "Games",
-        rightBarX + 35,
-        ColY,
+        choiceX + 35,
+        gameY,
         Anchor::MIDDLE_LEFT,
         Colors::CYAN,
         30
     ));
 
-    Entity gameLineBar;
-    gameLineBar.pos = {rightBarX, midY};
-    gameLineBar.anchor = Anchor::CENTER;
-    gameLineBar.size = {2.0f, 320.0f};
-    gameLineBar.character = '|';
-    gameLineBar.color = Colors::WHITE;
-    gameLineBar.spritePath = "";
-    _entities.push_back(gameLineBar);
+    if (_gamePaths.empty()) return;
 
-    int y = 200;
-    Entity selector;
-    selector.color = Colors::RED;
-    selector.spritePath = "sprite/menu/arrow3.png";
-    selector.anchor = Anchor::CENTER;
-    selector.size = {65, 65};
+    int currentGameY = gameY + 50;
 
-    for (size_t i = 0; i < _gamePaths.size(); i++) {
-        Color color = Colors::WHITE;
-        if (_currentSection == CurrentChoice::ONGAME && i == static_cast<size_t>(_gameIdx) && _isInPlayerBox == false) {
-            color = Colors::RED;
-            selector.pos = {rightBarX + 20, static_cast<float>(y)};
-            _entities.push_back(selector);
-        }
-        _uiText.push_back(Text(
-            _gamePaths[i],
-            rightBarX + 40,
-            y,
-            Anchor::MIDDLE_LEFT,
-            color,
-            10
-        ));
-        y += 40;
+    Entity arrowLeft;
+    arrowLeft.color = Colors::RED;
+    arrowLeft.spritePath = getOrientedSprite("arrow", Orientation::LEFT);
+    arrowLeft.character = '<';
+    arrowLeft.anchor = Anchor::CENTER;
+    arrowLeft.size = {65, 65};
+
+    Entity arrowRight;
+    arrowRight.color = Colors::RED;
+    arrowRight.spritePath = getOrientedSprite("arrow", Orientation::RIGHT);
+    arrowRight.character = '>';
+    arrowRight.anchor = Anchor::CENTER;
+    arrowRight.size = {65, 65};
+
+    Color color = Colors::WHITE;
+    if (_currentSection == CurrentChoice::ONGAME && !_isInPlayerBox) {
+        color = Colors::RED;
+        arrowLeft.pos = {choiceX + 20, static_cast<float>(currentGameY)};
+        arrowRight.pos = {choiceX + 300, static_cast<float>(currentGameY)};
+        _entities.push_back(arrowLeft);
+        _entities.push_back(arrowRight);
     }
+
+    _uiText.push_back(Text(
+        _gamePaths[_gameIdx],
+        choiceX + 40,
+        currentGameY,
+        Anchor::MIDDLE_LEFT,
+        color,
+        10
+    ));
 }
 
 void arcade::ArcadeMenu::drawPlayerNameBox(float midX)
@@ -311,15 +317,13 @@ void arcade::ArcadeMenu::update([[maybe_unused]] float elapsedTime)
     _uiText.clear();
     _entities.clear();
 
-    float leftColX = (midX / 2.0f);
-    float rightColX = midX + (midX / 2.0f);
-    float leftBarX = leftColX / 2.0f;
-    float rightBarX = rightColX - 150.0f;
-    float ColY = midY - 150.0f;
+    float choiceX = (midX / 6.0f);
+    float graphicY = midY - 150.0f;
+    float gameY = midY;
 
     drawTitle(midX);
-    drawGraphicsSection(leftBarX, ColY, midY);
-    drawGamesSection(rightBarX, ColY, midY);
+    drawGraphicsSection(choiceX, graphicY);
+    drawGamesSection(choiceX, gameY);
     drawPlayerNameBox(midX);
 }
 

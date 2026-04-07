@@ -79,15 +79,20 @@ namespace arcade {
         const std::string& getPlayerName() const override;
 
         private:
+
+        /// @brief Initializes the oriented sprites for the menu.
+        void setMenuOrientedSprites();
+
+        /// @brief Checks if the window has been resized and sets a flag to update the menu visuals if needed.
         void isResized();
 
         /// @brief Current menu section being navigated (graphics or games)
         enum class CurrentChoice { ONGRAPHIC, ONGAME };
 
         /// @brief Handles the up key input to navigate upwards in the menu.
-        void upKey();
+        void leftKey();
         /// @brief Handles the down key input to navigate downwards in the menu.
-        void downKey();
+        void rightKey();
 
         /// @brief Handles left/right key input to switch between graphic and game selection
         /// sections.
@@ -134,16 +139,14 @@ namespace arcade {
         void drawTitle(float midX);
 
         /// @brief draw the sections for graphics and game selection in the menu
-        /// @param leftBarX The x-coordinate of the left bar separating the sections
-        /// @param ColY The y-coordinate of the column separating the sections
-        /// @param midY The y-coordinate of the middle of the screen, used for centering the sections
-        void drawGraphicsSection(float leftBarX, float ColY, float midY);
+        /// @param choiceX The x-coordinate of the graphic bar separating the sections
+        /// @param graphicY The y-coordinate of the graphic column separating the sections
+        void drawGraphicsSection(float choiceX, float graphicY);
 
         /// @brief draw the sections for graphics and game selection in the menu
-        /// @param rightBarX The x-coordinate of the right bar separating the sections
-        /// @param ColY The y-coordinate of the column separating the sections
-        /// @param midY The y-coordinate of the middle of the screen, used for centering the sections
-        void drawGamesSection(float rightBarX, float ColY, float midY);
+        /// @param choiceX The x-coordinate of the game bar separating the sections
+        /// @param gameY The y-coordinate of the game column separating the sections
+        void drawGamesSection(float choiceX, float gameY);
 
         /// @brief draw the box for entering the player's name in the menu
         /// @param midX The x-coordinate of the middle of the screen, used for centering the name box
