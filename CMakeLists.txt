@@ -33,7 +33,7 @@ endif()
 # --- INTERFACE TARGET ---
 add_library(arcadeGlobal INTERFACE)
 
-target_compile_options(arcadeGlobal INTERFACE 
+target_compile_options(arcadeGlobal INTERFACE
     -Wall -Wextra -Werror -Wpedantic
 )
 
@@ -52,72 +52,96 @@ file(GLOB CORE_FILES CONFIGURE_DEPENDS "source/core/*.cpp")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_executable(arcade source/main.cpp ${CORE_FILES})
-target_link_libraries(arcade PRIVATE arcadeGlobal ${CMAKE_DL_LIBS}) 
+target_link_libraries(arcade PRIVATE arcadeGlobal ${CMAKE_DL_LIBS})
 
 # --- GAME MODULES ---
-file(GLOB GAME_FILES CONFIGURE_DEPENDS "source/module/game/*.cpp" "source/module/menu/*.cpp")
+# --- MENU ---
+add_library(ArcadeMenu SHARED
+    source/module/menu/ArcadeMenu.cpp
+    source/module/AGameModule.cpp
+)
 
-foreach(file IN LISTS GAME_FILES)
-    cmake_path(GET file STEM name)
-    add_library(${name} SHARED ${file} source/module/AGameModule.cpp)
+target_link_libraries(ArcadeMenu PRIVATE arcadeGlobal)
 
-    # Link each game to the global configurations
-    target_link_libraries(${name} PRIVATE arcadeGlobal)
+set_target_properties(ArcadeMenu PROPERTIES
+    PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
+)
 
-    set_target_properties(${name} PROPERTIES 
-        PREFIX ""
-        LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
-    )
-endforeach()
+# --- SNAKE ---
+add_library(snake SHARED
+    source/module/game/SnakeGame.cpp
+    source/module/AGameModule.cpp
+)
+
+target_link_libraries(snake PRIVATE arcadeGlobal)
+
+set_target_properties(snake PROPERTIES
+    PREFIX "arcade_"
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
+)
+
+# --- SOLARFOX ---
+add_library(solarfox SHARED
+    source/module/game/SolarfoxGame.cpp
+    source/module/AGameModule.cpp
+)
+
+target_link_libraries(solarfox PRIVATE arcadeGlobal)
+
+set_target_properties(solarfox PROPERTIES
+    PREFIX "arcade_"
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
+)
 
 # --- GRAPHIC MODULES ---
 # --- SDL2 ---
-add_library(arcade_sdl2 SHARED 
-    source/module/graphic/SDL2Display.cpp 
+add_library(sdl2 SHARED
+    source/module/graphic/SDL2Display.cpp
     source/module/ADisplayModule.cpp
 )
 
-target_link_libraries(arcade_sdl2 PRIVATE 
-    arcadeGlobal 
-    SDL2::SDL2 
-    SDL2_image::SDL2_image 
+target_link_libraries(sdl2 PRIVATE
+    arcadeGlobal
+    SDL2::SDL2
+    SDL2_image::SDL2_image
     SDL2_ttf::SDL2_ttf
 )
 
-set_target_properties(arcade_sdl2 PROPERTIES 
-    PREFIX ""
+set_target_properties(sdl2 PROPERTIES
+    PREFIX "arcade_"
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
 )
 
 # --- NCURSES ---
 find_package(Curses REQUIRED)
 
-add_library(arcade_ncurses SHARED 
-    source/module/graphic/NCURSESDisplay.cpp 
+add_library(ncurses SHARED
+    source/module/graphic/NCURSESDisplay.cpp
     source/module/ADisplayModule.cpp
 )
 
-target_include_directories(arcade_ncurses PRIVATE ${CURSES_INCLUDE_DIRS})
+target_include_directories(ncurses PRIVATE ${CURSES_INCLUDE_DIRS})
 
-target_link_libraries(arcade_ncurses PRIVATE 
-    arcadeGlobal 
+target_link_libraries(ncurses PRIVATE
+    arcadeGlobal
     ${CURSES_LIBRARIES}
 )
 
-set_target_properties(arcade_ncurses PROPERTIES 
-    PREFIX ""
+set_target_properties(ncurses PROPERTIES
+    PREFIX "arcade_"
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib
 )
 
 # --- TESTS ---
 find_package(PkgConfig QUIET)
-if (PKG_CONFIG_FOUND)
+if(PKG_CONFIG_FOUND)
     pkg_check_modules(CRITERION criterion QUIET)
 endif()
 
-if (CRITERION_FOUND)
+if(CRITERION_FOUND)
     file(GLOB TEST_FILES CONFIGURE_DEPENDS "tests/*.cpp")
-    add_executable(tests_run ${TEST_FILES}) 
+    add_executable(tests_run ${TEST_FILES})
 
     # Link with common flags and Criterion
     target_link_libraries(tests_run PRIVATE arcadeGlobal ${CRITERION_LIBRARIES})
