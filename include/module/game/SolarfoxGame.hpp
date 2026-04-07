@@ -67,6 +67,7 @@ namespace arcade {
 
         Entity _ship;
         std::string _currentSpritePath;
+        char _shipChar;
         Position _shipPosition;
         Direction _shipDirection;
         float _shipSpeed;

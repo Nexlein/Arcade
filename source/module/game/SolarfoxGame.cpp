@@ -30,6 +30,7 @@ arcade::Solarfox::Solarfox()
 /*TODO:
     - ajouter son?
     - pouvoir shot les ennemis
+    - fix ennemis qui se deplace/tirent alors que le jeu n'a pas commencé
     - fix vaisseau qui peut se retouner au debut
 */
 void arcade::Solarfox::update(float elapsedTime)
@@ -52,6 +53,8 @@ void arcade::Solarfox::update(float elapsedTime)
     background.spritePath = "sprite/solarfox/solarfox_bg.png";
     _entities.push_back(background);
 
+    // Update UI texts
+    appendCommonUITexts();
 
     // Bordures de la zone walkable
     // Entity borderTop, borderBottom, borderLeft, borderRight;
@@ -83,7 +86,7 @@ void arcade::Solarfox::update(float elapsedTime)
         enemyEntity.size = {40, 40};
         enemyEntity.anchor = enemy.anchor;
         enemyEntity.character = 'E';
-        enemyEntity.color = Colors::MAGENTA;
+        enemyEntity.color = Colors::RED;
         enemyEntity.spritePath = enemy.spritePath;
         _entities.push_back(enemyEntity);
     }
@@ -105,7 +108,7 @@ void arcade::Solarfox::update(float elapsedTime)
         ebEntity.anchor = Anchor::CENTER;
         ebEntity.size = {20, 20};
         ebEntity.character = 'o';
-        ebEntity.color = Colors::RED;
+        ebEntity.color = Colors::MAGENTA;
         ebEntity.spritePath = "sprite/solarfox/fireball.png";
         _entities.push_back(ebEntity);
     }
@@ -117,7 +120,7 @@ void arcade::Solarfox::update(float elapsedTime)
         powerupEntity.pos = powerup.pos;
         powerupEntity.size = {30, 30};
         powerupEntity.character = 'P';
-        powerupEntity.color = Colors::GREEN;
+        powerupEntity.color = Colors::BLUE;
         powerupEntity.spritePath = "sprite/solarfox/diamond.png";
         _entities.push_back(powerupEntity);
     }
@@ -125,14 +128,11 @@ void arcade::Solarfox::update(float elapsedTime)
     _ship.pos = _shipPosition;
     _ship.anchor = Anchor::CENTER;
     _ship.size = {55, 55};
-    _ship.character = '>';
+    _ship.character = _shipChar;
     _ship.color = Colors::CYAN;
     _ship.backgroundColor = Colors::BLACK;
     _ship.spritePath = _currentSpritePath;
     _entities.push_back(_ship);
-
-    // Update UI texts
-    appendCommonUITexts();
 }
 
 void arcade::Solarfox::updatePosition()
@@ -278,13 +278,14 @@ void arcade::Solarfox::nextLevel()
     _bullets.clear();
     _enemyBullets.clear();
     _currentSpritePath = "sprite/solarfox/ship/spaceship2.png";
+    _shipChar = '>';
     _shipDirection = Direction::NONE;
     _shipPosition = {static_cast<float>(_context.width / 2.0f),
                      static_cast<float>(_context.height / 2.0f)};
     _shipDirection = Direction::NONE;
 
     _shipSpeed     = SPACESHIP_SPEED + (_level - 1) * 0.6f;
-    _bulletSpeed   = BULLET_SPEED    + (_level - 1) * 0.02f;
+    _bulletSpeed   = BULLET_SPEED    + (_level - 1) * 0.01f;
     _enemyFireRate = std::max(0.8f, ENEMY_FIRE_RATE - (_level - 1) * 0.15f);
 
     initPowerups();
@@ -296,15 +297,19 @@ void arcade::Solarfox::handleSpaceshipDirection(Key key)
     if ((key == Key::UP || key == Key::Z) && _shipDirection != Direction::DOWN) {
         _shipDirection = Direction::UP;
         _currentSpritePath = "sprite/solarfox/ship/spaceship1.png";
+        _shipChar = '^';
     } else if ((key == Key::DOWN || key == Key::S) && _shipDirection != Direction::UP) {
         _shipDirection = Direction::DOWN;
         _currentSpritePath = "sprite/solarfox/ship/spaceship3.png";
+        _shipChar = 'v';
     } else if ((key == Key::LEFT || key == Key::Q) && _shipDirection != Direction::RIGHT) {
         _shipDirection = Direction::LEFT;
         _currentSpritePath = "sprite/solarfox/ship/spaceship4.png";
+        _shipChar = '<';
     } else if ((key == Key::RIGHT || key == Key::D) && _shipDirection != Direction::LEFT) {
         _shipDirection = Direction::RIGHT;
         _currentSpritePath = "sprite/solarfox/ship/spaceship2.png";
+        _shipChar = '>';
     }
 }
 
@@ -365,6 +370,7 @@ void arcade::Solarfox::restart()
     _score = 0;
 
     _currentSpritePath = "sprite/solarfox/ship/spaceship2.png";
+    _shipChar = '>';
     _shipPosition = {static_cast<float>(midX), static_cast<float>(midY)};
     _shipDirection = Direction::NONE;
     _bullets.clear();
