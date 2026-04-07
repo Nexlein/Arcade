@@ -63,12 +63,20 @@ void arcade::NCURSESDisplay::display() { wrefresh(_win); }
 
 void arcade::NCURSESDisplay::drawEntity(const Entity& entity)
 {
-    Viewport vp = computeViewport();
-    int x = static_cast<int>(entity.pos.x * vp.scale) + vp.offsetX;
-    int y = static_cast<int>(entity.pos.y * vp.scale) + vp.offsetY;
+    int x, y;
+    if (_context.space == CoordinateSpace::PIXEL) {
+        int winW, winH;
+        getmaxyx(_win, winH, winW);
+        x = static_cast<int>(entity.pos.x * winW / _context.width);
+        y = static_cast<int>(entity.pos.y * winH / _context.height);
+    } else {
+        Viewport vp = computeViewport();
+        x = static_cast<int>(entity.pos.x * vp.scale) + vp.offsetX;
+        y = static_cast<int>(entity.pos.y * vp.scale) + vp.offsetY;
+    }
 
-    int width = entity.size.x > 0 ? static_cast<int>(entity.size.x * vp.scale) : 1;
-    int height = entity.size.y > 0 ? static_cast<int>(entity.size.y * vp.scale) : 1;
+    int width = 1;
+    int height = 1;
     applyAnchor(x, y, width, height, entity.anchor);
 
     // Set color and draw the character
@@ -80,9 +88,17 @@ void arcade::NCURSESDisplay::drawEntity(const Entity& entity)
 
 void arcade::NCURSESDisplay::drawText(const Text& text)
 {
-    Viewport vp = computeViewport();
-    int x = static_cast<int>(text.pos.x * vp.scale) + vp.offsetX;
-    int y = static_cast<int>(text.pos.y * vp.scale) + vp.offsetY;
+    int x, y;
+    if (_context.space == CoordinateSpace::PIXEL) {
+        int winW, winH;
+        getmaxyx(_win, winH, winW);
+        x = static_cast<int>(text.pos.x * winW / _context.width);
+        y = static_cast<int>(text.pos.y * winH / _context.height);
+    } else {
+        Viewport vp = computeViewport();
+        x = static_cast<int>(text.pos.x * vp.scale) + vp.offsetX;
+        y = static_cast<int>(text.pos.y * vp.scale) + vp.offsetY;
+    }
 
     int textWidth = static_cast<int>(text.content.length());
     applyAnchor(x, y, textWidth, 1, text.anchor);
@@ -96,11 +112,21 @@ void arcade::NCURSESDisplay::drawText(const Text& text)
 
 void arcade::NCURSESDisplay::drawRectangle(const Rect& rect, const Color& color)
 {
-    Viewport vp = computeViewport();
-    int x0 = static_cast<int>(rect.x * vp.scale) + vp.offsetX;
-    int y0 = static_cast<int>(rect.y * vp.scale) + vp.offsetY;
-    int x1 = static_cast<int>((rect.x + rect.width) * vp.scale) + vp.offsetX;
-    int y1 = static_cast<int>((rect.y + rect.height) * vp.scale) + vp.offsetY;
+    int x0, y0, x1, y1;
+    if (_context.space == CoordinateSpace::PIXEL) {
+        int winW, winH;
+        getmaxyx(_win, winH, winW);
+        x0 = static_cast<int>(rect.x * winW / _context.width);
+        y0 = static_cast<int>(rect.y * winH / _context.height);
+        x1 = static_cast<int>((rect.x + rect.width) * winW / _context.width);
+        y1 = static_cast<int>((rect.y + rect.height) * winH / _context.height);
+    } else {
+        Viewport vp = computeViewport();
+        x0 = static_cast<int>(rect.x * vp.scale) + vp.offsetX;
+        y0 = static_cast<int>(rect.y * vp.scale) + vp.offsetY;
+        x1 = static_cast<int>((rect.x + rect.width) * vp.scale) + vp.offsetX;
+        y1 = static_cast<int>((rect.y + rect.height) * vp.scale) + vp.offsetY;
+    }
 
     short colorPair = getColorPair(color, color);
     attron(COLOR_PAIR(colorPair));
