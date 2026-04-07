@@ -86,7 +86,6 @@ namespace arcade {
         void setRenderContext(const RenderContext& context) override;
 
         protected:
-
         /// @brief Compute the viewport for rendering based on the current window size and render context
         /// @return The computed viewport containing scale and offsets for rendering
         virtual Viewport computeViewport() const = 0;
