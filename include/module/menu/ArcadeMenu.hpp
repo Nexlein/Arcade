@@ -105,6 +105,39 @@ namespace arcade {
 
         /// @brief Flag to ensure we don't update uselessly unless input or window changes
         bool _needsUpdate;
+
+        /// @brief The player's name entered in the menu.
+        std::string _playerName;
+
+        /// @brief Flag indicating whether the player is currently entering their name in the menu.
+        bool _isInPlayerBox;
+
+        /// @brief Handles input for entering the player's name in the menu.
+        /// @param key The key that was pressed by the user while entering their name.
+        void handlePlayerNameInput(Key key);
+
+        /// @brief Creates a save file for the player
+        void createPlayerSave();
+
+        /// @brief draw the title of the menu at the top of the screen
+        /// @param midX The x-coordinate of the middle of the screen, used for centering the title
+        void drawTitle(float midX);
+
+        /// @brief draw the sections for graphics and game selection in the menu
+        /// @param leftBarX The x-coordinate of the left bar separating the sections
+        /// @param ColY The y-coordinate of the column separating the sections
+        /// @param midY The y-coordinate of the middle of the screen, used for centering the sections
+        void drawGraphicsSection(float leftBarX, float ColY, float midY);
+
+        /// @brief draw the sections for graphics and game selection in the menu
+        /// @param rightBarX The x-coordinate of the right bar separating the sections
+        /// @param ColY The y-coordinate of the column separating the sections
+        /// @param midY The y-coordinate of the middle of the screen, used for centering the sections
+        void drawGamesSection(float rightBarX, float ColY, float midY);
+
+        /// @brief draw the box for entering the player's name in the menu
+        /// @param midX The x-coordinate of the middle of the screen, used for centering the name box
+        void drawPlayerNameBox(float midX);
     };
 }  // namespace arcade
 
