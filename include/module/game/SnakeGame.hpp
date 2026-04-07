@@ -29,14 +29,6 @@ namespace arcade {
         /// @param mouseEvent The mouse event
         void handleInput(MouseEvent mouseEvent) override;
 
-        /// @brief get all entities to be rendered
-        /// @return Const reference to vector of entities to render
-        const std::vector<Entity>& getEntities() const override;
-
-        /// @brief get all UI text elements to be rendered
-        /// @return Const reference to vector of text elements to render
-        const std::vector<Text>& getUIText() const override;
-
         /// @brief Restart the game
         void restart() override;
 
