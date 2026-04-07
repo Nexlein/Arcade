@@ -28,7 +28,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
       _displayIdx(-1),
       _gameIdx(-1),
       _gameState(GameState::MENU),
-      _playerName(""),
+      _playerName("Guest"),
       _isRunning(true)
 {
     if (ac != 2) {
@@ -107,6 +107,7 @@ void arcade::Arcade::menuManager()
         menu->setDisplayPaths(_displayPaths);
         menu->setGamePaths(_gamePaths);
         menu->setDisplayIdx(_displayIdx);
+        menu->setPlayerName(_playerName);
     }
 
     _gameState = GameState::MENU;
@@ -240,6 +241,7 @@ void arcade::Arcade::handleMenuSelection()
     std::string selectedGraphic = menu->getSelectedGraphic();
     std::string selectedGame = menu->getSelectedGame();
 
+    _playerName = menu->getPlayerName();
     if (!selectedGraphic.empty()) {
         loadDisplayFromPath(selectedGraphic);
         menu->setDisplayIdx(_displayIdx);

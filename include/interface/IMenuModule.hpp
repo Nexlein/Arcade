@@ -33,6 +33,13 @@ namespace arcade {
             /// @brief Gets the path of the selected graphic library
             /// @return The path of the selected graphic library
             virtual const std::string& getSelectedGraphic() const = 0;
+
+            /// @brief Sets the player's name entered in the menu.
+            /// @param name The player's name to set.
+            virtual void setPlayerName(const std::string& name) = 0;
+            /// @brief Gets the player's name entered in the menu.
+            /// @return A constant reference to the player's name.
+            virtual const std::string& getPlayerName() const = 0;
     };
 }
 
