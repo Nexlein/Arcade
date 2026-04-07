@@ -27,7 +27,11 @@ arcade::Solarfox::Solarfox()
     : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(800, 600, CoordinateSpace::PIXEL))
 { init(); }
 
-// ajouter des sons.
+/*TODO:
+    - ajouter son?
+    - pouvoir shot les ennemis
+    - fix vaisseau qui peut se retouner au debut
+*/
 void arcade::Solarfox::update(float elapsedTime)
 {
     if (_state == GameState::RUNNING) {
@@ -133,49 +137,39 @@ void arcade::Solarfox::update(float elapsedTime)
 
 void arcade::Solarfox::updatePosition()
 {
+    // Move spaceship
     switch (_shipDirection) {
     case Direction::UP:    _shipPosition.y -= _shipSpeed; break;
     case Direction::DOWN:  _shipPosition.y += _shipSpeed; break;
     case Direction::LEFT:  _shipPosition.x -= _shipSpeed; break;
     case Direction::RIGHT: _shipPosition.x += _shipSpeed; break;
-    case Direction::NONE: return;
+    default: break;
     }
 
+    // Move player bullets
     for (auto& bullet : _bullets) {
         switch (bullet.dir) {
-        case Direction::UP: bullet.pos.y -= BULLET_SPEED;
-            break;
-        case Direction::DOWN: bullet.pos.y += BULLET_SPEED;
-            break;
-        case Direction::LEFT: bullet.pos.x -= BULLET_SPEED;
-            break;
-        case Direction::RIGHT: bullet.pos.x += BULLET_SPEED;
-            break;
+        case Direction::UP:     bullet.pos.y -= BULLET_SPEED; break;
+        case Direction::DOWN:   bullet.pos.y += BULLET_SPEED; break;
+        case Direction::LEFT:   bullet.pos.x -= BULLET_SPEED; break;
+        case Direction::RIGHT:  bullet.pos.x += BULLET_SPEED; break;
         default: break;
         }
         bullet.distanceTraveled += BULLET_SPEED;
     }
 
+    // Move enemies
     for (auto& enemy : _enemies) {
         switch (enemy.dir) {
-            case Direction::UP:
-                enemy.pos.y -= SPACESHIP_SPEED / 2;
-                break;
-            case Direction::DOWN:
-                enemy.pos.y += SPACESHIP_SPEED / 2;
-                break;
-            case Direction::LEFT:
-                enemy.pos.x -= SPACESHIP_SPEED / 2;
-                break;
-            case Direction::RIGHT:
-                enemy.pos.x += SPACESHIP_SPEED / 2;
-                break;
-            default:
-                break;
+        case Direction::UP:     enemy.pos.y -= SPACESHIP_SPEED / 2; break;
+        case Direction::DOWN:   enemy.pos.y += SPACESHIP_SPEED / 2; break;
+        case Direction::LEFT:   enemy.pos.x -= SPACESHIP_SPEED / 2; break;
+        case Direction::RIGHT:  enemy.pos.x += SPACESHIP_SPEED / 2; break;
+        default: break;
         }
     }
 
-    // Mise à jour timers et spawn des tirs ennemis
+    // Enemy shooting
     for (auto& enemy : _enemies) {
         enemy.timeSinceLastShot += _moveInterval;
         if (enemy.timeSinceLastShot >= _enemyFireRate) {
@@ -187,7 +181,7 @@ void arcade::Solarfox::updatePosition()
         }
     }
 
-    // Déplacement des tirs ennemis
+    // Move enemy bullets
     for (auto& eb : _enemyBullets) {
         switch (eb.dir) {
             case Direction::UP:    eb.pos.y -= _bulletSpeed; break;
@@ -198,7 +192,7 @@ void arcade::Solarfox::updatePosition()
         }
     }
 
-    // Suppression si hors bounds
+    // Remove enemy bullets that are out of bounds
     _enemyBullets.erase(
         std::remove_if(_enemyBullets.begin(), _enemyBullets.end(), [](const Bullet& eb) {
             return eb.pos.x < START_X || eb.pos.x > END_X ||
@@ -220,13 +214,12 @@ void arcade::Solarfox::updatePosition()
     if (_enemies[3].pos.y >= END_Y) _enemies[3].dir = Direction::UP;
     else if (_enemies[3].pos.y <= START_Y + 30) _enemies[3].dir = Direction::DOWN;
 
-    // Remove bullets that have traveled beyond their range
+    // Player bullet range checker
     _bullets.erase(
     std::remove_if(_bullets.begin(), _bullets.end(), [](const Bullet& b) {
         return b.distanceTraveled >= 2 * CELL_SIZE;
     }),
-    _bullets.end()
-);
+    _bullets.end());
 
     // Keep spaceship within bounds (200,100) to (400,400)
     if (_shipPosition.x < START_X || _shipPosition.x > END_X ||
@@ -251,7 +244,7 @@ void arcade::Solarfox::detectCollisions()
         }
     }
 
-    // Tir ennemi vs vaisseau
+    // Ship vs enemy bullets
     for (const auto& eb : _enemyBullets) {
         const float SHIP_HALF = 25.0f;
         if (eb.pos.x >= _shipPosition.x - SHIP_HALF && eb.pos.x <= _shipPosition.x + SHIP_HALF &&
@@ -261,7 +254,7 @@ void arcade::Solarfox::detectCollisions()
         }
     }
 
-    // Tir joueur vs tir ennemi
+    // Player bullets vs enemy bullets
     for (auto& bullet : _bullets) {
         _enemyBullets.erase(
             std::remove_if(_enemyBullets.begin(), _enemyBullets.end(), [&](const Bullet& eb) {
@@ -272,7 +265,7 @@ void arcade::Solarfox::detectCollisions()
         );
     }
 
-    // Passage au niveau suivant si tous les powerups sont collectés
+    // Next level checker
     bool allCollected = std::all_of(_powerups.begin(), _powerups.end(),
         [](const Powerup& p) { return p.collected; });
     if (allCollected && !_powerups.empty())
@@ -290,10 +283,9 @@ void arcade::Solarfox::nextLevel()
                      static_cast<float>(_context.height / 2.0f)};
     _shipDirection = Direction::NONE;
 
-    _shipSpeed     = SPACESHIP_SPEED + (_level - 1) * 0.6f;   // +0.4 px/tick par niveau
-    _bulletSpeed   = BULLET_SPEED    + (_level - 1) * 0.3f;
-    _enemyFireRate = std::max(0.8f, ENEMY_FIRE_RATE - (_level - 1) * 0.10f);
-    // _moveInterval reste MOVE_INTERVAL, on ne touche plus à ça
+    _shipSpeed     = SPACESHIP_SPEED + (_level - 1) * 0.6f;
+    _bulletSpeed   = BULLET_SPEED    + (_level - 1) * 0.02f;
+    _enemyFireRate = std::max(0.8f, ENEMY_FIRE_RATE - (_level - 1) * 0.15f);
 
     initPowerups();
     initEnemies();
