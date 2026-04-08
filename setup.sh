@@ -13,7 +13,7 @@ sudo apt-get install -y \
     libx11-dev libxext-dev libgl1-mesa-dev \
     libasound2-dev libpulse-dev \
     libncurses5-dev libncursesw5-dev \
-    liballegro5-dev liballegro-image5-dev liballegro-ttf5-dev liballegro-primitives5-dev
+    liballegro5-dev liballegro-image5-dev liballegro-ttf5-dev
 
 echo "Installing Criterion..."
 
