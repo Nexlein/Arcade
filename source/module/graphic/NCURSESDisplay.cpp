@@ -282,20 +282,7 @@ arcade::ADisplayModule::Viewport arcade::NCURSESDisplay::computeViewport() const
     return {scale, offsetX, offsetY};
 }
 
-void arcade::NCURSESDisplay::applyAnchor(int& x, int& y, int width, int height, Anchor anchor) const
-{
-    switch (anchor) {
-        case Anchor::TOP_LEFT: break;
-        case Anchor::TOP_CENTER: x -= width / 2; break;
-        case Anchor::TOP_RIGHT: x -= width; break;
-        case Anchor::MIDDLE_LEFT: y -= height / 2; break;
-        case Anchor::CENTER: x -= width / 2; y -= height / 2; break;
-        case Anchor::MIDDLE_RIGHT: x -= width; y -= height / 2; break;
-        case Anchor::BOTTOM_LEFT: y -= height; break;
-        case Anchor::BOTTOM_CENTER: x -= width / 2; y -= height; break;
-        case Anchor::BOTTOM_RIGHT: x -= width; y -= height; break;
-    }
-}
+
 
 short arcade::NCURSESDisplay::getClosestNcursesColor(const Color& color) const
 {

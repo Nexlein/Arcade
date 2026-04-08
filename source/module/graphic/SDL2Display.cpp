@@ -13,15 +13,10 @@
 #include "ADisplayModule.hpp"
 
 #include <algorithm>
-#include <array>
-#include <filesystem>
 #include <unordered_map>
 
 /// @brief Name of the SDL2 display module
 static const std::string DISPLAY_NAME = "SDL2";
-
-/// @brief Valid image formats for sprites
-static const std::array<std::string_view, 3> VALID_FORMATS = {".png", ".jpg", ".jpeg"};
 
 /// @brief Mapping of SDL key codes to arcade::Key values
 static const std::unordered_map<SDL_Keycode, arcade::Key> KEY_BINDINGS = {
@@ -78,7 +73,6 @@ static const std::unordered_map<SDL_Keycode, arcade::Key> MOUSE_BINDINGS = {
     {SDL_BUTTON_MIDDLE, arcade::Key::MOUSE_MIDDLE},
 };
 
-// TODO: gestion des size/fullscreen a revoir.
 arcade::SDL2Display::SDL2Display() : ADisplayModule(DISPLAY_NAME), _win(nullptr), _renderer(nullptr)
 {}
 
@@ -173,21 +167,8 @@ void arcade::SDL2Display::pollEvents()
 
             auto it = MOUSE_BINDINGS.find(event.button.button);
             if (it != MOUSE_BINDINGS.end()) _mouseEvent.push(MouseEvent{{x, y}, it->second});
-            else _mouseEvent.push(MouseEvent{Position{}, Key::UNKNOWN});
         }
     }
-}
-
-bool arcade::SDL2Display::isValidFormat(const std::string& path)
-{
-    std::filesystem::path p(path);
-
-    if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
-        std::string ext = p.extension().string();
-        return std::find(VALID_FORMATS.begin(), VALID_FORMATS.end(), std::string_view(ext)) !=
-               VALID_FORMATS.end();
-    }
-    return false;
 }
 
 SDL_Texture* arcade::SDL2Display::getSprite(const std::string& path)
@@ -220,21 +201,6 @@ arcade::ADisplayModule::Viewport arcade::SDL2Display::computeViewport() const
     return {scale, offsetX, offsetY};
 }
 
-void arcade::SDL2Display::applyScaling(SDL_Rect& dst)
-{
-    auto [scale, offsetX, offsetY] = computeViewport();
-
-    float x0 = dst.x * scale;
-    float y0 = dst.y * scale;
-    float x1 = (dst.x + dst.w) * scale;
-    float y1 = (dst.y + dst.h) * scale;
-
-    dst.x = static_cast<int>(std::floor(x0)) + offsetX;
-    dst.y = static_cast<int>(std::floor(y0)) + offsetY;
-    dst.w = static_cast<int>(std::ceil(x1)) - static_cast<int>(std::floor(x0));
-    dst.h = static_cast<int>(std::ceil(y1)) - static_cast<int>(std::floor(y0));
-}
-
 void arcade::SDL2Display::drawEntity(const Entity& entity)
 {
     float width = entity.size.x > 0 ? entity.size.x : 1;
@@ -243,8 +209,8 @@ void arcade::SDL2Display::drawEntity(const Entity& entity)
     SDL_Rect dst = {static_cast<int>(entity.pos.x), static_cast<int>(entity.pos.y),
                 static_cast<int>(width), static_cast<int>(height)};
 
-    applyScaling(dst);
-    applyAnchor(entity.anchor, dst);
+    applyScaling(dst.x, dst.y, dst.w, dst.h);
+    applyAnchor( dst.x, dst.y, dst.w, dst.h, entity.anchor);
 
     SDL_Texture* sprite = nullptr;
     if (!entity.spritePath.empty())
@@ -324,9 +290,9 @@ void arcade::SDL2Display::drawText(const Text& text)
     if (!texture) return;
 
     SDL_Rect dst = {static_cast<int>(text.pos.x), static_cast<int>(text.pos.y), 0, 0};
-    applyScaling(dst);
+    applyScaling(dst.x, dst.y, dst.w, dst.h);
     SDL_QueryTexture(texture, nullptr, nullptr, &dst.w, &dst.h);
-    applyAnchor(text.anchor, dst);
+    applyAnchor( dst.x, dst.y, dst.w, dst.h, text.anchor);
 
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
 }
@@ -339,21 +305,6 @@ void arcade::SDL2Display::drawRectangle(const Rect& rect, const Color& color)
 
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(_renderer, &sdlRect);
-}
-
-void arcade::SDL2Display::applyAnchor(Anchor anchor, SDL_Rect& dst)
-{
-    switch (anchor) {
-    case Anchor::TOP_LEFT: break;
-    case Anchor::TOP_CENTER:    dst.x -= dst.w / 2; break;
-    case Anchor::TOP_RIGHT:     dst.x -= dst.w; break;
-    case Anchor::MIDDLE_LEFT:   dst.y -= dst.h / 2; break;
-    case Anchor::CENTER:        dst.x -= dst.w / 2; dst.y -= dst.h / 2; break;
-    case Anchor::MIDDLE_RIGHT:  dst.x -= dst.w; dst.y -= dst.h / 2; break;
-    case Anchor::BOTTOM_LEFT:   dst.y -= dst.h; break;
-    case Anchor::BOTTOM_CENTER: dst.x -= dst.w / 2; dst.y -= dst.h; break;
-    case Anchor::BOTTOM_RIGHT:  dst.x -= dst.w; dst.y -= dst.h; break;
-    }
 }
 
 void arcade::SDL2Display::display() { SDL_RenderPresent(_renderer); }

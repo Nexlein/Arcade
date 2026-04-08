@@ -82,11 +82,6 @@ namespace arcade {
         /// @return A pointer to the loaded sprite
         SDL_Texture* getSprite(const std::string& path);
 
-        /// @brief Check if the specified file has a valid format
-        /// @param path The path to the file
-        /// @return True if the format is valid, false otherwise
-        bool isValidFormat(const std::string& path);
-
         /// @brief Cleanup all loaded fonts
         void stopFont();
 
@@ -96,8 +91,6 @@ namespace arcade {
         /// @brief Cleanup all loaded text textures
         void stopText();
 
-        void applyAnchor(Anchor anchor, SDL_Rect& dst);
-        void applyScaling(SDL_Rect& dst);
         Viewport computeViewport() const override;
 
         /// @brief The SDL2 window

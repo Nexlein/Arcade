@@ -10,6 +10,12 @@
 /// the Arcade project
 
 #include "ADisplayModule.hpp"
+#include <cmath>
+#include <filesystem>
+#include <array>
+
+/// @brief Valid image formats for sprites
+static const std::array<std::string_view, 3> VALID_FORMATS = {".png", ".jpg", ".jpeg"};
 
 arcade::ADisplayModule::ADisplayModule(std::string name, RenderContext context)
     : _name(name),
@@ -68,3 +74,45 @@ void arcade::ADisplayModule::setWindowSize(int width, int height)
 }
 void arcade::ADisplayModule::setFullscreen(bool fullscreen) { _fullScreen = fullscreen; }
 void arcade::ADisplayModule::setRenderContext(const RenderContext& context) { _context = context; }
+
+bool arcade::ADisplayModule::isValidFormat(const std::string& path)
+{
+    std::filesystem::path p(path);
+
+    if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
+        std::string ext = p.extension().string();
+        return std::find(VALID_FORMATS.begin(), VALID_FORMATS.end(), std::string_view(ext)) !=
+               VALID_FORMATS.end();
+    }
+    return false;
+}
+
+void arcade::ADisplayModule::applyAnchor(int& x, int& y, int width, int height, Anchor anchor) const
+{
+    switch (anchor) {
+        case Anchor::TOP_LEFT:      break;
+        case Anchor::TOP_CENTER:    x -= width / 2; break;
+        case Anchor::TOP_RIGHT:     x -= width; break;
+        case Anchor::MIDDLE_LEFT:   y -= height / 2; break;
+        case Anchor::CENTER:        x -= width / 2; y -= height / 2; break;
+        case Anchor::MIDDLE_RIGHT:  x -= width; y -= height / 2; break;
+        case Anchor::BOTTOM_LEFT:   y -= height; break;
+        case Anchor::BOTTOM_CENTER: x -= width / 2; y -= height; break;
+        case Anchor::BOTTOM_RIGHT:  x -= width; y -= height; break;
+    }
+}
+
+void arcade::ADisplayModule::applyScaling(int& x, int& y, int& width, int& height) const
+{
+    auto [scale, offsetX, offsetY] = computeViewport();
+
+    float x0 = x * scale;
+    float y0 = y * scale;
+    float x1 = (x + width) * scale;
+    float y1 = (y + height) * scale;
+
+    x = static_cast<int>(std::floor(x0)) + offsetX;
+    y = static_cast<int>(std::floor(y0)) + offsetY;
+    width = static_cast<int>(std::ceil(x1)) - static_cast<int>(std::floor(x0));
+    height = static_cast<int>(std::ceil(y1)) - static_cast<int>(std::floor(y0));
+}

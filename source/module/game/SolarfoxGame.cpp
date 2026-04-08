@@ -27,12 +27,6 @@ arcade::Solarfox::Solarfox()
     : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(800, 600, CoordinateSpace::PIXEL))
 {}
 
-/*TODO:
-    - ajouter son?
-    - pouvoir shot les ennemis
-    - fix ennemis qui se deplace/tirent alors que le jeu n'a pas commencé
-    - fix vaisseau qui peut se retouner au debut
-*/
 void arcade::Solarfox::update(float elapsedTime)
 {
     if (_state == GameState::RUNNING) {

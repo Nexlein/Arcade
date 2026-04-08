@@ -86,6 +86,10 @@ namespace arcade {
         void setRenderContext(const RenderContext& context) override;
 
         protected:
+        /// @brief Check if the specified file has a valid format
+        /// @param path The path to the file
+        /// @return True if the format is valid, false otherwise
+        bool isValidFormat(const std::string& path);
 
         /// @brief Compute the viewport for rendering based on the current window size and render context
         /// @return The computed viewport containing scale and offsets for rendering
@@ -93,6 +97,12 @@ namespace arcade {
 
         /// @brief Update the delta time, meant to be called once per frame (e.g. in pollEvents)
         void updateDeltaTime();
+
+        /// @brief Apply the specified anchor to the given coordinates based on the entity's dimensions
+        void applyAnchor(int& x, int& y, int width, int height, Anchor anchor) const;
+
+        /// @brief Apply scaling to the given coordinates and dimensions based on the computed viewport
+        void applyScaling(int& x, int& y, int& width, int& height) const;
 
         /// @brief The name of the display module
         std::string _name;
