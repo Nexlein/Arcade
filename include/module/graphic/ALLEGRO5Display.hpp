@@ -8,10 +8,16 @@
 #pragma once
 
 #include "ADisplayModule.hpp"
+
+#include <map>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/color.h>
+#include <allegro5/drawing.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/keycodes.h>
 
 namespace arcade {
     /// @brief ALLEGRO5 implementation of the IDisplayModule interface
@@ -54,20 +60,41 @@ namespace arcade {
         bool isOpen() const override;
 
         private:
+        /// @brief Get a sprite from the cache or load a new one
+        /// @param path The path to the sprite file
+        /// @return A pointer to the loaded sprite
+        ALLEGRO_BITMAP* getSprite(const std::string& path);
 
+        /// @brief Try to open a font from the specified path
+        /// @param fontPath The path to the font file
+        /// @param size The size of the font
+        /// @return A pointer to the loaded font, or nullptr if failed
+        ALLEGRO_FONT* tryOpenFont(const std::string& fontPath, int size);
 
-        /// @brief Check if the specified file has a valid format
-        /// @param path The path to the file
-        /// @return True if the format is valid, false otherwise
-        bool isValidFormat(const std::string& path);
+        /// @brief Get a fallback font if the specified font cannot be loaded
+        /// @param size The size of the font
+        /// @return A pointer to the fallback font
+        ALLEGRO_FONT* getFallbackFont(int size);
 
-        // void applyAnchor(Anchor anchor, SDL_Rect& dst);
-        // void applyScaling(SDL_Rect& dst);
+        ALLEGRO_FONT* getFont(const std::string& path, int size);
+
         Viewport computeViewport() const override;
+
+        /// @brief Stop and cleanup loaded fonts
+        void stopFont();
+
+        /// @brief Stop and cleanup loaded sprites
+        void stopSprites();
 
         /// @brief The SDL2 window
         ALLEGRO_DISPLAY* _win;
 
-        /// @brief The SDL2 renderer
+        ALLEGRO_EVENT_QUEUE *_queue;
+
+        /// @brief Cache for loaded fonts, keyed by (path, size)
+        std::map<std::pair<std::string, int>, ALLEGRO_FONT*> _fontCache;
+
+        /// @brief Cache for loaded sprites, keyed by file path
+        std::map<std::string, ALLEGRO_BITMAP*> _spriteCache;
     };
 }  // namespace arcade

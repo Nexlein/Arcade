@@ -138,6 +138,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(ALLEGRO5 REQUIRED allegro-5)
 pkg_check_modules(ALLEGRO5_IMAGE REQUIRED allegro_image-5)
 pkg_check_modules(ALLEGRO5_TTF REQUIRED allegro_ttf-5)
+pkg_check_modules(ALLEGRO5_PRIMITIVES REQUIRED allegro_primitives-5)
 
 add_library(arcade_allegro5 SHARED
     source/module/graphic/ALLEGRO5Display.cpp
@@ -155,6 +156,7 @@ target_link_libraries(arcade_allegro5 PRIVATE
     ${ALLEGRO5_LIBRARIES}
     ${ALLEGRO5_IMAGE_LIBRARIES}
     ${ALLEGRO5_TTF_LIBRARIES}
+    ${ALLEGRO5_PRIMITIVES_LIBRARIES}
 )
 
 set_target_properties(arcade_allegro5 PROPERTIES
