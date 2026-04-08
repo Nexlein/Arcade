@@ -250,8 +250,11 @@ void arcade::ALLEGRO5::drawEntity(const Entity& entity)
 
 void arcade::ALLEGRO5::drawRectangle(const Rect& rect, const Color& color)
 {
+    int width = rect.width > 0 ? rect.width : 1;
+    int height = rect.height > 0 ? rect.height : 1;
+
     al_draw_filled_rectangle(rect.x, rect.y,
-        rect.x + rect.width, rect.y + rect.height,
+        rect.x + width, rect.y + height,
         al_map_rgb(color.r, color.g, color.b)
     );
 }
