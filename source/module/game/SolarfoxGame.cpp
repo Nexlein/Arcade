@@ -25,7 +25,28 @@ const int END_Y = 500;
 
 arcade::Solarfox::Solarfox()
     : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(800, 600, CoordinateSpace::PIXEL))
-{}
+{
+    setSolarfoxOrientedSprites();
+}
+
+void arcade::Solarfox::setSolarfoxOrientedSprites()
+{
+    setOrientedSprite("ship", Orientation::UP, "sprite/solarfox/ship/spaceship1.png");
+    setOrientedSprite("ship", Orientation::RIGHT, "sprite/solarfox/ship/spaceship2.png");
+    setOrientedSprite("ship", Orientation::DOWN, "sprite/solarfox/ship/spaceship3.png");
+    setOrientedSprite("ship", Orientation::LEFT, "sprite/solarfox/ship/spaceship4.png");
+    setOrientedSprite("ship", Orientation::NONE, "sprite/solarfox/ship/spaceship2.png");
+
+    setOrientedSprite("enemy1", Orientation::NONE, "sprite/solarfox/enemy/enemy1.png");
+    setOrientedSprite("enemy2", Orientation::NONE, "sprite/solarfox/enemy/enemy2.png");
+    setOrientedSprite("enemy3", Orientation::NONE, "sprite/solarfox/enemy/enemy3.png");
+    setOrientedSprite("enemy4", Orientation::NONE, "sprite/solarfox/enemy/enemy4.png");
+
+    setOrientedSprite("background", Orientation::NONE, "sprite/solarfox/solarfox_bg.png");
+    setOrientedSprite("bullet", Orientation::NONE, "sprite/solarfox/bullet.png");
+    setOrientedSprite("fireball", Orientation::NONE, "sprite/solarfox/fireball.png");
+    setOrientedSprite("powerup", Orientation::NONE, "sprite/solarfox/diamond.png");
+}
 
 void arcade::Solarfox::update(float elapsedTime)
 {
@@ -44,7 +65,7 @@ void arcade::Solarfox::update(float elapsedTime)
     Entity background;
     background.pos = {0, 0};
     background.size = {800, 600};
-    background.spritePath = "sprite/solarfox/solarfox_bg.png";
+    background.spritePath = getOrientedSprite("background", Orientation::NONE);
     _entities.push_back(background);
 
     // Update UI texts
@@ -92,7 +113,7 @@ void arcade::Solarfox::update(float elapsedTime)
         bulletEntity.size = { 25,25};
         bulletEntity.character = '*';
         bulletEntity.color = Colors::YELLOW;
-        bulletEntity.spritePath = "sprite/solarfox/bullet.png";
+        bulletEntity.spritePath = getOrientedSprite("bullet", Orientation::NONE);
         _entities.push_back(bulletEntity);
     }
 
@@ -103,7 +124,7 @@ void arcade::Solarfox::update(float elapsedTime)
         ebEntity.size = {20, 20};
         ebEntity.character = 'o';
         ebEntity.color = Colors::MAGENTA;
-        ebEntity.spritePath = "sprite/solarfox/fireball.png";
+        ebEntity.spritePath = getOrientedSprite("fireball", Orientation::NONE);
         _entities.push_back(ebEntity);
     }
 
@@ -115,7 +136,7 @@ void arcade::Solarfox::update(float elapsedTime)
         powerupEntity.size = {30, 30};
         powerupEntity.character = 'P';
         powerupEntity.color = Colors::BLUE;
-        powerupEntity.spritePath = "sprite/solarfox/diamond.png";
+        powerupEntity.spritePath = getOrientedSprite("powerup", Orientation::NONE);
         _entities.push_back(powerupEntity);
     }
 
@@ -125,7 +146,7 @@ void arcade::Solarfox::update(float elapsedTime)
     _ship.character = _shipChar;
     _ship.color = Colors::CYAN;
     _ship.backgroundColor = Colors::BLACK;
-    _ship.spritePath = _currentSpritePath;
+    _ship.spritePath = getOrientedSprite("ship", _shipDirection);
     _entities.push_back(_ship);
 }
 
@@ -133,20 +154,20 @@ void arcade::Solarfox::updatePosition()
 {
     // Move spaceship
     switch (_shipDirection) {
-    case Direction::UP:    _shipPosition.y -= _shipSpeed; break;
-    case Direction::DOWN:  _shipPosition.y += _shipSpeed; break;
-    case Direction::LEFT:  _shipPosition.x -= _shipSpeed; break;
-    case Direction::RIGHT: _shipPosition.x += _shipSpeed; break;
+    case Orientation::UP:    _shipPosition.y -= _shipSpeed; break;
+    case Orientation::DOWN:  _shipPosition.y += _shipSpeed; break;
+    case Orientation::LEFT:  _shipPosition.x -= _shipSpeed; break;
+    case Orientation::RIGHT: _shipPosition.x += _shipSpeed; break;
     default: break;
     }
 
     // Move player bullets
     for (auto& bullet : _bullets) {
         switch (bullet.dir) {
-        case Direction::UP:     bullet.pos.y -= BULLET_SPEED; break;
-        case Direction::DOWN:   bullet.pos.y += BULLET_SPEED; break;
-        case Direction::LEFT:   bullet.pos.x -= BULLET_SPEED; break;
-        case Direction::RIGHT:  bullet.pos.x += BULLET_SPEED; break;
+        case Orientation::UP:     bullet.pos.y -= BULLET_SPEED; break;
+        case Orientation::DOWN:   bullet.pos.y += BULLET_SPEED; break;
+        case Orientation::LEFT:   bullet.pos.x -= BULLET_SPEED; break;
+        case Orientation::RIGHT:  bullet.pos.x += BULLET_SPEED; break;
         default: break;
         }
         bullet.distanceTraveled += BULLET_SPEED;
@@ -155,10 +176,10 @@ void arcade::Solarfox::updatePosition()
     // Move enemies
     for (auto& enemy : _enemies) {
         switch (enemy.dir) {
-        case Direction::UP:     enemy.pos.y -= SPACESHIP_SPEED / 2; break;
-        case Direction::DOWN:   enemy.pos.y += SPACESHIP_SPEED / 2; break;
-        case Direction::LEFT:   enemy.pos.x -= SPACESHIP_SPEED / 2; break;
-        case Direction::RIGHT:  enemy.pos.x += SPACESHIP_SPEED / 2; break;
+        case Orientation::UP:     enemy.pos.y -= SPACESHIP_SPEED / 2; break;
+        case Orientation::DOWN:   enemy.pos.y += SPACESHIP_SPEED / 2; break;
+        case Orientation::LEFT:   enemy.pos.x -= SPACESHIP_SPEED / 2; break;
+        case Orientation::RIGHT:  enemy.pos.x += SPACESHIP_SPEED / 2; break;
         default: break;
         }
     }
@@ -178,10 +199,10 @@ void arcade::Solarfox::updatePosition()
     // Move enemy bullets
     for (auto& eb : _enemyBullets) {
         switch (eb.dir) {
-            case Direction::UP:    eb.pos.y -= _bulletSpeed; break;
-            case Direction::DOWN:  eb.pos.y += _bulletSpeed; break;
-            case Direction::LEFT:  eb.pos.x -= _bulletSpeed; break;
-            case Direction::RIGHT: eb.pos.x += _bulletSpeed; break;
+            case Orientation::UP:    eb.pos.y -= _bulletSpeed; break;
+            case Orientation::DOWN:  eb.pos.y += _bulletSpeed; break;
+            case Orientation::LEFT:  eb.pos.x -= _bulletSpeed; break;
+            case Orientation::RIGHT: eb.pos.x += _bulletSpeed; break;
             default: break;
         }
     }
@@ -196,17 +217,17 @@ void arcade::Solarfox::updatePosition()
     );
 
 
-    if (_enemies[0].pos.x >= END_X) _enemies[0].dir = Direction::LEFT;
-    else if (_enemies[0].pos.x <= START_X + 30) _enemies[0].dir = Direction::RIGHT;
+    if (_enemies[0].pos.x >= END_X) _enemies[0].dir = Orientation::LEFT;
+    else if (_enemies[0].pos.x <= START_X + 30) _enemies[0].dir = Orientation::RIGHT;
 
-    if (_enemies[1].pos.y >= END_Y) _enemies[1].dir = Direction::UP;
-    else if (_enemies[1].pos.y <= START_Y + 30) _enemies[1].dir = Direction::DOWN;
+    if (_enemies[1].pos.y >= END_Y) _enemies[1].dir = Orientation::UP;
+    else if (_enemies[1].pos.y <= START_Y + 30) _enemies[1].dir = Orientation::DOWN;
 
-    if (_enemies[2].pos.x >= END_X) _enemies[2].dir = Direction::LEFT;
-    else if (_enemies[2].pos.x <= START_X + 30) _enemies[2].dir = Direction::RIGHT;
+    if (_enemies[2].pos.x >= END_X) _enemies[2].dir = Orientation::LEFT;
+    else if (_enemies[2].pos.x <= START_X + 30) _enemies[2].dir = Orientation::RIGHT;
 
-    if (_enemies[3].pos.y >= END_Y) _enemies[3].dir = Direction::UP;
-    else if (_enemies[3].pos.y <= START_Y + 30) _enemies[3].dir = Direction::DOWN;
+    if (_enemies[3].pos.y >= END_Y) _enemies[3].dir = Orientation::UP;
+    else if (_enemies[3].pos.y <= START_Y + 30) _enemies[3].dir = Orientation::DOWN;
 
     // Player bullet range checker
     _bullets.erase(
@@ -271,12 +292,11 @@ void arcade::Solarfox::nextLevel()
     _level++;
     _bullets.clear();
     _enemyBullets.clear();
-    _currentSpritePath = "sprite/solarfox/ship/spaceship2.png";
     _shipChar = '>';
-    _shipDirection = Direction::NONE;
+    _shipDirection = Orientation::NONE;
     _shipPosition = {static_cast<float>(_context.width / 2.0f),
                      static_cast<float>(_context.height / 2.0f)};
-    _shipDirection = Direction::NONE;
+    _shipDirection = Orientation::NONE;
 
     _shipSpeed     = SPACESHIP_SPEED + (_level - 1) * 0.6f;
     _bulletSpeed   = BULLET_SPEED    + (_level - 1) * 0.01f;
@@ -288,21 +308,17 @@ void arcade::Solarfox::nextLevel()
 
 void arcade::Solarfox::handleSpaceshipDirection(Key key)
 {
-    if ((key == Key::UP || key == Key::Z) && _shipDirection != Direction::DOWN) {
-        _shipDirection = Direction::UP;
-        _currentSpritePath = "sprite/solarfox/ship/spaceship1.png";
+    if ((key == Key::UP || key == Key::Z) && _shipDirection != Orientation::DOWN) {
+        _shipDirection = Orientation::UP;
         _shipChar = '^';
-    } else if ((key == Key::DOWN || key == Key::S) && _shipDirection != Direction::UP) {
-        _shipDirection = Direction::DOWN;
-        _currentSpritePath = "sprite/solarfox/ship/spaceship3.png";
+    } else if ((key == Key::DOWN || key == Key::S) && _shipDirection != Orientation::UP) {
+        _shipDirection = Orientation::DOWN;
         _shipChar = 'v';
-    } else if ((key == Key::LEFT || key == Key::Q) && _shipDirection != Direction::RIGHT) {
-        _shipDirection = Direction::LEFT;
-        _currentSpritePath = "sprite/solarfox/ship/spaceship4.png";
+    } else if ((key == Key::LEFT || key == Key::Q) && _shipDirection != Orientation::RIGHT) {
+        _shipDirection = Orientation::LEFT;
         _shipChar = '<';
-    } else if ((key == Key::RIGHT || key == Key::D) && _shipDirection != Direction::LEFT) {
-        _shipDirection = Direction::RIGHT;
-        _currentSpritePath = "sprite/solarfox/ship/spaceship2.png";
+    } else if ((key == Key::RIGHT || key == Key::D) && _shipDirection != Orientation::LEFT) {
+        _shipDirection = Orientation::RIGHT;
         _shipChar = '>';
     }
 }
@@ -348,10 +364,10 @@ void arcade::Solarfox::initPowerups()
 
 void arcade::Solarfox::initEnemies()
 {
-    _enemies[0] = {{START_X + 30, START_Y}, Direction::RIGHT, Direction::DOWN,  0.0f,                    "sprite/solarfox/enemy/enemy1.png", Anchor::BOTTOM_RIGHT};
-    _enemies[1] = {{END_X, START_Y},        Direction::DOWN,  Direction::LEFT,  _enemyFireRate * 0.25f,  "sprite/solarfox/enemy/enemy2.png", Anchor::BOTTOM_LEFT};
-    _enemies[2] = {{END_X / 2.0f, END_Y},   Direction::RIGHT, Direction::UP,   _enemyFireRate * 0.5f,   "sprite/solarfox/enemy/enemy3.png", Anchor::TOP_RIGHT};
-    _enemies[3] = {{START_X, END_Y / 2.0f}, Direction::DOWN,  Direction::RIGHT, _enemyFireRate * 0.75f,  "sprite/solarfox/enemy/enemy4.png", Anchor::BOTTOM_RIGHT};
+    _enemies[0] = {{START_X + 30, START_Y}, Orientation::RIGHT, Orientation::DOWN,  0.0f,                    getOrientedSprite("enemy1", Orientation::NONE), Anchor::BOTTOM_RIGHT};
+    _enemies[1] = {{END_X, START_Y},        Orientation::DOWN,  Orientation::LEFT,  _enemyFireRate * 0.25f,  getOrientedSprite("enemy2", Orientation::NONE), Anchor::BOTTOM_LEFT};
+    _enemies[2] = {{END_X / 2.0f, END_Y},   Orientation::RIGHT, Orientation::UP,   _enemyFireRate * 0.5f,   getOrientedSprite("enemy3", Orientation::NONE), Anchor::TOP_RIGHT};
+    _enemies[3] = {{START_X, END_Y / 2.0f}, Orientation::DOWN,  Orientation::RIGHT, _enemyFireRate * 0.75f,  getOrientedSprite("enemy4", Orientation::NONE), Anchor::BOTTOM_RIGHT};
 
 }
 
@@ -363,10 +379,9 @@ void arcade::Solarfox::restart()
     _state = GameState::RUNNING;
     _score = 0;
 
-    _currentSpritePath = "sprite/solarfox/ship/spaceship2.png";
     _shipChar = '>';
     _shipPosition = {static_cast<float>(midX), static_cast<float>(midY)};
-    _shipDirection = Direction::NONE;
+    _shipDirection = Orientation::NONE;
     _bullets.clear();
     _powerups.clear();
     _enemyBullets.clear();

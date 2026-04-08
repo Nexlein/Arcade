@@ -36,11 +36,9 @@ namespace arcade {
 
         private:
 
-        enum class Direction { UP, DOWN, LEFT, RIGHT, NONE };
-
         struct Bullet {
             Position pos;
-            Direction dir;
+            Orientation dir;
             float distanceTraveled;
         };
 
@@ -51,8 +49,8 @@ namespace arcade {
 
         struct Enemy {
             Position pos;
-            Direction dir;
-            Direction shotDir;
+            Orientation dir;
+            Orientation shotDir;
             float timeSinceLastShot;
             std::string spritePath;
             Anchor anchor;
@@ -64,12 +62,12 @@ namespace arcade {
         void initEnemies();
         void detectCollisions();
         void nextLevel();
+        void setSolarfoxOrientedSprites();
 
         Entity _ship;
-        std::string _currentSpritePath;
         char _shipChar;
         Position _shipPosition;
-        Direction _shipDirection;
+        Orientation _shipDirection;
         float _shipSpeed;
 
         int _level;
