@@ -25,7 +25,7 @@ const int END_Y = 500;
 
 arcade::Solarfox::Solarfox()
     : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(800, 600, CoordinateSpace::PIXEL))
-{ init(); }
+{}
 
 /*TODO:
     - ajouter son?

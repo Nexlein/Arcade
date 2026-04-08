@@ -102,6 +102,7 @@ void arcade::Arcade::menuManager()
 
     _gameLoader = std::make_unique<DLLoader<IGameModule>>(_menuPath);
     _gameInstance = _gameLoader->getInstance();
+    _gameInstance->init();
 
     IMenuModule* menu = dynamic_cast<IMenuModule*>(_gameInstance);
     if (menu) {
@@ -198,6 +199,7 @@ void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
         // Assign new loader
         _gameLoader = std::move(newGameLoader);
         _gameInstance = newGameInstance;
+        _gameInstance->init();
         _gameState = GameState::RUNNING;
 
         // Update the selected game index in the menu

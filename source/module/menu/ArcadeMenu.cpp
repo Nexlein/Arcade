@@ -32,7 +32,6 @@ arcade::ArcadeMenu::ArcadeMenu()
       _isInPlayerBox(false)
 {
     setMenuOrientedSprites();
-    init();
 }
 
 void arcade::ArcadeMenu::setMenuOrientedSprites()
