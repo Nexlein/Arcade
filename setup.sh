@@ -17,7 +17,7 @@ sudo apt-get install -y \
 
 echo "Installing Criterion..."
 
-wget -q https://github.com/Snitcher/criterion/releases/download/v2.4.2/criterion-2.4.2-linux-x86_64.tar.xz
+wget -q https://github.com/Snaipe/Criterion/releases/download/v2.4.2/criterion-2.4.2-linux-x86_64.tar.xz
 tar xf criterion-2.4.2-linux-x86_64.tar.xz
 sudo cp -r criterion-2.4.2/* /usr/local/
 sudo ldconfig
