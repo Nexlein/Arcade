@@ -13,6 +13,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
@@ -28,7 +29,7 @@ arcade::Arcade::Arcade(int ac, char* av[])
       _displayIdx(-1),
       _gameIdx(-1),
       _gameState(GameState::MENU),
-      _playerName(""),
+      _playerName("Guest"),
       _isRunning(true)
 {
     if (ac != 2) {
@@ -101,12 +102,14 @@ void arcade::Arcade::menuManager()
 
     _gameLoader = std::make_unique<DLLoader<IGameModule>>(_menuPath);
     _gameInstance = _gameLoader->getInstance();
+    _gameInstance->init();
 
     IMenuModule* menu = dynamic_cast<IMenuModule*>(_gameInstance);
     if (menu) {
         menu->setDisplayPaths(_displayPaths);
         menu->setGamePaths(_gamePaths);
         menu->setDisplayIdx(_displayIdx);
+        menu->setPlayerName(_playerName);
     }
 
     _gameState = GameState::MENU;
@@ -131,7 +134,7 @@ void arcade::Arcade::moduleSwitcher(arcade::Key key)
         }
         case Key::NEXT_GAME:
         case Key::PREV_GAME:
-            if (_gamePaths.empty() || _gameState != GameState::RUNNING) return;
+            if (_gamePaths.empty() || _gameState == GameState::MENU) return;
             if (key == Key::NEXT_GAME)
                 idx = (_gameIdx + 1) % _gamePaths.size();
             else
@@ -151,11 +154,12 @@ bool arcade::Arcade::processKeys()
         if (key == Key::EXIT) {
             _isRunning = false;
             return false;
-        } else if (key == Key::MENU && _gameState == GameState::RUNNING)
+        } else if (key == Key::MENU && _gameState != GameState::MENU)
             menuManager();
-        else if (key == Key::RESTART && _gameState == GameState::RUNNING)
+        else if (key == Key::RESTART && _gameState != GameState::MENU) {
             _gameInstance->restart();
-        else if (key == Key::PREV_GAME || key == Key::NEXT_GAME || key == Key::PREV_GRAPHICS || key == Key::NEXT_GRAPHICS)
+            _gameState = GameState::RUNNING;
+        } else if (key == Key::PREV_GAME || key == Key::NEXT_GAME || key == Key::PREV_GRAPHICS || key == Key::NEXT_GRAPHICS)
             moduleSwitcher(key);
         else
             _gameInstance->handleInput(key);
@@ -195,6 +199,7 @@ void arcade::Arcade::loadGameFromPath(const std::string& selectedGame)
         // Assign new loader
         _gameLoader = std::move(newGameLoader);
         _gameInstance = newGameInstance;
+        _gameInstance->init();
         _gameState = GameState::RUNNING;
 
         // Update the selected game index in the menu
@@ -240,6 +245,7 @@ void arcade::Arcade::handleMenuSelection()
     std::string selectedGraphic = menu->getSelectedGraphic();
     std::string selectedGame = menu->getSelectedGame();
 
+    _playerName = menu->getPlayerName();
     if (!selectedGraphic.empty()) {
         loadDisplayFromPath(selectedGraphic);
         menu->setDisplayIdx(_displayIdx);
@@ -253,8 +259,31 @@ void arcade::Arcade::handleMenuSelection()
 
 void arcade::Arcade::handleStateTransitions()
 {
-    if (_gameState == GameState::MENU && _gameInstance->getState() == GameState::WON)
-        handleMenuSelection();
+    GameState currentState = _gameInstance->getState();
+
+    if (_gameState == GameState::MENU) {
+        if (currentState == GameState::WON) handleMenuSelection();
+    } else {
+        if (currentState == GameState::GAME_OVER || currentState == GameState::WON) {
+            if (_gameState == GameState::RUNNING) {
+                _gameState = currentState;
+                saveScoreToFile();
+            }
+        } else if (currentState == GameState::RUNNING)
+            _gameState = GameState::RUNNING;
+    }
+}
+
+void arcade::Arcade::saveScoreToFile()
+{
+    std::ofstream file("saves.csv", std::ios::app);
+
+    if (!file.is_open()) return;
+    if (file.tellp() == 0) file << "Player,Score,Game\n";
+    file << _playerName << ","
+         << _gameInstance->getScore() << ","
+         << _gameInstance->getName() << "\n";
+    file.close();
 }
 
 void arcade::Arcade::renderFrame()

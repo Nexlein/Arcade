@@ -14,7 +14,6 @@ const std::string GAMENAME = "Snake";
 arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(26, 22, CoordinateSpace::GRID))
 {
     setSnakeOrientedSprites();
-    init(); 
 }
 
 void arcade::SnakeGame::setSnakeOrientedSprites()

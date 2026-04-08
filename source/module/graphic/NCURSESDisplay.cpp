@@ -40,6 +40,8 @@ void arcade::NCURSESDisplay::init()
     nodelay(stdscr, TRUE);
     // Hide the cursor
     curs_set(0);
+    // Enable mouse events
+    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
 
     _win = stdscr;
 }
@@ -63,12 +65,20 @@ void arcade::NCURSESDisplay::display() { wrefresh(_win); }
 
 void arcade::NCURSESDisplay::drawEntity(const Entity& entity)
 {
-    Viewport vp = computeViewport();
-    int x = static_cast<int>(entity.pos.x * vp.scale) + vp.offsetX;
-    int y = static_cast<int>(entity.pos.y * vp.scale) + vp.offsetY;
+    int x, y;
+    if (_context.space == CoordinateSpace::PIXEL) {
+        int winW, winH;
+        getmaxyx(_win, winH, winW);
+        x = static_cast<int>(entity.pos.x * winW / _context.width);
+        y = static_cast<int>(entity.pos.y * winH / _context.height);
+    } else {
+        Viewport vp = computeViewport();
+        x = static_cast<int>(entity.pos.x * vp.scale) + vp.offsetX;
+        y = static_cast<int>(entity.pos.y * vp.scale) + vp.offsetY;
+    }
 
-    int width = entity.size.x > 0 ? static_cast<int>(entity.size.x * vp.scale) : 1;
-    int height = entity.size.y > 0 ? static_cast<int>(entity.size.y * vp.scale) : 1;
+    int width = 1;
+    int height = 1;
     applyAnchor(x, y, width, height, entity.anchor);
 
     // Set color and draw the character
@@ -80,9 +90,17 @@ void arcade::NCURSESDisplay::drawEntity(const Entity& entity)
 
 void arcade::NCURSESDisplay::drawText(const Text& text)
 {
-    Viewport vp = computeViewport();
-    int x = static_cast<int>(text.pos.x * vp.scale) + vp.offsetX;
-    int y = static_cast<int>(text.pos.y * vp.scale) + vp.offsetY;
+    int x, y;
+    if (_context.space == CoordinateSpace::PIXEL) {
+        int winW, winH;
+        getmaxyx(_win, winH, winW);
+        x = static_cast<int>(text.pos.x * winW / _context.width);
+        y = static_cast<int>(text.pos.y * winH / _context.height);
+    } else {
+        Viewport vp = computeViewport();
+        x = static_cast<int>(text.pos.x * vp.scale) + vp.offsetX;
+        y = static_cast<int>(text.pos.y * vp.scale) + vp.offsetY;
+    }
 
     int textWidth = static_cast<int>(text.content.length());
     applyAnchor(x, y, textWidth, 1, text.anchor);
@@ -96,11 +114,21 @@ void arcade::NCURSESDisplay::drawText(const Text& text)
 
 void arcade::NCURSESDisplay::drawRectangle(const Rect& rect, const Color& color)
 {
-    Viewport vp = computeViewport();
-    int x0 = static_cast<int>(rect.x * vp.scale) + vp.offsetX;
-    int y0 = static_cast<int>(rect.y * vp.scale) + vp.offsetY;
-    int x1 = static_cast<int>((rect.x + rect.width) * vp.scale) + vp.offsetX;
-    int y1 = static_cast<int>((rect.y + rect.height) * vp.scale) + vp.offsetY;
+    int x0, y0, x1, y1;
+    if (_context.space == CoordinateSpace::PIXEL) {
+        int winW, winH;
+        getmaxyx(_win, winH, winW);
+        x0 = static_cast<int>(rect.x * winW / _context.width);
+        y0 = static_cast<int>(rect.y * winH / _context.height);
+        x1 = static_cast<int>((rect.x + rect.width) * winW / _context.width);
+        y1 = static_cast<int>((rect.y + rect.height) * winH / _context.height);
+    } else {
+        Viewport vp = computeViewport();
+        x0 = static_cast<int>(rect.x * vp.scale) + vp.offsetX;
+        y0 = static_cast<int>(rect.y * vp.scale) + vp.offsetY;
+        x1 = static_cast<int>((rect.x + rect.width) * vp.scale) + vp.offsetX;
+        y1 = static_cast<int>((rect.y + rect.height) * vp.scale) + vp.offsetY;
+    }
 
     short colorPair = getColorPair(color, color);
     attron(COLOR_PAIR(colorPair));
@@ -205,8 +233,27 @@ void arcade::NCURSESDisplay::pollEvents()
 
     int ch;
     while ((ch = wgetch(_win)) != ERR) {
-        auto it = KEY_BINDINGS.find(ch);
-        if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
+        if (ch == KEY_MOUSE) {
+            MEVENT event;
+            if (getmouse(&event) == OK) {
+                MouseEvent mouseEvent;
+                mouseEvent.pos.x = static_cast<float>(event.x);
+                mouseEvent.pos.y = static_cast<float>(event.y);
+
+                if (event.bstate & BUTTON1_PRESSED || event.bstate & BUTTON1_CLICKED)
+                    mouseEvent.button = arcade::Key::MOUSE_LEFT;
+                else if (event.bstate & BUTTON2_PRESSED || event.bstate & BUTTON2_CLICKED)
+                    mouseEvent.button = arcade::Key::MOUSE_MIDDLE;
+                else if (event.bstate & BUTTON3_PRESSED || event.bstate & BUTTON3_CLICKED)
+                    mouseEvent.button = arcade::Key::MOUSE_RIGHT;
+                else mouseEvent.button = arcade::Key::UNKNOWN;
+
+                _mouseEvent.push(mouseEvent);
+            }
+        } else {
+            auto it = KEY_BINDINGS.find(ch);
+            if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
+        }
     }
 }
 
