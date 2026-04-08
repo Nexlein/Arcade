@@ -188,13 +188,14 @@ ALLEGRO_FONT* arcade::ALLEGRO5::getFont(const std::string& path, int size)
 
 void arcade::ALLEGRO5::drawText(const Text& text)
 {
-    ALLEGRO_FONT* font = getFont(text.fontPath, text.fontSize);
-    if (!font) return;
-
     int x = text.pos.x;
     int y = text.pos.y;
     int width = 0;
     int height = 0;
+    ALLEGRO_FONT* font = getFont(text.fontPath, text.fontSize);
+
+    if (!font) return;
+
     applyAnchor(x, y, width, height, text.anchor);
     applyScaling(x, y, width, height);
     al_draw_text(
