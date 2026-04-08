@@ -62,9 +62,6 @@ namespace arcade {
         /// @return The computed viewport containing scale and offsets for rendering
         Viewport computeViewport() const override;
 
-        /// @brief Apply the specified anchor to the given coordinates based on the entity's dimensions
-        void applyAnchor(int& x, int& y, int width, int height, Anchor anchor) const;
-
         /// @brief Convert a generic arcade::Color into the closest NCURSES color index
         short getClosestNcursesColor(const Color& color) const;
 
