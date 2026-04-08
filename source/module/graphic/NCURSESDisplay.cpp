@@ -40,6 +40,8 @@ void arcade::NCURSESDisplay::init()
     nodelay(stdscr, TRUE);
     // Hide the cursor
     curs_set(0);
+    // Enable mouse events
+    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
 
     _win = stdscr;
 }
@@ -231,8 +233,27 @@ void arcade::NCURSESDisplay::pollEvents()
 
     int ch;
     while ((ch = wgetch(_win)) != ERR) {
-        auto it = KEY_BINDINGS.find(ch);
-        if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
+        if (ch == KEY_MOUSE) {
+            MEVENT event;
+            if (getmouse(&event) == OK) {
+                MouseEvent mouseEvent;
+                mouseEvent.pos.x = static_cast<float>(event.x);
+                mouseEvent.pos.y = static_cast<float>(event.y);
+
+                if (event.bstate & BUTTON1_PRESSED || event.bstate & BUTTON1_CLICKED)
+                    mouseEvent.button = arcade::Key::MOUSE_LEFT;
+                else if (event.bstate & BUTTON2_PRESSED || event.bstate & BUTTON2_CLICKED)
+                    mouseEvent.button = arcade::Key::MOUSE_MIDDLE;
+                else if (event.bstate & BUTTON3_PRESSED || event.bstate & BUTTON3_CLICKED)
+                    mouseEvent.button = arcade::Key::MOUSE_RIGHT;
+                else mouseEvent.button = arcade::Key::UNKNOWN;
+
+                _mouseEvent.push(mouseEvent);
+            }
+        } else {
+            auto it = KEY_BINDINGS.find(ch);
+            if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
+        }
     }
 }
 
