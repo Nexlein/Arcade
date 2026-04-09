@@ -104,6 +104,9 @@ namespace arcade {
         /// @param key The key that was pressed (LEFT or RIGHT)
         void switchChoice(const Key& key);
 
+        /// @brief Validates the current selection and updates the menu state accordingly.
+        void validateSelection();
+
         /// @brief A vector of file paths for available display modules.
         std::vector<std::string> _displayPaths;
         /// @brief A vector of file paths for available game modules.
