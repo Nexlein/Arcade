@@ -5,6 +5,9 @@
 ** SnakeGame
 */
 
+/// @file SnakeGame.hpp
+/// @brief Implementation of the Snake game logic
+
 #pragma once
 
 #include <deque>
@@ -15,6 +18,7 @@ namespace arcade {
     /// @brief Snake game implementation
     class SnakeGame : public AGameModule {
         public:
+        /// @brief Constructor for the SnakeGame class
         SnakeGame();
 
         /// @brief Update the game state
@@ -33,13 +37,19 @@ namespace arcade {
         void restart() override;
 
         private:
+        /// @brief Time since the last snake movement, used to control movement speed
         float _timeSinceLastMove;
+        /// @brief Interval between snake movements (in seconds)
         float _moveInterval;
 
+        /// @brief Current direction of the snake's movement
         Orientation _currentDir;
+        /// @brief Next direction to turn the snake, set by input and applied on the next move
         Orientation _nextDir;
 
+        /// @brief Deque representing the snake's body segments, with the head at the front
         std::deque<Position> _snakeBody;
+        /// @brief Vector of fruit positions currently on the board
         std::vector<Position> _fruits;
 
         /// @brief Move the snake in the current direction, handle collisions and fruit consumption

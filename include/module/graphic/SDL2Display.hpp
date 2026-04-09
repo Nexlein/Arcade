@@ -22,7 +22,9 @@ namespace arcade {
     /// @brief SDL2 implementation of the IDisplayModule interface
     class SDL2Display : public ADisplayModule {
         public:
+        /// @brief Constructor for the SDL2 display module
         SDL2Display();
+        /// @brief Destructor for the SDL2 display module
         ~SDL2Display();
 
         /// @brief Initialize the SDL2 display module
@@ -91,6 +93,8 @@ namespace arcade {
         /// @brief Cleanup all loaded text textures
         void stopText();
 
+        /// @brief Compute the viewport for the display
+        /// @return The computed viewport containing scale and offsets for rendering
         Viewport computeViewport() const override;
 
         /// @brief The SDL2 window

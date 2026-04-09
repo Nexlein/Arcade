@@ -5,6 +5,9 @@
 ** DLLoader
 */
 
+/// @file DLLoader.hpp
+/// @brief A class for loading and managing shared libraries
+
 #include <dlfcn.h>
 
 #include <iostream>
@@ -50,12 +53,18 @@ namespace arcade {
             return createModule();
         }
 
+        /// @brief Exception class for DLLoader errors
         class DLLoaderException : public std::exception {
             public:
+            /// @brief Constructor that takes an error message
+            /// @param message The error message describing the exception
             DLLoaderException(const std::string& message) : _message(message) {}
+            /// @brief Override of the what() function to return the error message
+            /// @return The error message as a C-style string
             const char* what() const noexcept override { return _message.c_str(); }
 
             private:
+            /// @brief The error message describing the exception
             std::string _message;
         };
 
