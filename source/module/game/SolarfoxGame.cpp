@@ -193,7 +193,9 @@ void arcade::Solarfox::updatePosition()
                 eb.pos = enemy.pos;
                 eb.dir = enemy.shotDir;
                 _enemyBullets.push_back(eb);
-                enemy.timeSinceLastShot = 0.0f;
+
+                std::uniform_real_distribution<float> distFireOffset(0.0f, _enemyFireRate / 2.0f);
+                enemy.timeSinceLastShot = distFireOffset(_rng);
             }
         }
     }
@@ -310,6 +312,8 @@ void arcade::Solarfox::nextLevel()
 
 void arcade::Solarfox::handleSpaceshipDirection(Key key)
 {
+    if (_state != GameState::RUNNING) return;
+
     if ((key == Key::UP || key == Key::Z) && _shipDirection != Orientation::DOWN) {
         _shipDirection = Orientation::UP;
         _shipChar = '^';
@@ -367,11 +371,14 @@ void arcade::Solarfox::initPowerups()
 
 void arcade::Solarfox::initEnemies()
 {
-    _enemies[0] = {{START_X + 30, START_Y}, Orientation::RIGHT, Orientation::DOWN,  0.0f,                    getOrientedSprite("enemy", Orientation::DOWN), Anchor::BOTTOM_RIGHT};
-    _enemies[1] = {{END_X, START_Y},        Orientation::DOWN,  Orientation::LEFT,  _enemyFireRate * 0.25f,  getOrientedSprite("enemy", Orientation::LEFT), Anchor::BOTTOM_LEFT};
-    _enemies[2] = {{END_X / 2.0f, END_Y},   Orientation::RIGHT, Orientation::UP,    _enemyFireRate * 0.5f,   getOrientedSprite("enemy", Orientation::UP), Anchor::TOP_RIGHT};
-    _enemies[3] = {{START_X, END_Y / 2.0f}, Orientation::DOWN,  Orientation::RIGHT, _enemyFireRate * 0.75f,  getOrientedSprite("enemy", Orientation::RIGHT), Anchor::BOTTOM_RIGHT};
+    std::uniform_real_distribution<float> distX(START_X + 30.0f, END_X - 30.0f);
+    std::uniform_real_distribution<float> distY(START_Y + 30.0f, END_Y - 30.0f);
+    std::uniform_real_distribution<float> distFire(0.0f, _enemyFireRate);
 
+    _enemies[0] = {{distX(_rng), START_Y}, Orientation::RIGHT, Orientation::DOWN,  distFire(_rng), getOrientedSprite("enemy", Orientation::DOWN), Anchor::BOTTOM_RIGHT};
+    _enemies[1] = {{END_X, distY(_rng)},   Orientation::DOWN,  Orientation::LEFT,  distFire(_rng), getOrientedSprite("enemy", Orientation::LEFT), Anchor::BOTTOM_LEFT};
+    _enemies[2] = {{distX(_rng), END_Y},   Orientation::RIGHT, Orientation::UP,    distFire(_rng), getOrientedSprite("enemy", Orientation::UP), Anchor::TOP_RIGHT};
+    _enemies[3] = {{START_X, distY(_rng)}, Orientation::DOWN,  Orientation::RIGHT, distFire(_rng), getOrientedSprite("enemy", Orientation::RIGHT), Anchor::BOTTOM_RIGHT};
 }
 
 void arcade::Solarfox::restart()
