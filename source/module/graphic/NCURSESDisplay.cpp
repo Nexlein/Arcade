@@ -10,11 +10,104 @@
 
 #include "NCURSESDisplay.hpp"
 
-#include <stdexcept>
 #include <unordered_map>
 
 /// @brief Name of the NCURSES display module
 static const std::string DISPLAY_NAME = "NCURSES";
+
+/// @brief Mapping of NCURSES key codes to arcade::Key values
+static const std::unordered_map<int, arcade::Key> KEY_BINDINGS = {
+    {'a', arcade::Key::A},
+    {'A', arcade::Key::A},
+    {'b', arcade::Key::B},
+    {'B', arcade::Key::B},
+    {'c', arcade::Key::C},
+    {'C', arcade::Key::C},
+    {'d', arcade::Key::D},
+    {'D', arcade::Key::D},
+    {'e', arcade::Key::E},
+    {'E', arcade::Key::E},
+    {'f', arcade::Key::F},
+    {'F', arcade::Key::F},
+    {'g', arcade::Key::G},
+    {'G', arcade::Key::G},
+    {'h', arcade::Key::H},
+    {'H', arcade::Key::H},
+    {'i', arcade::Key::I},
+    {'I', arcade::Key::I},
+    {'j', arcade::Key::J},
+    {'J', arcade::Key::J},
+    {'k', arcade::Key::K},
+    {'K', arcade::Key::K},
+    {'l', arcade::Key::L},
+    {'L', arcade::Key::L},
+    {'m', arcade::Key::MENU},
+    {'M', arcade::Key::MENU},
+    {'n', arcade::Key::N},
+    {'N', arcade::Key::N},
+    {'o', arcade::Key::O},
+    {'O', arcade::Key::O},
+    {'p', arcade::Key::P},
+    {'P', arcade::Key::P},
+    {'q', arcade::Key::Q},
+    {'Q', arcade::Key::Q},
+    {'r', arcade::Key::RESTART},
+    {'R', arcade::Key::RESTART},
+    {'s', arcade::Key::S},
+    {'S', arcade::Key::S},
+    {'t', arcade::Key::T},
+    {'T', arcade::Key::T},
+    {'u', arcade::Key::U},
+    {'U', arcade::Key::U},
+    {'v', arcade::Key::V},
+    {'V', arcade::Key::V},
+    {'w', arcade::Key::W},
+    {'W', arcade::Key::W},
+    {'x', arcade::Key::X},
+    {'X', arcade::Key::X},
+    {'y', arcade::Key::Y},
+    {'Y', arcade::Key::Y},
+    {'z', arcade::Key::Z},
+    {'Z', arcade::Key::Z},
+    {'0', arcade::Key::NUM_0},
+    {(int)(-15456), arcade::Key::NUM_0},
+    {'1', arcade::Key::PREV_GAME},
+    {'&', arcade::Key::PREV_GAME},
+    {'2', arcade::Key::NEXT_GAME},
+    {(int)(-15447), arcade::Key::NEXT_GAME},
+    {'3', arcade::Key::PREV_GRAPHICS},
+    {'"', arcade::Key::PREV_GRAPHICS},
+    {'4', arcade::Key::NEXT_GRAPHICS},
+    {'\'', arcade::Key::NEXT_GRAPHICS},
+    {'5', arcade::Key::NUM_5},
+    {'(', arcade::Key::NUM_5},
+    {'6', arcade::Key::NUM_6},
+    {'-', arcade::Key::NUM_6},
+    {'7', arcade::Key::NUM_7},
+    {(int)(-15448), arcade::Key::NUM_7},
+    {'8', arcade::Key::NUM_8},
+    {'_', arcade::Key::NUM_8},
+    {'9', arcade::Key::NUM_9},
+    {(int)(-15449), arcade::Key::NUM_9},
+    {' ', arcade::Key::SPACE},
+    {KEY_ENTER, arcade::Key::ENTER},
+    {10, arcade::Key::ENTER},
+    {'\n', arcade::Key::ENTER},
+    {13, arcade::Key::ENTER},
+    {27, arcade::Key::EXIT},
+    {KEY_BACKSPACE, arcade::Key::BACKSPACE},
+    {KEY_UP, arcade::Key::UP},
+    {KEY_DOWN, arcade::Key::DOWN},
+    {KEY_LEFT, arcade::Key::LEFT},
+    {KEY_RIGHT, arcade::Key::RIGHT}
+};
+
+/// @brief Mapping of NCURSES mouse button codes to arcade::Key values
+static const std::unordered_map<mmask_t, arcade::Key> MOUSE_BINDINGS = {
+    {BUTTON1_PRESSED, arcade::Key::MOUSE_LEFT},
+    {BUTTON3_PRESSED, arcade::Key::MOUSE_RIGHT},
+    {BUTTON2_PRESSED, arcade::Key::MOUSE_MIDDLE},
+};
 
 arcade::NCURSESDisplay::NCURSESDisplay()
     : ADisplayModule(DISPLAY_NAME), _win(nullptr), _nextColorPairId(0)
@@ -140,92 +233,25 @@ void arcade::NCURSESDisplay::drawRectangle(const Rect& rect, const Color& color)
     attroff(COLOR_PAIR(colorPair));
 }
 
-/// @brief Mapping of NCURSES key codes to arcade::Key values
-static const std::unordered_map<int, arcade::Key> KEY_BINDINGS = {
-    {'a', arcade::Key::A},
-    {'A', arcade::Key::A},
-    {'b', arcade::Key::B},
-    {'B', arcade::Key::B},
-    {'c', arcade::Key::C},
-    {'C', arcade::Key::C},
-    {'d', arcade::Key::D},
-    {'D', arcade::Key::D},
-    {'e', arcade::Key::E},
-    {'E', arcade::Key::E},
-    {'f', arcade::Key::F},
-    {'F', arcade::Key::F},
-    {'g', arcade::Key::G},
-    {'G', arcade::Key::G},
-    {'h', arcade::Key::H},
-    {'H', arcade::Key::H},
-    {'i', arcade::Key::I},
-    {'I', arcade::Key::I},
-    {'j', arcade::Key::J},
-    {'J', arcade::Key::J},
-    {'k', arcade::Key::K},
-    {'K', arcade::Key::K},
-    {'l', arcade::Key::L},
-    {'L', arcade::Key::L},
-    {'m', arcade::Key::MENU},
-    {'M', arcade::Key::MENU},
-    {'n', arcade::Key::N},
-    {'N', arcade::Key::N},
-    {'o', arcade::Key::O},
-    {'O', arcade::Key::O},
-    {'p', arcade::Key::P},
-    {'P', arcade::Key::P},
-    {'q', arcade::Key::Q},
-    {'Q', arcade::Key::Q},
-    {'r', arcade::Key::RESTART},
-    {'R', arcade::Key::RESTART},
-    {'s', arcade::Key::S},
-    {'S', arcade::Key::S},
-    {'t', arcade::Key::T},
-    {'T', arcade::Key::T},
-    {'u', arcade::Key::U},
-    {'U', arcade::Key::U},
-    {'v', arcade::Key::V},
-    {'V', arcade::Key::V},
-    {'w', arcade::Key::W},
-    {'W', arcade::Key::W},
-    {'x', arcade::Key::X},
-    {'X', arcade::Key::X},
-    {'y', arcade::Key::Y},
-    {'Y', arcade::Key::Y},
-    {'z', arcade::Key::Z},
-    {'Z', arcade::Key::Z},
-    {'0', arcade::Key::NUM_0},
-    {(int)(-15456), arcade::Key::NUM_0},
-    {'1', arcade::Key::PREV_GAME},
-    {'&', arcade::Key::PREV_GAME},
-    {'2', arcade::Key::NEXT_GAME},
-    {(int)(-15447), arcade::Key::NEXT_GAME},
-    {'3', arcade::Key::PREV_GRAPHICS},
-    {'"', arcade::Key::PREV_GRAPHICS},
-    {'4', arcade::Key::NEXT_GRAPHICS},
-    {'\'', arcade::Key::NEXT_GRAPHICS},
-    {'5', arcade::Key::NUM_5},
-    {'(', arcade::Key::NUM_5},
-    {'6', arcade::Key::NUM_6},
-    {'-', arcade::Key::NUM_6},
-    {'7', arcade::Key::NUM_7},
-    {(int)(-15448), arcade::Key::NUM_7},
-    {'8', arcade::Key::NUM_8},
-    {'_', arcade::Key::NUM_8},
-    {'9', arcade::Key::NUM_9},
-    {(int)(-15449), arcade::Key::NUM_9},
-    {' ', arcade::Key::SPACE},
-    {KEY_ENTER, arcade::Key::ENTER},
-    {10, arcade::Key::ENTER},
-    {'\n', arcade::Key::ENTER},
-    {13, arcade::Key::ENTER},
-    {27, arcade::Key::EXIT},
-    {KEY_BACKSPACE, arcade::Key::BACKSPACE},
-    {KEY_UP, arcade::Key::UP},
-    {KEY_DOWN, arcade::Key::DOWN},
-    {KEY_LEFT, arcade::Key::LEFT},
-    {KEY_RIGHT, arcade::Key::RIGHT}
-};
+void arcade::NCURSESDisplay::mouseClickHandler()
+{
+    MEVENT event;
+
+    if (getmouse(&event) == OK) {
+        int termW, termH;
+        getmaxyx(_win, termH, termW);
+
+        float x = (static_cast<float>(event.x) / termW) * _context.width;
+        float y = (static_cast<float>(event.y) / termH) * _context.height;
+
+        x = std::clamp(x, 0.0f, static_cast<float>(_context.width));
+        y = std::clamp(y, 0.0f, static_cast<float>(_context.height));
+
+        auto it = MOUSE_BINDINGS.find(event.bstate & (BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED));
+        if (it != MOUSE_BINDINGS.end())
+            _mouseEvent.push(MouseEvent{{x, y}, it->second});
+    }
+}
 
 void arcade::NCURSESDisplay::pollEvents()
 {
@@ -233,24 +259,9 @@ void arcade::NCURSESDisplay::pollEvents()
 
     int ch;
     while ((ch = wgetch(_win)) != ERR) {
-        if (ch == KEY_MOUSE) {
-            MEVENT event;
-            if (getmouse(&event) == OK) {
-                MouseEvent mouseEvent;
-                mouseEvent.pos.x = static_cast<float>(event.x);
-                mouseEvent.pos.y = static_cast<float>(event.y);
-
-                if (event.bstate & BUTTON1_PRESSED || event.bstate & BUTTON1_CLICKED)
-                    mouseEvent.button = arcade::Key::MOUSE_LEFT;
-                else if (event.bstate & BUTTON2_PRESSED || event.bstate & BUTTON2_CLICKED)
-                    mouseEvent.button = arcade::Key::MOUSE_MIDDLE;
-                else if (event.bstate & BUTTON3_PRESSED || event.bstate & BUTTON3_CLICKED)
-                    mouseEvent.button = arcade::Key::MOUSE_RIGHT;
-                else mouseEvent.button = arcade::Key::UNKNOWN;
-
-                _mouseEvent.push(mouseEvent);
-            }
-        } else {
+        if (ch == KEY_MOUSE)
+            mouseClickHandler();
+        else {
             auto it = KEY_BINDINGS.find(ch);
             if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
         }
