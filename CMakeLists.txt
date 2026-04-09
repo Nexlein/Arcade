@@ -100,10 +100,10 @@ find_package(SDL2_ttf QUIET)
 # Fallback: Fetch SDL2 from GitHub if any package is missing
 if(NOT SDL2_FOUND OR NOT SDL2_image_FOUND OR NOT SDL2_ttf_FOUND)
     message(STATUS "Fetching SDL2 dependencies from GitHub...")
-    FetchContent_Declare(SDL2 GIT_REPOSITORY https://github.com/libsdl-org/SDL.git GIT_TAG release-2.30.0 GIT_SHALLOW TRUE)
-    FetchContent_Declare(SDL2_image GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git GIT_TAG release-2.8.2 GIT_SHALLOW TRUE)
-    FetchContent_Declare(SDL2_ttf GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git GIT_TAG release-2.22.0 GIT_SHALLOW TRUE)
-    FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_ttf)
+    fetchcontent_declare(SDL2 GIT_REPOSITORY https://github.com/libsdl-org/SDL.git GIT_TAG release-2.30.0 GIT_SHALLOW TRUE)
+    fetchcontent_declare(SDL2_image GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git GIT_TAG release-2.8.2 GIT_SHALLOW TRUE)
+    fetchcontent_declare(SDL2_ttf GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git GIT_TAG release-2.22.0 GIT_SHALLOW TRUE)
+    fetchcontent_makeavailable(SDL2 SDL2_image SDL2_ttf)
 endif()
 
 add_arcade_module(sdl2
@@ -129,8 +129,8 @@ if(NOT ALLEGRO5_FOUND)
     set(WANT_PRIMITIVES ON CACHE BOOL "Build primitives addon" FORCE)
     set(SHARED ON CACHE BOOL "Build shared libraries" FORCE)
 
-    FetchContent_Declare(allegro5 GIT_REPOSITORY https://github.com/liballeg/allegro5.git GIT_TAG 5.2.9.0 GIT_SHALLOW TRUE)
-    FetchContent_MakeAvailable(allegro5)
+    fetchcontent_declare(allegro5 GIT_REPOSITORY https://github.com/liballeg/allegro5.git GIT_TAG 5.2.9.0 GIT_SHALLOW TRUE)
+    fetchcontent_makeavailable(allegro5)
 
     # Map the fallback variables to match PkgConfig behavior
     set(ALLEGRO5_INCLUDE_DIRS ${allegro5_SOURCE_DIR}/include ${allegro5_BINARY_DIR}/include)
