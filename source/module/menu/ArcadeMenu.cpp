@@ -94,7 +94,7 @@ void arcade::ArcadeMenu::handleInput(Key key)
     }
 }
 
-void arcade::ArcadeMenu::handleInput([[maybe_unused]] MouseEvent mouseEvent)
+void arcade::ArcadeMenu::handleInput(MouseEvent mouseEvent)
 {
     if (mouseEvent.button == Key::UNKNOWN) return;
 
