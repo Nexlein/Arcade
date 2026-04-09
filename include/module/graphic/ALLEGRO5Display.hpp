@@ -2,8 +2,11 @@
 ** EPITECH PROJECT, 2026
 ** Arcade
 ** File description:
-** LIBCACADisplay
+** ALLEGRO5Display
 */
+
+/// @file ALLEGRO5Display.hpp
+/// @brief ALLEGRO5 implementation of the IDisplayModule interface
 
 #pragma once
 
@@ -23,7 +26,9 @@ namespace arcade {
     /// @brief ALLEGRO5 implementation of the IDisplayModule interface
     class ALLEGRO5 : public ADisplayModule {
         public:
+        /// @brief Constructor for the ALLEGRO5 display module
         ALLEGRO5();
+        /// @brief Destructor for the ALLEGRO5 display module
         ~ALLEGRO5();
 
         /// @brief Initialize the ALLEGRO5 display module
@@ -76,8 +81,14 @@ namespace arcade {
         /// @return A pointer to the fallback font
         ALLEGRO_FONT* getFallbackFont(int size);
 
+        /// @brief Get a font from the cache or load a new one
+        /// @param path The path to the font file
+        /// @param size The size of the font
+        /// @return A pointer to the loaded font
         ALLEGRO_FONT* getFont(const std::string& path, int size);
 
+        /// @brief Compute the viewport for the display
+        /// @return The computed viewport containing scale and offsets for rendering
         Viewport computeViewport() const override;
 
         /// @brief Stop and cleanup loaded fonts
@@ -86,9 +97,10 @@ namespace arcade {
         /// @brief Stop and cleanup loaded sprites
         void stopSprites();
 
-        /// @brief The SDL2 window
+        /// @brief The ALLEGRO display
         ALLEGRO_DISPLAY* _win;
 
+        /// @brief The ALLEGRO event queue
         ALLEGRO_EVENT_QUEUE *_queue;
 
         /// @brief Cache for loaded fonts, keyed by (path, size)
