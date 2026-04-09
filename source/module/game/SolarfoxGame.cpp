@@ -303,7 +303,7 @@ void arcade::Solarfox::nextLevel()
     _shipDirection = Orientation::NONE;
 
     _shipSpeed     = SPACESHIP_SPEED + (_level - 1) * 0.2f;
-    _bulletSpeed   = BULLET_SPEED    + (_level - 1) * 0.01f;
+    _bulletSpeed   = ENEMY_BULLET_SPEED + (_level - 1) * 0.08f;
     _enemyFireRate = std::max(0.8f, ENEMY_FIRE_RATE - (_level - 1) * 0.15f);
 
     initPowerups();
