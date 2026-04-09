@@ -88,6 +88,7 @@ void arcade::ALLEGRO5::init()
     al_init_primitives_addon();
 
     _queue = al_create_event_queue();
+    al_set_new_display_flags(ALLEGRO_RESIZABLE);
     _win = al_create_display(_context.width, _context.height);
     if (!_win) throw std::runtime_error("Failed to create Allegro display");
 
@@ -190,11 +191,12 @@ void arcade::ALLEGRO5::drawText(const Text& text)
 {
     int x = text.pos.x;
     int y = text.pos.y;
-    int width = 0;
-    int height = 0;
     ALLEGRO_FONT* font = getFont(text.fontPath, text.fontSize);
 
     if (!font) return;
+
+    int width = al_get_text_width(font, text.content.c_str());
+    int height = al_get_font_line_height(font);
 
     applyAnchor(x, y, width, height, text.anchor);
     applyScaling(x, y, width, height);
@@ -260,6 +262,21 @@ void arcade::ALLEGRO5::drawRectangle(const Rect& rect, const Color& color)
     );
 }
 
+void arcade::ALLEGRO5::mouseClickHandler(const ALLEGRO_EVENT& event)
+{
+    auto [scale, offsetX, offsetY] = computeViewport();
+
+    float x = (static_cast<float>(event.mouse.x) - offsetX) / scale;
+    float y = (static_cast<float>(event.mouse.y) - offsetY) / scale;
+
+    x = std::clamp(x, 0.0f, 800.0f);
+    y = std::clamp(y, 0.0f, 600.0f);
+
+    auto it = MOUSE_BINDINGS.find(event.mouse.button);
+    if (it != MOUSE_BINDINGS.end())
+        _mouseEvent.push(MouseEvent{{x, y}, it->second});
+}
+
 void arcade::ALLEGRO5::pollEvents()
 {
     updateDeltaTime();
@@ -272,14 +289,12 @@ void arcade::ALLEGRO5::pollEvents()
             auto it = KEY_BINDINGS.find(event.keyboard.keycode);
             if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
             break;
-        } case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN: {
-            float x = static_cast<float>(event.mouse.x);
-            float y = static_cast<float>(event.mouse.y);
-
-            auto it = MOUSE_BINDINGS.find(event.mouse.button);
-            if (it != MOUSE_BINDINGS.end())
-                _mouseEvent.push(MouseEvent{{x, y}, it->second});
-        }
+        } case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+            mouseClickHandler(event);
+            break;
+        case ALLEGRO_EVENT_DISPLAY_RESIZE:
+            al_acknowledge_resize(_win);
+            break;
         }
     }
 }

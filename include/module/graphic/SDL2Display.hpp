@@ -97,6 +97,9 @@ namespace arcade {
         /// @return The computed viewport containing scale and offsets for rendering
         Viewport computeViewport() const override;
 
+        /// @brief Handle mouse click events and convert them to game input
+        void mouseClickHandler(const SDL_Event& event);
+
         /// @brief The SDL2 window
         SDL_Window* _win;
 

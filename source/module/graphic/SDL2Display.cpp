@@ -150,6 +150,21 @@ void arcade::SDL2Display::stop()
 
 bool arcade::SDL2Display::isOpen() const { return _win != nullptr; }
 
+void arcade::SDL2Display::mouseClickHandler(const SDL_Event& event)
+{
+    auto [scale, offsetX, offsetY] = computeViewport();
+
+    float x = (static_cast<float>(event.button.x) - offsetX) / scale;
+    float y = (static_cast<float>(event.button.y) - offsetY) / scale;
+
+    // Clamp dans la fenêtre virtuelle (optionnel mais propre)
+    x = std::clamp(x, 0.0f, 800.0f);
+    y = std::clamp(y, 0.0f, 600.0f);
+
+    auto it = MOUSE_BINDINGS.find(event.button.button);
+    if (it != MOUSE_BINDINGS.end()) _mouseEvent.push(MouseEvent{{x, y}, it->second});
+}
+
 void arcade::SDL2Display::pollEvents()
 {
     updateDeltaTime();
@@ -162,11 +177,8 @@ void arcade::SDL2Display::pollEvents()
             if (it != KEY_BINDINGS.end()) _keyEvent.push(it->second);
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
-            float x = static_cast<float>(event.button.x);
-            float y = static_cast<float>(event.button.y);
-
-            auto it = MOUSE_BINDINGS.find(event.button.button);
-            if (it != MOUSE_BINDINGS.end()) _mouseEvent.push(MouseEvent{{x, y}, it->second});
+            mouseClickHandler(event);
+            break;
         }
     }
 }
