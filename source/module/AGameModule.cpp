@@ -96,6 +96,16 @@ void arcade::AGameModule::appendCommonUITexts()
             Colors::RED,
             30
         ));
+
+    if (_state == GameState::WON)
+        _uiText.push_back(Text(
+            "YOU WIN!",
+            midX,
+            midY,
+            Anchor::CENTER,
+            Colors::GREEN,
+            30
+        ));
 }
 
 std::string arcade::AGameModule::getOrientedSprite(const std::string& key, Orientation orientation) const
