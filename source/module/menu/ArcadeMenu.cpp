@@ -116,10 +116,8 @@ void arcade::ArcadeMenu::handleInput(MouseEvent mouseEvent)
             if (mouseEvent.pos.y >= graphicY && mouseEvent.pos.y <= graphicY + 30) {
                 if (mouseEvent.pos.x >= graphicX && mouseEvent.pos.x <= graphicX + 21)
                     handleInput(Key::LEFT);
-                else if (mouseEvent.pos.x >= 350 && mouseEvent.pos.x <= 375) {
-                    printf("IN\n");
+                else if (mouseEvent.pos.x >= 350 && mouseEvent.pos.x <= 375)
                     handleInput(Key::RIGHT);
-                }
             }
         }
         // Check if click is within game arrows
