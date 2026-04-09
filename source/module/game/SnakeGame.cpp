@@ -11,7 +11,7 @@
 
 const std::string GAMENAME = "Snake";
 
-arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(26, 22, CoordinateSpace::GRID))
+arcade::SnakeGame::SnakeGame() : AGameModule(GAMENAME, GameState::RUNNING, RenderContext(12, 11, CoordinateSpace::GRID))
 {
     setSnakeOrientedSprites();
 }
@@ -232,10 +232,10 @@ void arcade::SnakeGame::restart()
     _snakeBody.clear();
     int midX = _context.width / 2;
     int midY = _context.height / 2;
-    _snakeBody.push_back({static_cast<float>(midX), static_cast<float>(midY)});
     _snakeBody.push_back({static_cast<float>(midX - 1), static_cast<float>(midY)});
     _snakeBody.push_back({static_cast<float>(midX - 2), static_cast<float>(midY)});
     _snakeBody.push_back({static_cast<float>(midX - 3), static_cast<float>(midY)});
+    _snakeBody.push_back({static_cast<float>(midX - 4), static_cast<float>(midY)});
 
     _fruits.clear();
     spawnFruit();
@@ -274,7 +274,9 @@ void arcade::SnakeGame::moveSnake()
     }
 
     /// Wall Collision (Game Over)
-    if (nextHead.x < 1 || nextHead.x >= _context.width - 1 || nextHead.y < 1 || nextHead.y >= _context.height - 1) {
+    if (_context.width <= 2 || _context.height <= 2
+        || nextHead.x < 1 || nextHead.x >= _context.width - 1
+        || nextHead.y < 1 || nextHead.y >= _context.height - 1) {
         _state = GameState::GAME_OVER;
         return;
     }
@@ -303,10 +305,24 @@ void arcade::SnakeGame::moveSnake()
     }
     /// If we didn't eat a fruit, remove the tail
     if (!ateFruit) _snakeBody.pop_back();
+
+    /// Check for win condition
+    if (_snakeBody.size() >= static_cast<size_t>((_context.width - 2) * (_context.height - 2)))
+        _state = GameState::WON;
 }
 
 void arcade::SnakeGame::spawnFruit()
 {
+    if (_context.width <= 2 || _context.height <= 2) {
+        _state = GameState::GAME_OVER;
+        return;
+    }
+
+    if (_snakeBody.size() >= static_cast<size_t>((_context.width - 2) * (_context.height - 2))) {
+        _state = GameState::WON;
+        return;
+    }
+
     static thread_local std::mt19937 rng{std::random_device{}()};
     std::uniform_int_distribution<int> distX(1, _context.width - 2);
     std::uniform_int_distribution<int> distY(1, _context.height - 2);
