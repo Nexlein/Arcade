@@ -62,6 +62,9 @@ namespace arcade {
         /// @return The computed viewport containing scale and offsets for rendering
         Viewport computeViewport() const override;
 
+        /// @brief Handle mouse click events and convert them to arcade::MouseEvent
+        void mouseClickHandler();
+
         /// @brief Convert a generic arcade::Color into the closest NCURSES color index
         short getClosestNcursesColor(const Color& color) const;
 
