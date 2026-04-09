@@ -13,7 +13,7 @@
 const std::string GAMENAME = "Solarfox";
 const float MOVE_INTERVAL = 0.0167f;
 const float SPACESHIP_SPEED = 5.0f;
-const float BULLET_SPEED = 16.0f;
+const float BULLET_SPEED = 17.0f;
 const float ENEMY_FIRE_RATE = 3.0f;
 const float ENEMY_BULLET_SPEED = 7.0f;
 
@@ -174,25 +174,27 @@ void arcade::Solarfox::updatePosition()
     }
 
     // Move enemies
-    for (auto& enemy : _enemies) {
-        switch (enemy.dir) {
-        case Orientation::UP:     enemy.pos.y -= SPACESHIP_SPEED / 2; break;
-        case Orientation::DOWN:   enemy.pos.y += SPACESHIP_SPEED / 2; break;
-        case Orientation::LEFT:   enemy.pos.x -= SPACESHIP_SPEED / 2; break;
-        case Orientation::RIGHT:  enemy.pos.x += SPACESHIP_SPEED / 2; break;
-        default: break;
+    if (_shipDirection != Orientation::NONE) {
+        for (auto& enemy : _enemies) {
+            switch (enemy.dir) {
+            case Orientation::UP:     enemy.pos.y -= SPACESHIP_SPEED / 2; break;
+            case Orientation::DOWN:   enemy.pos.y += SPACESHIP_SPEED / 2; break;
+            case Orientation::LEFT:   enemy.pos.x -= SPACESHIP_SPEED / 2; break;
+            case Orientation::RIGHT:  enemy.pos.x += SPACESHIP_SPEED / 2; break;
+            default: break;
+            }
         }
-    }
 
-    // Enemy shooting
-    for (auto& enemy : _enemies) {
-        enemy.timeSinceLastShot += _moveInterval;
-        if (enemy.timeSinceLastShot >= _enemyFireRate) {
-            Bullet eb;
-            eb.pos = enemy.pos;
-            eb.dir = enemy.shotDir;
-            _enemyBullets.push_back(eb);
-            enemy.timeSinceLastShot = 0.0f;
+        // Enemy shooting
+        for (auto& enemy : _enemies) {
+            enemy.timeSinceLastShot += _moveInterval;
+            if (enemy.timeSinceLastShot >= _enemyFireRate) {
+                Bullet eb;
+                eb.pos = enemy.pos;
+                eb.dir = enemy.shotDir;
+                _enemyBullets.push_back(eb);
+                enemy.timeSinceLastShot = 0.0f;
+            }
         }
     }
 
@@ -314,7 +316,7 @@ void arcade::Solarfox::handleSpaceshipDirection(Key key)
     } else if ((key == Key::DOWN || key == Key::S) && _shipDirection != Orientation::UP) {
         _shipDirection = Orientation::DOWN;
         _shipChar = 'v';
-    } else if ((key == Key::LEFT || key == Key::Q) && _shipDirection != Orientation::RIGHT) {
+    } else if ((key == Key::LEFT || key == Key::Q) && _shipDirection != Orientation::RIGHT && _shipDirection != Orientation::NONE) {
         _shipDirection = Orientation::LEFT;
         _shipChar = '<';
     } else if ((key == Key::RIGHT || key == Key::D) && _shipDirection != Orientation::LEFT) {
@@ -336,7 +338,8 @@ void arcade::Solarfox::handleInput(Key key)
         newBullet.pos = _shipPosition;
         newBullet.dir = _shipDirection;
         _bullets.push_back(newBullet);
-    }
+    } else if (key == Key::C)
+        _shipSpeed += 1.0f;
 
     handleSpaceshipDirection(key);
 }
