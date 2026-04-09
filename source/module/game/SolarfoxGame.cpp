@@ -298,7 +298,7 @@ void arcade::Solarfox::nextLevel()
                      static_cast<float>(_context.height / 2.0f)};
     _shipDirection = Orientation::NONE;
 
-    _shipSpeed     = SPACESHIP_SPEED + (_level - 1) * 0.6f;
+    _shipSpeed     = SPACESHIP_SPEED + (_level - 1) * 0.2f;
     _bulletSpeed   = BULLET_SPEED    + (_level - 1) * 0.01f;
     _enemyFireRate = std::max(0.8f, ENEMY_FIRE_RATE - (_level - 1) * 0.15f);
 

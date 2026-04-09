@@ -67,6 +67,13 @@ void arcade::ArcadeMenu::restart()
     _needsUpdate = true;
 }
 
+void arcade::ArcadeMenu::validateSelection()
+{
+    _validatedSection = _currentSection;
+    _hasValidatedSelection = true;
+    _state = GameState::WON;
+}
+
 void arcade::ArcadeMenu::handleInput(Key key)
 {
     _needsUpdate = true;
@@ -75,36 +82,65 @@ void arcade::ArcadeMenu::handleInput(Key key)
         return;
     }
     switch (key) {
-        case Key::LEFT:
-            leftKey();
-            break;
-        case Key::RIGHT:
-            rightKey();
-            break;
-        case Key::UP:
-        case Key::DOWN:
-            switchChoice(key);
-            break;
-        case Key::ENTER:
-            _validatedSection = _currentSection;
-            _hasValidatedSelection = true;
-            _state = GameState::WON;
-            break;
-        case Key::N:
-            _isInPlayerBox = true;
-            break;
-        default:
-            break;
+    case Key::LEFT: leftKey(); break;
+    case Key::RIGHT: rightKey(); break;
+    case Key::UP:
+    case Key::DOWN: switchChoice(key); break;
+    case Key::ENTER: validateSelection();
+        break;
+    case Key::N: _isInPlayerBox = true;
+        break;
+    default: break;
     }
 }
 
-void arcade::ArcadeMenu::handleInput([[maybe_unused]] MouseEvent mouseEvent) {}
+void arcade::ArcadeMenu::handleInput([[maybe_unused]] MouseEvent mouseEvent)
+{
+    if (mouseEvent.button == Key::UNKNOWN) return;
+
+    if (mouseEvent.button == Key::MOUSE_LEFT) {
+
+        // Check if click is in player name box
+        if (!_isInPlayerBox) {
+            int boxX = 240;
+            int boxY = 550;
+            if ((mouseEvent.pos.x >= boxX && mouseEvent.pos.x <= boxX + 325) &&
+                (mouseEvent.pos.y >= boxY && mouseEvent.pos.y <= boxY + 25))
+                    _isInPlayerBox = true;
+        }
+
+        // Check if click is within graphics arrows
+        if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
+            int graphicX =  75;
+            int graphicY =  189;
+            if (mouseEvent.pos.y >= graphicY && mouseEvent.pos.y <= graphicY + 30) {
+                if (mouseEvent.pos.x >= graphicX && mouseEvent.pos.x <= graphicX + 21)
+                    handleInput(Key::LEFT);
+                else if (mouseEvent.pos.x >= 350 && mouseEvent.pos.x <= 375) {
+                    printf("IN\n");
+                    handleInput(Key::RIGHT);
+                }
+            }
+        }
+        // Check if click is within game arrows
+        else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty()) {
+            int gameX = 75;
+            int gameY = 340;
+            if (mouseEvent.pos.y >= gameY && mouseEvent.pos.y <= gameY + 30) {
+                if (mouseEvent.pos.x >= gameX && mouseEvent.pos.x <= gameX + 21)
+                    handleInput(Key::LEFT);
+                else if (mouseEvent.pos.x >= 350 && mouseEvent.pos.x <= 375)
+                    handleInput(Key::RIGHT);
+            }
+        }
+    }
+}
 
 void arcade::ArcadeMenu::leftKey()
 {
-    if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty()) {
+    if (_currentSection == CurrentChoice::ONGRAPHIC && !_displayPaths.empty())
         _displayIdx = (_displayIdx - 1 + _displayPaths.size()) % _displayPaths.size();
-    } else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty())
+    else if (_currentSection == CurrentChoice::ONGAME && !_gamePaths.empty())
         _gameIdx = (_gameIdx - 1 + _gamePaths.size()) % _gamePaths.size();
 }
 
@@ -143,7 +179,7 @@ void arcade::ArcadeMenu::isResized()
 void arcade::ArcadeMenu::drawTitle(float midX)
 {
     _uiText.push_back(Text(
-        "Start Game",
+        "Arcade",
         midX,
         65,
         Anchor::CENTER,
@@ -327,7 +363,7 @@ void arcade::ArcadeMenu::drawScoreBoard(float boardX, float boardY)
         boardX,
         boardY,
         Anchor::MIDDLE_LEFT,
-        Colors::CYAN,
+        Color(231, 22, 242),
         20
     ));
 
