@@ -31,16 +31,16 @@ arcade::Solarfox::Solarfox()
 
 void arcade::Solarfox::setSolarfoxOrientedSprites()
 {
-    setOrientedSprite("ship", Orientation::UP, "sprite/solarfox/ship/spaceship1.png");
-    setOrientedSprite("ship", Orientation::RIGHT, "sprite/solarfox/ship/spaceship2.png");
-    setOrientedSprite("ship", Orientation::DOWN, "sprite/solarfox/ship/spaceship3.png");
-    setOrientedSprite("ship", Orientation::LEFT, "sprite/solarfox/ship/spaceship4.png");
-    setOrientedSprite("ship", Orientation::NONE, "sprite/solarfox/ship/spaceship2.png");
+    setOrientedSprite("ship", Orientation::UP, "sprite/solarfox/ship/spaceshipTop.png");
+    setOrientedSprite("ship", Orientation::RIGHT, "sprite/solarfox/ship/spaceshipRight.png");
+    setOrientedSprite("ship", Orientation::DOWN, "sprite/solarfox/ship/spaceshipDown.png");
+    setOrientedSprite("ship", Orientation::LEFT, "sprite/solarfox/ship/spaceshipLeft.png");
+    setOrientedSprite("ship", Orientation::NONE, "sprite/solarfox/ship/spaceshipRight.png");
 
-    setOrientedSprite("enemy1", Orientation::NONE, "sprite/solarfox/enemy/enemy1.png");
-    setOrientedSprite("enemy2", Orientation::NONE, "sprite/solarfox/enemy/enemy2.png");
-    setOrientedSprite("enemy3", Orientation::NONE, "sprite/solarfox/enemy/enemy3.png");
-    setOrientedSprite("enemy4", Orientation::NONE, "sprite/solarfox/enemy/enemy4.png");
+    setOrientedSprite("enemy", Orientation::UP, "sprite/solarfox/enemy/enemyTop.png");
+    setOrientedSprite("enemy", Orientation::DOWN, "sprite/solarfox/enemy/enemyDown.png");
+    setOrientedSprite("enemy", Orientation::RIGHT, "sprite/solarfox/enemy/enemyRight.png");
+    setOrientedSprite("enemy", Orientation::LEFT, "sprite/solarfox/enemy/enemyLeft.png");
 
     setOrientedSprite("background", Orientation::NONE, "sprite/solarfox/solarfox_bg.png");
     setOrientedSprite("bullet", Orientation::NONE, "sprite/solarfox/bullet.png");
@@ -367,10 +367,10 @@ void arcade::Solarfox::initPowerups()
 
 void arcade::Solarfox::initEnemies()
 {
-    _enemies[0] = {{START_X + 30, START_Y}, Orientation::RIGHT, Orientation::DOWN,  0.0f,                    getOrientedSprite("enemy1", Orientation::NONE), Anchor::BOTTOM_RIGHT};
-    _enemies[1] = {{END_X, START_Y},        Orientation::DOWN,  Orientation::LEFT,  _enemyFireRate * 0.25f,  getOrientedSprite("enemy2", Orientation::NONE), Anchor::BOTTOM_LEFT};
-    _enemies[2] = {{END_X / 2.0f, END_Y},   Orientation::RIGHT, Orientation::UP,   _enemyFireRate * 0.5f,   getOrientedSprite("enemy3", Orientation::NONE), Anchor::TOP_RIGHT};
-    _enemies[3] = {{START_X, END_Y / 2.0f}, Orientation::DOWN,  Orientation::RIGHT, _enemyFireRate * 0.75f,  getOrientedSprite("enemy4", Orientation::NONE), Anchor::BOTTOM_RIGHT};
+    _enemies[0] = {{START_X + 30, START_Y}, Orientation::RIGHT, Orientation::DOWN,  0.0f,                    getOrientedSprite("enemy", Orientation::DOWN), Anchor::BOTTOM_RIGHT};
+    _enemies[1] = {{END_X, START_Y},        Orientation::DOWN,  Orientation::LEFT,  _enemyFireRate * 0.25f,  getOrientedSprite("enemy", Orientation::LEFT), Anchor::BOTTOM_LEFT};
+    _enemies[2] = {{END_X / 2.0f, END_Y},   Orientation::RIGHT, Orientation::UP,    _enemyFireRate * 0.5f,   getOrientedSprite("enemy", Orientation::UP), Anchor::TOP_RIGHT};
+    _enemies[3] = {{START_X, END_Y / 2.0f}, Orientation::DOWN,  Orientation::RIGHT, _enemyFireRate * 0.75f,  getOrientedSprite("enemy", Orientation::RIGHT), Anchor::BOTTOM_RIGHT};
 
 }
 
