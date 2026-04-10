@@ -5,6 +5,9 @@
 ** IMenuModule
 */
 
+/// @file IMenuModule.hpp
+/// @brief An interface for a class that manages the menu of the arcade
+
 #ifndef IMENU_MODULE_HPP
 #define IMENU_MODULE_HPP
 
@@ -12,6 +15,7 @@
 #include <vector>
 
 namespace arcade {
+    /// @brief An interface for a class that manages the menu of the arcade
     class IMenuModule {
         public:
             virtual ~IMenuModule() = default;
