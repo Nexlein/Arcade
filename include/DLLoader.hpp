@@ -15,6 +15,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "interface/IDLLoader.hpp"
+
 #ifndef DLLOADER_HPP
 #define DLLOADER_HPP
 
@@ -23,7 +25,7 @@ namespace arcade {
     /// @brief A class for loading and managing shared libraries
     /// @tparam T The type of the module to load
     template <typename T>
-    class DLLoader {
+    class DLLoader : public IDLLoader<T> {
         public:
         /// @brief Constructor that loads the shared library at the given filepath
         /// @param filepath The path to the shared library to load
@@ -39,7 +41,7 @@ namespace arcade {
         /// @param entryPointName The name of the entry point function to call (default is
         /// "entryPoint")
         /// @return A pointer to the instance of the loaded module, or nullptr if there was an error
-        T* getInstance(const std::string& entryPointName = "entryPoint")
+        T* getInstance(const std::string& entryPointName = "entryPoint") override
         {
             if (!_handle) return nullptr;
 
