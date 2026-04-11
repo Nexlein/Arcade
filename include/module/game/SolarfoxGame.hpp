@@ -89,6 +89,8 @@ namespace arcade {
         void nextLevel();
         /// @brief Set the oriented sprites for the solarfox
         void setSolarfoxOrientedSprites();
+        /// @brief Create a new bullet based on the spaceship's current position and direction
+        void createNewBullet();
 
         /// @brief The main spaceship entity
         Entity _ship;

@@ -63,8 +63,8 @@ void arcade::Solarfox::update(float elapsedTime)
     _uiText.clear();
     // Game background
     Entity background;
-    background.pos = {0, 0};
-    background.size = {800, 600};
+    background.pos = {160, 60};
+    background.size = {480, 480};
     background.spritePath = getOrientedSprite("background", Orientation::NONE);
     _entities.push_back(background);
 
@@ -72,28 +72,51 @@ void arcade::Solarfox::update(float elapsedTime)
     appendCommonUITexts();
 
     // Bordures de la zone walkable
-    // Entity borderTop, borderBottom, borderLeft, borderRight;
+    Entity borderTop, borderBottom, borderLeft, borderRight;
 
-    // borderTop.pos = {START_X, START_Y};
-    // borderTop.size = {400, 2};
-    // borderTop.color = Colors::RED;
+    borderTop.pos = {START_X, START_Y};
+    borderTop.size = {400, 2};
+    borderTop.color = Colors::RED;
 
-    // borderBottom.pos = {START_X, END_Y};
-    // borderBottom.size = {400, 2};
-    // borderBottom.color = Colors::RED;
+    borderBottom.pos = {START_X, END_Y};
+    borderBottom.size = {400, 2};
+    borderBottom.color = Colors::RED;
 
-    // borderLeft.pos = {START_X, START_Y};
-    // borderLeft.size = {2, 400};
-    // borderLeft.color = Colors::RED;
+    borderLeft.pos = {START_X, START_Y};
+    borderLeft.size = {2, 400};
+    borderLeft.color = Colors::RED;
 
-    // borderRight.pos = {END_X, START_Y};
-    // borderRight.size = {2, 400};
-    // borderRight.color = Colors::RED;
+    borderRight.pos = {END_X, START_Y};
+    borderRight.size = {2, 400};
+    borderRight.color = Colors::RED;
 
-    // _entities.push_back(borderTop);
-    // _entities.push_back(borderBottom);
-    // _entities.push_back(borderLeft);
-    // _entities.push_back(borderRight);
+    _entities.push_back(borderTop);
+    _entities.push_back(borderBottom);
+    _entities.push_back(borderLeft);
+    _entities.push_back(borderRight);
+
+    Entity borderTop2, borderBottom2, borderLeft2, borderRight2;
+
+    borderTop2.pos = {START_X - 40, START_Y - 40};
+    borderTop2.size = {480, 1};
+    borderTop2.color = Colors::GREEN;
+
+    borderBottom2.pos = {START_X - 40, END_Y + 40};
+    borderBottom2.size = {480, 1};
+    borderBottom2.color = Colors::GREEN;
+
+    borderLeft2.pos = {START_X - 40, START_Y - 40};
+    borderLeft2.size = {1, 480};
+    borderLeft2.color = Colors::GREEN;
+
+    borderRight2.pos = {END_X + 40, START_Y - 40};
+    borderRight2.size = {1, 480};
+    borderRight2.color = Colors::GREEN;
+
+    _entities.push_back(borderTop2);
+    _entities.push_back(borderBottom2);
+    _entities.push_back(borderLeft2);
+    _entities.push_back(borderRight2);
 
     for (const auto& enemy : _enemies) {
         Entity enemyEntity;
@@ -329,6 +352,14 @@ void arcade::Solarfox::handleSpaceshipDirection(Key key)
     }
 }
 
+void arcade::Solarfox::createNewBullet()
+{
+    Bullet newBullet;
+    newBullet.pos = _shipPosition;
+    newBullet.dir = _shipDirection;
+    _bullets.push_back(newBullet);
+}
+
 void arcade::Solarfox::handleInput(Key key)
 {
     if (key == Key::P) {
@@ -337,12 +368,9 @@ void arcade::Solarfox::handleInput(Key key)
         else if (_state == GameState::PAUSED)
             resume();
         return;
-    } else if (key == Key::SPACE) {
-        Bullet newBullet;
-        newBullet.pos = _shipPosition;
-        newBullet.dir = _shipDirection;
-        _bullets.push_back(newBullet);
-    } else if (key == Key::C)
+    } else if (key == Key::SPACE)
+        createNewBullet();
+    else if (key == Key::C)
         _shipSpeed += 1.0f;
 
     handleSpaceshipDirection(key);
@@ -350,7 +378,8 @@ void arcade::Solarfox::handleInput(Key key)
 
 void arcade::Solarfox::handleInput(MouseEvent mouseEvent)
 {
-    (void)mouseEvent;
+    if (mouseEvent.button == Key::MOUSE_LEFT)
+        createNewBullet();
 }
 
 void arcade::Solarfox::initPowerups()
