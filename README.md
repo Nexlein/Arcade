@@ -28,7 +28,7 @@ The project uses CMake. Build dependencies:
 
 If SDL2 or Allegro 5 are not found on the system, CMake downloads and builds them with `FetchContent` (slower first build, needs network access).
 
-On Debian/Ubuntu, `setup.sh` installs the system packages (ncurses, Allegro 5, X11/Wayland/audio headers) and Criterion:
+On Debian/Ubuntu, `setup.sh` installs the system packages (ncurses, SDL2, Allegro 5, X11/Wayland/audio headers) and Criterion:
 
 ```bash
 ./setup.sh
