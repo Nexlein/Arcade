@@ -13,12 +13,26 @@ This architecture allows you to swap graphics engines or switch games entirely o
 
 - **Dynamic Loading:** Hot-swappable games and displays at runtime.
 - **Multiple Backends:** Supports graphical (SDL2, Allegro5) and terminal-based (NCURSES) displays.
-- **Classic Games:** Play modular versions of classic games like Snake, Pacman, or SolarFox.
+- **Classic Games:** Play modular versions of classic games Snake and SolarFox.
 - **Strict OOP:** Built with rigorous Object-Oriented Programming principles using C++ interfaces.
 
 ## Installation
 
-The project uses CMake for easy compilation. Make sure you have `cmake` and your preferred graphics libraries installed (e.g., `libsdl2-dev`, `libncurses-dev`).
+The project uses CMake. Build dependencies:
+
+- `cmake`, a C++ compiler and `pkg-config`
+- **ncurses** (`libncurses-dev`): required
+- **SDL2**, **SDL2_image** and **SDL2_ttf** (`libsdl2-dev`, `libsdl2-image-dev`, `libsdl2-ttf-dev`)
+- **Allegro 5** with its image, TTF and primitives addons (`liballegro5-dev`, `liballegro-image5-dev`, `liballegro-ttf5-dev`)
+- **Criterion** (optional, for the unit tests)
+
+If SDL2 or Allegro 5 are not found on the system, CMake downloads and builds them with `FetchContent` (slower first build, needs network access).
+
+On Debian/Ubuntu, `setup.sh` installs the system packages (ncurses, Allegro 5, X11/Wayland/audio headers) and Criterion:
+
+```bash
+./setup.sh
+```
 
 ```bash
 # Generate build files
